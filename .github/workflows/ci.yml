@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Frontend CI
 
 on:
   push:
@@ -37,26 +37,3 @@ jobs:
 
       - name: Run Production Build
         run: npm run build
-
-  backend:
-    name: Backend Setup & Verify
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: "npm"
-          cache-dependency-path: ./backend/package-lock.json
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Verify Server Syntax
-        run: node --check server.js
