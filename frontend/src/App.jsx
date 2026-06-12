@@ -1,8 +1,6 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import RootLayout from './layouts/RootLayout';
 import { BuyerSidebar, SellerSidebar, AdminSidebar } from './components/RoleBasedSidebar';
-import MapDiscovery from './pages/MapDiscovery';
 import WorkspaceView from './components/WorkspaceView';
 
 const App = () => (
@@ -17,7 +15,6 @@ const App = () => (
       </Route>
 
       <Route path="/*" element={<RootLayout sidebarContent={<BuyerSidebar />} />}>
-        <Route index element={<MapDiscovery />} />
         <Route path="*" element={<WorkspaceView />} />
       </Route>
     </Routes>
