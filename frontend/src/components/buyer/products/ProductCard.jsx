@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
@@ -26,6 +26,7 @@ const getColorHex = (colorName) => {
 };
 
 export const ProductCard = ({ product, onAddToCart }) => {
+  const navigate = useNavigate();
   const { cartItems, addToCart, removeFromCart, savedProductIds, toggleSaveProduct } = useCart();
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
@@ -33,8 +34,19 @@ export const ProductCard = ({ product, onAddToCart }) => {
   const isInCart = cartItems.some((item) => item.product._id === product._id);
   const isSaved = savedProductIds?.includes(product._id) || false;
 
+  const handleCardClick = (e) => {
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    navigate(`/product/${product._id}`);
+  };
+
   return (
-    <div className="bg-card border border-border/80 rounded-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-(--shadow-soft-lg) hover:border-primary/30 group">
+    <div
+      onClick={handleCardClick}
+      className="bg-card border border-border/80 rounded-xl overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-(--shadow-soft-lg) hover:border-primary/30 group cursor-pointer"
+    >
+
 
       {/* IMAGE */}
       <Link to={`/product/${product._id}`} className="relative h-40 bg-muted overflow-hidden block shrink-0">

@@ -464,4 +464,30 @@ export const mockOrders = [
     status: 'pending',
     createdAt: '2026-06-12T14:15:00Z',
   },
+  {
+    _id: 'order_3',
+    buyer: 'user_buyer_1',
+    shop: 'shop_3',
+    items: [
+      {
+        product: 'prod_7',
+        name: 'Speckled Coffee Mug',
+        price: 65000,
+        quantity: 1,
+      },
+      {
+        product: 'prod_9',
+        name: 'Matte Charcoal Vase',
+        price: 95000,
+        quantity: 1,
+      },
+    ],
+    total: 160000,
+    deliveryAddress: '123 Mango Avenue, Cebu City, Cebu 6000',
+    trackingNumber: 'ENT778899001',
+    courier: 'Enterprise Cargo',
+    paymentMethod: 'cod',
+    status: 'delivered',
+    createdAt: '2026-06-08T09:00:00Z',
+  },
 ];
