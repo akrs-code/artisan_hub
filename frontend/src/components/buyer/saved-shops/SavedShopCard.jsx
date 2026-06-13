@@ -1,0 +1,69 @@
+import { Link } from 'react-router-dom';
+import { Heart, MapPin, Star, ArrowRight } from 'lucide-react';
+
+export const SavedShopCard = ({ shop, onUnsave }) => (
+  <div className="bg-card border border-border/80 rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-[var(--shadow-soft-lg)] transition-all duration-300 group flex flex-col h-full">
+    {/* Cover Image */}
+    <div className="relative h-28 overflow-hidden bg-muted shrink-0">
+      <img
+        src={shop.coverUrl}
+        alt={`${shop.name} cover`}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+      {/* Unsave Button */}
+      <button
+        onClick={() => onUnsave(shop._id)}
+        aria-label="Remove from saved"
+        className="absolute top-2.5 right-2.5 w-7 h-7 flex items-center justify-center bg-card/90 backdrop-blur-md rounded-full hover:bg-card hover:text-destructive transition-colors duration-200 border border-border/50 shadow-sm"
+      >
+        <Heart className="w-3.5 h-3.5 text-destructive fill-destructive" />
+      </button>
+
+      {/* Logo */}
+      <div className="absolute -bottom-5 left-3.5">
+        <img
+          src={shop.logoUrl}
+          alt={`${shop.name} logo`}
+          className="w-10 h-10 rounded-xl border-2 border-card shadow-sm object-cover"
+        />
+      </div>
+    </div>
+
+    {/* Content */}
+    <div className="p-3.5 pt-7 flex flex-col flex-1">
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <h3 className="font-headline font-bold text-sm text-foreground line-clamp-1 leading-tight group-hover:text-primary transition-colors">
+          {shop.name}
+        </h3>
+        <span className="flex items-center gap-0.5 text-[9px] font-sans font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+          <Star className="w-2.5 h-2.5 fill-primary" />
+          4.9
+        </span>
+      </div>
+
+      <span className="inline-block text-[9px] font-sans font-bold text-primary uppercase tracking-widest bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-full self-start mb-2">
+        {shop.category}
+      </span>
+
+      <p className="text-[10px] text-muted-foreground line-clamp-2 mb-3 flex-1 font-body leading-relaxed">
+        {shop.description}
+      </p>
+
+      <div className="flex items-center justify-between pt-2.5 border-t border-border/50">
+        <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-sans max-w-[65%]">
+          <MapPin className="w-3 h-3 shrink-0 text-primary/70" />
+          <span className="line-clamp-1">{shop.address}</span>
+        </div>
+        <Link
+          to={`/shop/${shop._id}`}
+          className="flex items-center gap-1 text-[9px] font-sans font-bold text-primary hover:text-primary-dark transition-colors duration-200 uppercase tracking-widest"
+        >
+          Visit
+          <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+    </div>
+  </div>
+);
