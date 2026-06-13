@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Banknote, MapPin, Truck, CheckCircle, ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { Card, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+
 
 const formatPrice = (c) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(c / 100);
@@ -64,24 +70,59 @@ const Checkout = () => {
   const [step, setStep] = useState('delivery'); // 'delivery', 'payment', 'review'
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card', 'gcash', 'cod'
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    province: '',
-    zipCode: '',
-    region: '',
-    deliveryNotes: '',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    cardholderName: ''
+  
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('checkoutFormData');
+      const parsed = saved ? JSON.parse(saved) : {};
+      return {
+        firstName: parsed.firstName || '',
+        lastName: parsed.lastName || '',
+        email: parsed.email || '',
+        phone: parsed.phone || '',
+        address: parsed.address || '',
+        city: parsed.city || '',
+        province: parsed.province || '',
+        zipCode: parsed.zipCode || '',
+        region: parsed.region || '',
+        deliveryNotes: parsed.deliveryNotes || '',
+        cardNumber: '',
+        cardExpiry: '',
+        cardCvv: '',
+        cardholderName: ''
+      };
+    } catch (e) {
+      return {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        province: '',
+        zipCode: '',
+        region: '',
+        deliveryNotes: '',
+        cardNumber: '',
+        cardExpiry: '',
+        cardCvv: '',
+        cardholderName: ''
+      };
+    }
   });
 
-  const handleChange = (e) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((p) => {
+      const updated = { ...p, [name]: value };
+      
+      // Persist only non-sensitive fields to localStorage
+      const { cardNumber, cardExpiry, cardCvv, cardholderName, ...safeData } = updated;
+      localStorage.setItem('checkoutFormData', JSON.stringify(safeData));
+      
+      return updated;
+    });
+  };
 
   const handleNextStep = (e) => {
     e.preventDefault();
@@ -132,9 +173,6 @@ const Checkout = () => {
   const codHandlingFee = paymentMethod === 'cod' ? 3000 : 0; // 30 pesos in centavos
   const grandTotal = cartTotal + SHIPPING_FEE + codHandlingFee;
 
-  const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
-  const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
-
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
 
@@ -160,133 +198,124 @@ const Checkout = () => {
         <div className="lg:col-span-2">
 
           {step === 'delivery' && (
-            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
-              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
+            <Card as="form" onSubmit={handleNextStep} className="border-border/80 space-y-6">
+              <CardTitle className="flex items-center gap-2.5">
                 <MapPin className="w-4 h-4 text-primary" />
                 Delivery Address
-              </h2>
+              </CardTitle>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className={fieldLabel}>First Name</label>
-                  <input
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
                     id="firstName"
                     name="firstName"
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="Maria"
-                    className={fieldInput}
+                    placeholder="e.g. Maria"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className={fieldLabel}>Last Name</label>
-                  <input
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
                     id="lastName"
                     name="lastName"
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="Santos"
-                    className={fieldInput}
+                    placeholder="e.g. Santos"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="email" className={fieldLabel}>Email Address</label>
-                  <input
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
                     id="email"
                     name="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="maria@email.com"
-                    className={fieldInput}
+                    placeholder="e.g. maria.santos@email.com"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="phone" className={fieldLabel}>Phone Number</label>
-                  <input
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
                     id="phone"
                     name="phone"
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="+63 9XX XXX XXXX"
-                    className={fieldInput}
+                    placeholder="e.g. +63 917 123 4567"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="address" className={fieldLabel}>Street Address</label>
-                  <input
+                  <Label htmlFor="address">Street Address</Label>
+                  <Input
                     id="address"
                     name="address"
                     required
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder="123 Rizal Street"
-                    className={fieldInput}
+                    placeholder="e.g. 123 Rizal Street, Barangay 4"
                   />
                 </div>
                 <div>
-                  <label htmlFor="city" className={fieldLabel}>City / Municipality</label>
-                  <input
+                  <Label htmlFor="city">City / Municipality</Label>
+                  <Input
                     id="city"
                     name="city"
                     required
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="Cagayan de Oro"
-                    className={fieldInput}
+                    placeholder="e.g. Cagayan de Oro"
                   />
                 </div>
                 <div>
-                  <label htmlFor="province" className={fieldLabel}>Province</label>
-                  <input
+                  <Label htmlFor="province">Province</Label>
+                  <Input
                     id="province"
                     name="province"
                     required
                     value={formData.province}
                     onChange={handleChange}
-                    placeholder="Misamis Oriental"
-                    className={fieldInput}
+                    placeholder="e.g. Misamis Oriental"
                   />
                 </div>
                 <div>
-                  <label htmlFor="zipCode" className={fieldLabel}>Zip Code</label>
-                  <input
+                  <Label htmlFor="zipCode">Zip Code</Label>
+                  <Input
                     id="zipCode"
                     name="zipCode"
                     required
                     value={formData.zipCode}
                     onChange={handleChange}
-                    placeholder="9000"
-                    className={fieldInput}
+                    placeholder="e.g. 9000"
                   />
                 </div>
                 <div>
-                  <label htmlFor="region" className={fieldLabel}>Region</label>
-                  <input
+                  <Label htmlFor="region">Region</Label>
+                  <Input
                     id="region"
                     name="region"
                     required
                     value={formData.region}
                     onChange={handleChange}
-                    placeholder="Region X"
-                    className={fieldInput}
+                    placeholder="e.g. Region X (Northern Mindanao)"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="deliveryNotes" className={fieldLabel}>Delivery Notes (Optional)</label>
-                  <textarea
+                  <Label htmlFor="deliveryNotes">Delivery Notes (Optional)</Label>
+                  <Textarea
                     id="deliveryNotes"
                     name="deliveryNotes"
                     value={formData.deliveryNotes}
                     onChange={handleChange}
-                    placeholder="e.g. Leave at the gate, call before delivery..."
+                    placeholder="e.g. Leave at the front gate, or call upon arrival..."
                     rows={3}
-                    className={`${fieldInput} resize-none`}
+                    className="resize-none"
                   />
                 </div>
               </div>
@@ -297,15 +326,15 @@ const Checkout = () => {
               >
                 Continue to Payment <ChevronRight className="w-3.5 h-3.5" />
               </button>
-            </form>
+            </Card>
           )}
 
           {step === 'payment' && (
-            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
-              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
+            <Card as="form" onSubmit={handleNextStep} className="border-border/80 space-y-6">
+              <CardTitle className="flex items-center gap-2.5">
                 <CreditCard className="w-4 h-4 text-primary" />
                 Payment Method
-              </h2>
+              </CardTitle>
 
               <div className="space-y-3">
                 {/* Credit / Debit Card option */}
@@ -356,7 +385,7 @@ const Checkout = () => {
                     }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className="w-4.5 h-4.5 rounded-full flex items-center justify-center text-primary-foreground shrink-0"><Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} /></span>
                     <span className="text-sm font-headline font-bold text-foreground">Cash on Delivery</span>
                   </div>
                   <input
@@ -375,33 +404,31 @@ const Checkout = () => {
                   <h3 className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Card Details</h3>
                   <div className="space-y-3">
                     <div>
-                      <label htmlFor="cardNumber" className={fieldLabel}>Card Number</label>
-                      <input
+                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Input
                         id="cardNumber"
                         name="cardNumber"
                         required
                         value={formData.cardNumber}
                         onChange={handleChange}
                         placeholder="1234 5678 9012 3456"
-                        className={fieldInput}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="cardExpiry" className={fieldLabel}>Expiry</label>
-                        <input
+                        <Label htmlFor="cardExpiry">Expiry</Label>
+                        <Input
                           id="cardExpiry"
                           name="cardExpiry"
                           required
                           value={formData.cardExpiry}
                           onChange={handleChange}
                           placeholder="MM / YY"
-                          className={fieldInput}
                         />
                       </div>
                       <div>
-                        <label htmlFor="cardCvv" className={fieldLabel}>CVV</label>
-                        <input
+                        <Label htmlFor="cardCvv">CVV</Label>
+                        <Input
                           id="cardCvv"
                           name="cardCvv"
                           type="password"
@@ -410,20 +437,18 @@ const Checkout = () => {
                           onChange={handleChange}
                           placeholder="***"
                           maxLength={4}
-                          className={fieldInput}
                         />
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="cardholderName" className={fieldLabel}>Cardholder Name</label>
-                      <input
+                      <Label htmlFor="cardholderName">Cardholder Name</Label>
+                      <Input
                         id="cardholderName"
                         name="cardholderName"
                         required
                         value={formData.cardholderName}
                         onChange={handleChange}
                         placeholder="MARIA L. SANTOS"
-                        className={fieldInput}
                       />
                     </div>
                   </div>
@@ -457,15 +482,15 @@ const Checkout = () => {
                   Review Order <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </form>
+            </Card>
           )}
 
           {step === 'review' && (
-            <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
-              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
+            <Card className="border-border/80 space-y-6">
+              <CardTitle className="flex items-center gap-2.5">
                 <CheckCircle className="w-4 h-4 text-secondary-dark" />
                 Review Your Order
-              </h2>
+              </CardTitle>
 
               <div className="space-y-4">
                 <div className="p-4 bg-muted/20 border border-border/50 rounded-xl space-y-2 text-xs font-sans">
@@ -512,15 +537,15 @@ const Checkout = () => {
                   )}
                 </button>
               </div>
-            </div>
+            </Card>
           )}
 
         </div>
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-card border border-border/80 rounded-2xl p-5 sticky top-8 shadow-sm">
-            <h2 className="text-base font-headline font-bold text-foreground mb-4">Order Summary</h2>
+          <Card className="sticky top-8 border-border/80 p-5">
+            <CardTitle className="mb-4">Order Summary</CardTitle>
 
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
               {cartItems.map((item) => (
@@ -580,12 +605,13 @@ const Checkout = () => {
               <Lock className="w-3 h-3 text-secondary-dark" />
               <span>Secured by SSL encryption</span>
             </div>
-          </div>
+          </Card>
         </div>
 
       </div>
     </div>
   );
 };
+
 
 export default Checkout;
