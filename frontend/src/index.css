@@ -14,24 +14,24 @@
   --font-label: "Literata", serif;
 
   /* Simplified Core Color Palette (Light, Base, Dark) */
-  --color-primary: #A0522D;
-  --color-primary-light: #FAF2EE;
-  --color-primary-dark: #70341B;
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
 
-  --color-secondary: #3D5A3E;
-  --color-secondary-light: #EBF0EC;
-  --color-secondary-dark: #2A3E2B;
+  --color-secondary: var(--secondary);
+  --color-secondary-light: var(--secondary-light);
+  --color-secondary-dark: var(--secondary-dark);
 
-  --color-tertiary: #8B6914;
-  --color-tertiary-light: #FAF6EB;
-  --color-tertiary-dark: #624A0E;
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-light: var(--tertiary-light);
+  --color-tertiary-dark: var(--tertiary-dark);
 
-  --color-neutral: #F5F0E8;
-  --color-neutral-light: #FAF8F5;
-  --color-neutral-dark: #362E25;
+  --color-neutral: var(--neutral);
+  --color-neutral-light: var(--neutral-light);
+  --color-neutral-dark: var(--neutral-dark);
 
-  --color-destructive: #A23B2C;
-  --color-destructive-hover: #812D21;
+  --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
 
   --shadow-soft: 0 4px 20px -2px rgba(139, 105, 20, 0.04), 0 2px 8px -1px rgba(0, 0, 0, 0.02);
   --shadow-soft-lg: 0 10px 30px -5px rgba(90, 70, 40, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
@@ -67,7 +67,6 @@ h5,
 h6 {
   font-family: var(--font-headline);
   font-weight: 600;
-  color: var(--color-neutral-dark);
 }
 
 /* Custom Components Utilities */
@@ -408,18 +407,25 @@ h6 {
 
   --primary: #A0522D;
   --primary-foreground: #FFFFFF;
+  --primary-light: #FAF2EE;
+  --primary-dark: #70341B;
 
-  --secondary: #EBF0EC;
-  --secondary-foreground: #2A3E2B;
+  --secondary: #3D5A3E;
+  --secondary-foreground: #FFFFFF;
+  --secondary-light: #EBF0EC;
+  --secondary-dark: #2A3E2B;
 
-  --accent: #FAF2EE;
-  --accent-foreground: #70341B;
+  --tertiary: #8B6914;
+  --tertiary-light: #FAF6EB;
+  --tertiary-dark: #624A0E;
 
-  --muted: #FAF8F5;
-  --muted-foreground: #6B6257;
+  --neutral: #F5F0E8;
+  --neutral-light: #FAF8F5;
+  --neutral-dark: #362E25;
 
   --destructive: #A23B2C;
   --destructive-foreground: #FFFFFF;
+  --destructive-hover: #812D21;
 
   --border: rgba(54, 46, 37, 0.15);
   --input: rgba(54, 46, 37, 0.15);
@@ -458,18 +464,25 @@ h6 {
 
   --primary: #C8744C;
   --primary-foreground: #FFFFFF;
+  --primary-light: #3A2A23;
+  --primary-dark: #E8A282;
 
   --secondary: #2A3E2B;
   --secondary-foreground: #F5F0E8;
+  --secondary-light: #1E2C1F;
+  --secondary-dark: #A4C6A5;
 
-  --accent: #3A2A23;
-  --accent-foreground: #F5F0E8;
+  --tertiary: #C49B3C;
+  --tertiary-light: #2E2510;
+  --tertiary-dark: #E5C575;
 
-  --muted: #312A25;
-  --muted-foreground: #B9B1A6;
+  --neutral: #2A241F;
+  --neutral-light: #312A25;
+  --neutral-dark: #F5F0E8;
 
   --destructive: #C85746;
   --destructive-foreground: #FFFFFF;
+  --destructive-hover: #A53C2D;
 
   --border: rgba(245, 240, 232, 0.12);
   --input: rgba(245, 240, 232, 0.12);

@@ -8,7 +8,7 @@ export const MapSearchBar = ({
   categories
 }) => {
   return (
-    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-lg pointer-events-none">
+    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-md pointer-events-none">
 
       {/* Search Input */}
       <div className="relative pointer-events-auto bg-card rounded-2xl shadow-lg border border-border/50 mb-3 flex items-center h-12 overflow-hidden">
@@ -33,7 +33,7 @@ export const MapSearchBar = ({
               onClick={() => setSelectedCategory(category)}
               aria-pressed={isActive}
               className={`
-                shrink-0 px-4 py-2 rounded-full text-xs font-sans font-medium shadow-sm border transition-all duration-200 whitespace-nowrap cursor-pointer
+                shrink-0 px-4 py-2 rounded-md text-xs font-label font-medium shadow-sm border transition-all duration-200 whitespace-nowrap cursor-pointer
                 ${isActive
                   ? 'bg-primary text-primary-foreground border-primary shadow-md'
                   : 'bg-card text-foreground border-border hover:bg-muted'

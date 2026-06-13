@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Trash2 } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 const formatPrice = (centavos) =>
@@ -8,19 +8,19 @@ const formatPrice = (centavos) =>
 
 const getColorHex = (colorName) => {
   const c = colorName.toLowerCase();
-  if (c.includes('white'))    return '#F8F8F8';
-  if (c.includes('black'))    return '#111827';
+  if (c.includes('white')) return '#F8F8F8';
+  if (c.includes('black')) return '#111827';
   if (c.includes('grey') || c.includes('gray')) return '#6B7280';
-  if (c.includes('rust'))     return '#B45309';
-  if (c.includes('ochre'))    return '#D4A017';
-  if (c.includes('sand'))     return '#D6C5A4';
+  if (c.includes('rust')) return '#B45309';
+  if (c.includes('ochre')) return '#D4A017';
+  if (c.includes('sand')) return '#D6C5A4';
   if (c.includes('charcoal')) return '#36454F';
-  if (c.includes('green'))    return '#4D7C0F';
-  if (c.includes('blue'))     return '#2563EB';
+  if (c.includes('green')) return '#4D7C0F';
+  if (c.includes('blue')) return '#2563EB';
   if (c.includes('mahogany')) return '#6B2E1A';
-  if (c.includes('clay'))     return '#C96E48';
-  if (c.includes('copper'))   return '#B87333';
-  if (c.includes('brass'))    return '#B5A642';
+  if (c.includes('clay')) return '#C96E48';
+  if (c.includes('copper')) return '#B87333';
+  if (c.includes('brass')) return '#B5A642';
   if (c.includes('terracotta')) return '#C97346';
   return '#9CA3AF';
 };
@@ -34,7 +34,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
   const isSaved = savedProductIds?.includes(product._id) || false;
 
   return (
-    <div className="bg-card border border-border/80 rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-[var(--shadow-soft-lg)] hover:border-primary/30 group">
+    <div className="bg-card border border-border/80 rounded-md overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-(--shadow-soft-lg) hover:border-primary/30 group">
 
       {/* IMAGE */}
       <Link to={`/product/${product._id}`} className="relative h-40 bg-muted overflow-hidden block shrink-0">
@@ -70,11 +70,6 @@ export const ProductCard = ({ product, onAddToCart }) => {
           <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest">
             {product.category}
           </span>
-          <div className="flex items-center gap-0.5">
-            <Star className="w-2.5 h-2.5 fill-yellow-500 text-yellow-500" />
-            <span className="text-[10px] font-sans font-bold text-foreground">{product.rating}</span>
-            <span className="text-[9px] text-muted-foreground">({product.reviewCount})</span>
-          </div>
         </div>
 
         {/* Name */}
@@ -85,25 +80,19 @@ export const ProductCard = ({ product, onAddToCart }) => {
           {product.name}
         </Link>
 
-        {/* Description */}
-        <p className="text-[10px] text-muted-foreground font-body line-clamp-1 mb-2.5 leading-relaxed">
-          {product.description}
-        </p>
-
         {/* Variants */}
         {(product.sizes?.length > 0 || product.colors?.length > 0) && (
-          <div className="flex items-center justify-between gap-2 py-2 border-t border-b border-border/50 mb-2.5">
+          <div className="flex items-center justify-between gap-2 py-2 mb-2.5">
             {product.sizes?.length > 0 ? (
               <div className="flex gap-1 overflow-x-auto hide-scrollbar">
                 {product.sizes.slice(0, 3).map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`h-4.5 min-w-[20px] px-1.5 rounded-md text-[8px] font-sans font-bold border transition-all ${
-                      selectedSize === size
-                        ? 'bg-primary text-white border-primary'
-                        : 'border-border/60 hover:border-primary/50 text-muted-foreground'
-                    }`}
+                    className={`h-4.5 min-w-5 px-1.5 rounded-md text-[8px] font-sans font-bold border transition-all ${selectedSize === size
+                      ? 'bg-primary text-white border-primary'
+                      : 'border-border/60 hover:border-primary/50 text-muted-foreground'
+                      }`}
                   >
                     {size.split(' ')[0]}
                   </button>
@@ -118,11 +107,10 @@ export const ProductCard = ({ product, onAddToCart }) => {
                     key={color}
                     onClick={() => setSelectedColor(color)}
                     title={color}
-                    className={`w-3.5 h-3.5 rounded-full border transition-all ${
-                      selectedColor === color
-                        ? 'ring-1 ring-offset-1 ring-foreground/40 border-foreground/30 scale-110'
-                        : 'border-border/60'
-                    }`}
+                    className={`w-3.5 h-3.5 rounded-full border transition-all ${selectedColor === color
+                      ? 'ring-1 ring-offset-1 ring-foreground/40 border-foreground/30 scale-110'
+                      : 'border-border/60'
+                      }`}
                     style={{ backgroundColor: getColorHex(color) }}
                   />
                 ))}
@@ -130,17 +118,6 @@ export const ProductCard = ({ product, onAddToCart }) => {
             )}
           </div>
         )}
-
-        {/* Stock indicator */}
-        <div className="mt-auto mb-2.5">
-          <span className={`text-[8px] font-sans font-bold uppercase tracking-widest ${
-            product.stockQuantity > 10 ? 'text-secondary-dark'
-            : product.stockQuantity > 0 ? 'text-tertiary'
-            : 'text-destructive'
-          }`}>
-            {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Unavailable'}
-          </span>
-        </div>
 
         {/* Price + CTA */}
         <div className="flex items-center justify-between pt-2.5 border-t border-border/50">
@@ -151,32 +128,10 @@ export const ProductCard = ({ product, onAddToCart }) => {
             </p>
           </div>
 
-          {isInCart ? (
-            <button
-              onClick={(e) => { e.stopPropagation(); removeFromCart(product._id); }}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[9px] font-sans font-bold uppercase tracking-widest rounded-xl bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-white transition-all duration-200"
-            >
-              <Trash2 className="w-3 h-3" />
-              Remove
-            </button>
-          ) : (
-            <button
-              disabled={!product.inStock}
-              onClick={(e) => {
-                e.stopPropagation();
-                const fn = onAddToCart || addToCart;
-                fn(product, 1, { size: selectedSize, color: selectedColor });
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1.5 text-[9px] font-sans font-bold uppercase tracking-widest rounded-xl transition-all duration-200 ${
-                product.inStock
-                  ? 'bg-primary text-white hover:bg-primary-dark'
-                  : 'bg-muted text-muted-foreground cursor-not-allowed'
-              }`}
-            >
-              <ShoppingBag className="w-3 h-3" />
-              Add
-            </button>
-          )}
+          <div className="flex items-center gap-0.5">
+            <Star className="w-2.5 h-2.5 fill-primary text-primary" />
+            <span className="text-[10px] font-sans font-bold text-foreground">{product.rating}</span>
+          </div>
         </div>
       </div>
     </div>

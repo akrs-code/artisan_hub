@@ -86,12 +86,57 @@ export const OrderCard = ({ order }) => {
 
           <button
             onClick={() => setExpanded(!expanded)}
-            className="w-8 h-8 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 hover:shadow-md transition-all duration-300"
+            className="w-8 h-8 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer"
             title="View Details"
           >
             <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-90 text-primary' : ''}`} />
           </button>
         </div>
+
+        {/* Expanded Details Panel */}
+        {expanded && (
+          <div className="mt-4 pt-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-300 ease-out">
+            <h4 className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-wider mb-3">Order Details</h4>
+            <div className="space-y-2 text-xs font-sans">
+              <div className="flex justify-between py-1 border-b border-border/30">
+                <span className="text-muted-foreground">Order ID</span>
+                <span className="font-semibold text-foreground">#{order._id}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border/30">
+                <span className="text-muted-foreground">Shop</span>
+                <span className="font-semibold text-foreground">{shop?.name || 'Artisan Shop'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border/30">
+                <span className="text-muted-foreground">Date Placed</span>
+                <span className="font-semibold text-foreground">{formatDate(order.createdAt)}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border/30">
+                <span className="text-muted-foreground">Status</span>
+                <span className="font-semibold text-foreground capitalize">{order.status}</span>
+              </div>
+              {order.courier && (
+                <div className="flex justify-between py-1 border-b border-border/30">
+                  <span className="text-muted-foreground">Courier</span>
+                  <span className="font-semibold text-foreground">{order.courier}</span>
+                </div>
+              )}
+              {order.trackingNumber && (
+                <div className="flex justify-between py-1 border-b border-border/30">
+                  <span className="text-muted-foreground">Tracking No.</span>
+                  <span className="font-semibold text-foreground">{order.trackingNumber}</span>
+                </div>
+              )}
+              <div className="flex justify-between py-1 border-b border-border/30">
+                <span className="text-muted-foreground">Payment Method</span>
+                <span className="font-semibold text-foreground uppercase">{order.paymentMethod}</span>
+              </div>
+              <div className="flex justify-between py-1.5 pt-2 font-headline font-bold text-sm">
+                <span className="text-foreground">Total</span>
+                <span className="text-primary">{formatPrice(order.total)}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

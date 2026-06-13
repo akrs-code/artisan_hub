@@ -68,7 +68,7 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
         <div className="shrink-0 border-t border-neutral-dark/10 p-4">
           <Link
             to="/profile"
-            className="flex items-center justify-between w-full px-3 py-3 bg-neutral-dark/5 border border-neutral-dark/10 rounded-lg hover:bg-neutral-dark/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary group shadow-sm"
+            className="flex items-center justify-between w-full px-3 py-3 bg-neutral-dark/5 border border-neutral-dark/10 rounded-md hover:bg-neutral-dark/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary group shadow-sm"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-8 h-8 rounded-full bg-white border border-neutral-dark/10 flex items-center justify-center text-neutral-dark/70 shrink-0">

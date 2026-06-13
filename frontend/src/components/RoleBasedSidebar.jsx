@@ -4,6 +4,7 @@ import {
   Store, LayoutDashboard, ShieldAlert, EyeOff, Scale,
   Users, FileText, FolderOpen,
   Truck, DollarSign,
+  Compass,
 } from 'lucide-react';
 
 const SidebarNavItem = ({ to, label, icon: Icon, exact = false, indent = false }) => (
@@ -42,8 +43,9 @@ const SidebarSectionHeader = ({ title }) => (
 export const BuyerSidebar = () => (
   <div className="flex flex-col pb-6">
     <ul className="flex flex-col">
-      <SidebarNavItem to="/" exact label="Map/Discovery" icon={Map} />
-      <SidebarNavItem to="/shops" label="Saved Shops" icon={Heart} />
+      <SidebarNavItem to="/" exact label="Map" icon={Map} />
+      <SidebarNavItem to="/discover" exact label="Discover" icon={Compass} />
+      <SidebarNavItem to="/shops" label="Saved Shops & Products" icon={Heart} />
       <SidebarNavItem to="/cart" label="Shopping Cart" icon={ShoppingCart} />
       <SidebarNavItem to="/orders" label="Orders" icon={Package} />
     </ul>

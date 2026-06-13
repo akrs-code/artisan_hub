@@ -86,7 +86,7 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions }) 
         <button
           onClick={() => onRemove(item.product._id)}
           aria-label={`Remove ${item.product.name}`}
-          className="p-1.5 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-200"
+          className="p-1.5 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 rounded-md transition-all duration-200"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

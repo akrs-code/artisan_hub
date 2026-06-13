@@ -1,7 +1,7 @@
 import { Plus, Minus } from 'lucide-react';
 
 export const QuantityControl = ({ quantity, onDecrement, onIncrement }) => (
-  <div className="flex items-center border border-border rounded-lg overflow-hidden h-8 bg-background shadow-sm">
+  <div className="flex items-center border border-border rounded-md overflow-hidden h-8 bg-background shadow-sm">
     <button
       onClick={onDecrement}
       disabled={quantity <= 1}
