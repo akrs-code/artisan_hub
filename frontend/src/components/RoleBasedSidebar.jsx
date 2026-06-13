@@ -39,37 +39,6 @@ const SidebarSectionHeader = ({ title }) => (
   </h2>
 );
 
-const FeaturedShopItem = ({ to, name, category }) => (
-  <li>
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `flex flex-col py-2.5 pr-4 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary group ${isActive
-          ? 'bg-primary/10 border-l-4 border-primary pl-4'
-          : 'border-l-4 border-transparent pl-5 hover:bg-neutral-dark/5'
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          <span className={`text-[13px] font-semibold transition-colors ${isActive ? 'text-primary' : 'text-neutral-dark/90'}`}>
-            {name}
-          </span>
-          <span className="text-[10px] text-neutral-dark/50">{category}</span>
-        </>
-      )}
-    </NavLink>
-  </li>
-);
-
-
-const featuredShops = [
-  { to: '/shop/iron-loom', name: 'The Iron Loom', category: 'Textiles' },
-  { to: '/shop/maranao', name: 'Maranao Woodworks', category: 'Woodwork' },
-  { to: '/shop/whang-od', name: 'Apo Whang-Od Tattoos', category: 'Woven Crafts' },
-];
-
-
 export const BuyerSidebar = () => (
   <div className="flex flex-col pb-6">
     <ul className="flex flex-col">
@@ -77,21 +46,6 @@ export const BuyerSidebar = () => (
       <SidebarNavItem to="/shops" label="Saved Shops" icon={Heart} />
       <SidebarNavItem to="/cart" label="Shopping Cart" icon={ShoppingCart} />
       <SidebarNavItem to="/orders" label="Orders" icon={Package} />
-    </ul>
-
-    <SidebarSectionHeader title="CATEGORIES" />
-    <ul className="flex flex-col">
-      <SidebarNavItem to="/category/woodwork" label="Woodwork" indent />
-      <SidebarNavItem to="/category/percussion" label="Percussion" indent />
-      <SidebarNavItem to="/category/textiles" label="Textiles" indent />
-      <SidebarNavItem to="/category/woven" label="Woven Crafts" indent />
-    </ul>
-
-    <SidebarSectionHeader title="FEATURED SHOPS" />
-    <ul className="flex flex-col">
-      {featuredShops.map((shop) => (
-        <FeaturedShopItem key={shop.to} {...shop} />
-      ))}
     </ul>
   </div>
 );

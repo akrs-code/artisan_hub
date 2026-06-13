@@ -13,8 +13,9 @@ const RootLayout = ({ sidebarContent }) => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
       }
-
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -23,7 +24,7 @@ const RootLayout = ({ sidebarContent }) => {
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#E8E3D9]">
+    <div className="flex h-screen w-screen overflow-hidden bg-background">
 
       {/* Sidebar — hidden off-screen on mobile, always visible on md+ */}
       <SharedSidebar
@@ -39,7 +40,7 @@ const RootLayout = ({ sidebarContent }) => {
         <Header toggleSidebar={toggleSidebar} />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto relative bg-[#E8E3D9]">
+        <main className="flex-1 overflow-y-auto relative bg-background">
           {/* Top padding only on mobile to clear the fixed header */}
           <div className="pt-[57px] md:pt-0 h-full">
             <Outlet context={{ toggleSidebar }} />
