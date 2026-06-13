@@ -99,16 +99,20 @@ export const RouteLayer = ({ geojson }) => {
     return () => {
       if (!map) return;
 
-      if (map.getLayer('route-layer')) {
-        map.removeLayer('route-layer');
-      }
+      try {
+        if (map.getLayer('route-layer')) {
+          map.removeLayer('route-layer');
+        }
 
-      if (map.getLayer('route-glow')) {
-        map.removeLayer('route-glow');
-      }
+        if (map.getLayer('route-glow')) {
+          map.removeLayer('route-glow');
+        }
 
-      if (map.getSource('route')) {
-        map.removeSource('route');
+        if (map.getSource('route')) {
+          map.removeSource('route');
+        }
+      } catch (err) {
+        console.warn("Map route cleanup skipped (map likely already destroyed):", err);
       }
     };
   }, [map, isLoaded, geojson]);

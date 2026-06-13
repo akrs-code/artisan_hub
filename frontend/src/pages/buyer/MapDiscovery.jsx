@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Map, MapMarker, MarkerContent, MarkerLabel, MarkerPopup, MapControls } from '@/components/ui/map';
 import { mockShops } from '../../lib/mockData';
 import { useCart } from '../../context/CartContext';
-import { MapSearchBar } from '@/components/buyer/MapSearchBar';
-import { RouteDistanceOverlay } from '@/components/buyer/RouteDistanceOverlay';
-import { ShopPopupContent } from '@/components/buyer/ShopPopupContent';
-import { RouteLayer } from '@/components/buyer/RouteLayer';
+import { MapSearchBar } from '@/components/buyer/map/MapSearchBar';
+import { RouteDistanceOverlay } from '@/components/buyer/map/RouteDistanceOverlay';
+import { ShopPopupContent } from '@/components/buyer/map/ShopPopupContent';
+import { RouteLayer } from '@/components/buyer/map/RouteLayer';
+import { NearbyShopStrip } from '@/components/buyer/map/NearbyShopStrip';
 
 const MapDiscovery = () => {
   const { savedShopIds, toggleSaveShop } = useCart();
@@ -162,6 +163,8 @@ const MapDiscovery = () => {
             </MapMarker>
           ))}
         </Map>
+
+        <NearbyShopStrip shops={filteredArtisans} title="Nearby Shops" />
       </div>
     </div>
   );
