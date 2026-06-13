@@ -4,7 +4,6 @@ import { Search, Filter, Store, Package } from 'lucide-react';
 import { mockShops, mockProducts } from '../../lib/mockData';
 import { useCart } from '../../context/CartContext';
 import { SavedShopCard } from '@/components/buyer/saved-shops/SavedShopCard';
-import { EmptySavedShops } from '@/components/buyer/saved-shops/EmptySavedShops';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 
 const SavedShops = () => {
@@ -36,18 +35,12 @@ const SavedShops = () => {
 
   return (
     <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs font-sans font-medium text-muted-foreground mb-8">
-        <Link to="/" className="hover:text-primary transition-colors">Discovery</Link>
-        <span className="text-border">/</span>
-        <span className="text-foreground font-bold">Saved Items</span>
-      </div>
 
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Saved Items</h1>
         <p className="text-muted-foreground font-sans text-xs">Your curated collection of favourite artisans and products.</p>
-        <div className="decorative-line decorative-line-primary w-16 mt-3" />
+
       </div>
 
       {/* TABS */}
@@ -59,9 +52,8 @@ const SavedShops = () => {
           <button
             key={key}
             onClick={() => handleTabChange(key)}
-            className={`flex items-center gap-1.5 pb-3 px-1 text-xs font-sans font-bold transition-colors border-b-2 mr-4 ${
-              activeTab === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
+            className={`flex items-center gap-1.5 pb-3 px-1 text-xs font-sans font-bold transition-colors border-b-2 mr-4 ${activeTab === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
           >
             <Icon className="w-3.5 h-3.5" />
             {label} ({count})
@@ -83,7 +75,7 @@ const SavedShops = () => {
             />
           </div>
           {categories.length > 2 && (
-            <div className="relative min-w-[150px]">
+            <div className="relative min-w-37.5">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <select
                 value={selectedCategory}

@@ -8,28 +8,67 @@ const STATUS_OPTIONS = ['All', 'pending', 'shipped', 'delivered'];
 
 const Orders = () => {
   const location = useLocation();
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem('artisan_hub_orders');
+    return saved ? JSON.parse(saved) : mockOrders;
+  });
   const [showBanner, setShowBanner] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
   useEffect(() => {
-    let current = [...mockOrders];
     if (location.state?.orderPlaced) {
       setShowBanner(true);
-      current.unshift({
-        _id: `order_${Math.random().toString(36).substr(2, 9)}`,
-        buyer: 'user_buyer_1',
-        shop: 'shop_1',
-        items: [{ product: 'prod_1', name: 'Just Ordered Item', price: 50000, quantity: 1 }],
-        total: 65000,
-        deliveryAddress: '123 Mango Avenue, Cebu City, Cebu 6000',
-        paymentMethod: 'cod',
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      });
+      const details = location.state.orderDetails;
+      if (details) {
+        const newOrder = {
+          _id: `order_${Math.random().toString(36).substring(2, 11)}`,
+          buyer: 'user_buyer_1',
+          shop: details.shop || 'shop_1',
+          items: details.items,
+          total: details.total,
+          deliveryAddress: details.deliveryAddress,
+          paymentMethod: details.paymentMethod,
+          status: 'pending',
+          courier: details.paymentMethod === 'cod' ? 'LBC' : 'J&T',
+          trackingNumber: details.paymentMethod === 'cod' ? 'LBC55443322' : 'JNT123456789',
+          createdAt: new Date().toISOString(),
+        };
+
+        setOrders((prev) => {
+          const exists = prev.some(
+            (o) =>
+              o.items[0]?.name === newOrder.items[0]?.name &&
+              Math.abs(new Date(o.createdAt).getTime() - new Date(newOrder.createdAt).getTime()) < 5000
+          );
+          if (exists) return prev;
+          const updated = [newOrder, ...prev];
+          localStorage.setItem('artisan_hub_orders', JSON.stringify(updated));
+          return updated;
+        });
+      } else {
+        const newOrder = {
+          _id: `order_${Math.random().toString(36).substring(2, 11)}`,
+          buyer: 'user_buyer_1',
+          shop: 'shop_1',
+          items: [{ product: 'prod_1', name: 'Just Ordered Item', price: 50000, quantity: 1 }],
+          total: 65000,
+          deliveryAddress: '123 Mango Avenue, Cebu City, Cebu 6000',
+          paymentMethod: 'cod',
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+        };
+
+        setOrders((prev) => {
+          const exists = prev.some((o) => o._id === newOrder._id);
+          if (exists) return prev;
+          const updated = [newOrder, ...prev];
+          localStorage.setItem('artisan_hub_orders', JSON.stringify(updated));
+          return updated;
+        });
+      }
+      window.history.replaceState({}, document.title);
     }
-    setOrders(current);
   }, [location]);
 
   const filteredOrders = orders.filter((order) => {
@@ -46,18 +85,12 @@ const Orders = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs font-sans font-medium text-muted-foreground mb-8">
-        <Link to="/" className="hover:text-primary transition-colors">Discovery</Link>
-        <span className="text-border">/</span>
-        <span className="text-foreground font-bold">Orders</span>
-      </div>
 
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
+        <h1 className=" text-primary-dark text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
         <p className="text-muted-foreground font-sans text-xs">Track and manage your artisan purchases.</p>
-        <div className="decorative-line decorative-line-primary w-16 mt-3" />
+        
       </div>
 
       {/* Success Banner */}

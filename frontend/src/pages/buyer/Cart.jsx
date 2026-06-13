@@ -20,16 +20,12 @@ const Cart = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs font-sans font-medium text-muted-foreground mb-8">
-        <Link to="/" className="hover:text-primary transition-colors">Discovery</Link>
-        <span className="text-border">/</span>
-        <span className="text-foreground font-bold">Shopping Cart</span>
-      </div>
+      
 
       {/* Page Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
+          <h1 className=" text-primary-dark text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
             Shopping Cart
           </h1>
           <p className="text-muted-foreground font-sans text-xs">

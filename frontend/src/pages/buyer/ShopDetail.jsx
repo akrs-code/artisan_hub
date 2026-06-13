@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { mockShops, mockProducts } from '../../lib/mockData';
-import { Star, ShoppingBag, ShieldCheck, Heart, MapPin, ChevronLeft, ArrowRight, Package } from 'lucide-react';
+import { Star, Heart, Package } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 
@@ -42,13 +42,9 @@ const ShopDetail = () => {
           alt={`${shop.name} cover`}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/80 via-neutral-dark/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-neutral-dark/80 via-neutral-dark/40 to-transparent" />
 
-        <div className="absolute top-6 left-6 z-20 flex items-center gap-2 text-white/80 text-xs font-sans font-medium bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-          <Link to="/" className="hover:text-white transition-colors">Discovery</Link>
-          <span>/</span>
-          <span className="text-white font-bold">{shop.name}</span>
-        </div>
+
 
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-12 px-8 text-center">
           <span className="text-white/70 text-[10px] font-sans font-bold uppercase tracking-[0.25em] mb-3">
@@ -83,41 +79,6 @@ const ShopDetail = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 w-full">
-        <div className="py-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center border-b border-border">
-          <div>
-            <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary block mb-4">
-              Our Story
-            </span>
-            <h2 className="text-4xl font-headline font-bold text-foreground mb-5 leading-tight">
-              A Legacy of Craft
-            </h2>
-            <div className="decorative-line decorative-line-primary w-16 mb-7" />
-            <p className="text-muted-foreground text-lg leading-loose font-body">
-              {shop.description}
-            </p>
-            <div className="flex items-center gap-2 mt-6 text-sm text-muted-foreground font-sans">
-              <MapPin className="w-4 h-4 text-primary shrink-0" />
-              <span>{shop.address}</span>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="rounded-[2.5rem] overflow-hidden aspect-[4/5] shadow-[var(--shadow-soft-lg)]">
-              <img
-                src={shop.logoUrl}
-                alt={`${shop.name} craftsmanship`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-6 -left-6 card-custom !p-5 !rounded-2xl flex flex-col items-center justify-center w-36 h-36 shadow-[var(--shadow-soft-lg)]">
-              <ShieldCheck className="w-9 h-9 text-primary mb-2" />
-              <span className="text-center text-xs font-sans font-bold text-foreground leading-snug">
-                Certified Heritage Craft
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div className="pt-16">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
             <div>
