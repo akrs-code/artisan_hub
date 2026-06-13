@@ -25,7 +25,7 @@ const Cart = () => {
       {/* Page Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className=" text-primary-dark text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
+          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
             Shopping Cart
           </h1>
           <p className="text-muted-foreground font-sans text-xs">
@@ -43,7 +43,7 @@ const Cart = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cart Table */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="bg-card border border-border/80 rounded-2xl overflow-hidden shadow-[var(--shadow-soft)]">
+          <div className="bg-card border border-border/80 rounded-xl overflow-hidden shadow-[var(--shadow-soft)]">
             {/* Table Header */}
             <div className="hidden sm:grid grid-cols-[56px_1fr_auto_auto_32px] gap-4 items-center px-5 py-3 bg-muted/30 border-b border-border/60">
               <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Item</span>
@@ -63,19 +63,11 @@ const Cart = () => {
               />
             ))}
           </div>
-
-          {/* Continue Shopping */}
-          <div>
-            <Link to="/" className="inline-flex items-center gap-2 text-xs font-sans font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Continue Shopping
-            </Link>
-          </div>
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-card border border-border/80 rounded-2xl p-5 sticky top-8 shadow-[var(--shadow-soft)]">
+          <div className="bg-card border border-border/80 rounded-xl p-5 sticky top-8 shadow-[var(--shadow-soft)]">
             <h2 className="text-base font-headline font-bold text-foreground mb-5">Order Summary</h2>
 
             <div className="space-y-2.5 mb-5">

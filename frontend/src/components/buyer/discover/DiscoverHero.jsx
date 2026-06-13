@@ -3,7 +3,7 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 
 export const DiscoverHero = ({ onExploreShops }) => (
   <section 
-    className="relative rounded-2xl overflow-hidden mb-6 min-h-[320px] md:min-h-[400px] flex items-center shadow-lg"
+    className="relative rounded-xl overflow-hidden mb-6 min-h-[320px] md:min-h-[400px] flex items-center shadow-lg"
     aria-label="Discover Artisan Marketplace"
   >
     {/* Background Image */}

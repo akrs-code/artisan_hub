@@ -11,7 +11,7 @@ export const MapSearchBar = ({
     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 w-[calc(100%-2rem)] max-w-md pointer-events-none">
 
       {/* Search Input */}
-      <div className="relative pointer-events-auto bg-card rounded-2xl shadow-lg border border-border/50 mb-3 flex items-center h-12 overflow-hidden">
+      <div className="relative pointer-events-auto bg-card rounded-xl shadow-lg border border-border/50 mb-3 flex items-center h-12 overflow-hidden">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
