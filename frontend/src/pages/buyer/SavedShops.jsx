@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { Search, Filter, Store, Package } from 'lucide-react';
 import { mockShops, mockProducts } from '../../lib/mockData';
 import { useCart } from '../../context/CartContext';
-import { SavedShopCard } from '@/components/buyer/saved-shops/SavedShopCard';
+import { ShopCard } from '@/components/buyer/shops/ShopCard';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const SavedShops = () => {
   const { savedShopIds, toggleSaveShop, savedProductIds, addToCart } = useCart();
@@ -44,69 +47,81 @@ const SavedShops = () => {
       </div>
 
       {/* TABS */}
-      <div className="flex items-center gap-1 border-b border-border/60 mb-6">
-        {[
-          { key: 'shops', icon: Store, label: 'Shops', count: baseShops.length },
-          { key: 'products', icon: Package, label: 'Products', count: baseProducts.length },
-        ].map(({ key, icon: Icon, label, count }) => (
-          <button
-            key={key}
-            onClick={() => handleTabChange(key)}
-            className={`flex items-center gap-1.5 pb-3 px-1 text-xs font-sans font-bold transition-colors border-b-2 mr-4 ${activeTab === key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label} ({count})
-          </button>
-        ))}
-      </div>
+      <Tabs>
+        <TabsList>
+          {[
+            { key: 'shops', icon: Store, label: 'Shops', count: baseShops.length },
+            { key: 'products', icon: Package, label: 'Products', count: baseProducts.length },
+          ].map(({ key, icon: Icon, label, count }) => (
+            <TabsTrigger
+              key={key}
+              active={activeTab === key}
+              onClick={() => handleTabChange(key)}
+              className="mr-4"
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label} ({count})
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* SEARCH + FILTER */}
       {((activeTab === 'shops' && baseShops.length > 0) || (activeTab === 'products' && baseProducts.length > 0)) && (
         <div className="flex flex-col sm:flex-row gap-2.5 mb-7">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground z-10" />
+            <Input
               type="text"
               placeholder={`Search saved ${activeTab}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+              className="pl-9 pr-4 py-2 text-xs"
             />
           </div>
           {categories.length > 2 && (
             <div className="relative min-w-37.5">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-              <select
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
+              <Select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm cursor-pointer"
+                className="pl-9 pr-8 py-2 text-xs"
               >
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
+              </Select>
             </div>
           )}
         </div>
       )}
 
+
       {/* CONTENT */}
       {activeTab === 'shops' ? (
         baseShops.length === 0 ? (
-          <EmptySavedShops />
+          <div className="text-center py-20 bg-card rounded-xl border border-border/80 flex flex-col items-center">
+            <Store className="w-10 h-10 text-muted-foreground/20 mb-4" />
+            <h3 className="text-lg font-headline font-bold text-foreground mb-2">Your Shop Collection is Empty</h3>
+            <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
+              You haven't saved any artisan shops yet. Explore our discover catalog to find unique craftsmen and local products.
+            </p>
+            <Link to="/discover" className="btn-base btn-primary px-6 py-2 rounded-xl font-sans font-bold text-xs uppercase tracking-widest">
+              Explore Shops
+            </Link>
+          </div>
         ) : filteredShops.length === 0 ? (
-          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-2xl">
+          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-xl">
             No saved shops match your search.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredShops.map((shop) => (
-              <SavedShopCard key={shop._id} shop={shop} onUnsave={toggleSaveShop} />
+              <ShopCard key={shop._id} shop={shop} />
             ))}
           </div>
         )
       ) : (
         baseProducts.length === 0 ? (
-          <div className="text-center py-20 bg-card rounded-2xl border border-border/80 flex flex-col items-center">
+          <div className="text-center py-20 bg-card rounded-xl border border-border/80 flex flex-col items-center">
             <Package className="w-10 h-10 text-muted-foreground/20 mb-4" />
             <h3 className="text-lg font-headline font-bold text-foreground mb-2">Your Product Collection is Empty</h3>
             <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
@@ -117,7 +132,7 @@ const SavedShops = () => {
             </Link>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-2xl">
+          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-xl">
             No saved products match your search.
           </div>
         ) : (
