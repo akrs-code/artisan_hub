@@ -3,9 +3,6 @@ import { useLocation, Link } from 'react-router-dom';
 import { Package, PartyPopper, Search, Filter } from 'lucide-react';
 import { mockOrders, mockShops } from '../../lib/mockData';
 import { OrderCard } from '@/components/buyer/orders/OrderCard';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-
 
 const STATUS_OPTIONS = ['All', 'pending', 'shipped', 'delivered'];
 
@@ -91,14 +88,14 @@ const Orders = () => {
 
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className=" text-primary-dark text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
+        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
         <p className="text-muted-foreground font-sans text-xs">Track and manage your artisan purchases.</p>
         
       </div>
 
       {/* Success Banner */}
       {showBanner && (
-        <div className="bg-secondary/10 border border-secondary/20 rounded-xl flex items-center gap-3.5 mb-8 p-4">
+        <div className="bg-secondary/10 border border-secondary/20 rounded-2xl flex items-center gap-3.5 mb-8 p-4">
           <div className="w-9 h-9 rounded-xl bg-secondary/20 flex items-center justify-center shrink-0">
             <PartyPopper className="w-4 h-4 text-secondary-dark" />
           </div>
@@ -113,7 +110,7 @@ const Orders = () => {
 
       {/* Empty State (no orders at all) */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-card rounded-xl border border-border/80 flex flex-col items-center">
+        <div className="text-center py-20 bg-card rounded-2xl border border-border/80 flex flex-col items-center">
           <Package className="w-10 h-10 text-muted-foreground/20 mb-4" />
           <h3 className="text-lg font-headline font-bold text-foreground mb-2">No Orders Yet</h3>
           <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
@@ -128,31 +125,30 @@ const Orders = () => {
           {/* Search + Filter row — same pattern as SavedShops */}
           <div className="flex flex-col sm:flex-row gap-2.5 mb-7">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
-              <Input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <input
                 type="text"
                 placeholder="Search by shop, item, or order ID…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 text-xs"
+                className="w-full pl-9 pr-4 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
               />
             </div>
             <div className="relative min-w-[160px]">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
-              <Select
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="pl-9 pr-8 py-2 text-xs capitalize"
+                className="w-full pl-9 pr-8 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm cursor-pointer capitalize"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s} className="capitalize">
                     {s === 'All' ? 'All Statuses' : s.charAt(0).toUpperCase() + s.slice(1)}
                   </option>
                 ))}
-              </Select>
+              </select>
             </div>
           </div>
-
 
           {/* Results count */}
           <p className="text-[10px] font-sans text-muted-foreground mb-4">
@@ -163,7 +159,7 @@ const Orders = () => {
 
           {/* Order Grid or no-results state */}
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-12 bg-card border border-border/80 rounded-xl flex flex-col items-center gap-3">
+            <div className="text-center py-12 bg-card border border-border/80 rounded-2xl flex flex-col items-center gap-3">
               <Package className="w-8 h-8 text-muted-foreground/20" />
               <p className="text-sm font-headline font-bold text-foreground">No orders match your search</p>
               <button

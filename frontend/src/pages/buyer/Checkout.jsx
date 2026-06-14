@@ -2,12 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Banknote, MapPin, Truck, CheckCircle, ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { Card, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
-
 
 const formatPrice = (c) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(c / 100);
@@ -35,12 +29,13 @@ const Steps = ({ currentStep }) => {
         return (
           <div key={s.id} className="flex items-center gap-2">
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-sans font-bold transition-all duration-300 border ${status === 'completed'
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-sans font-bold transition-all duration-300 border ${
+                status === 'completed'
                   ? 'bg-secondary text-white border-secondary'
                   : status === 'active'
-                    ? 'border-primary text-primary ring-2 ring-primary/20 bg-primary/5'
-                    : 'border-border text-muted-foreground bg-muted/20'
-                }`}
+                  ? 'border-primary text-primary ring-2 ring-primary/20 bg-primary/5'
+                  : 'border-border text-muted-foreground bg-muted/20'
+              }`}
             >
               {status === 'completed' ? (
                 <Check className="w-3.5 h-3.5" />
@@ -49,8 +44,9 @@ const Steps = ({ currentStep }) => {
               )}
             </div>
             <span
-              className={`text-[10px] font-sans font-bold uppercase tracking-widest ${status === 'inactive' ? 'text-muted-foreground' : 'text-foreground'
-                }`}
+              className={`text-[10px] font-sans font-bold uppercase tracking-widest ${
+                status === 'inactive' ? 'text-muted-foreground' : 'text-foreground'
+              }`}
             >
               {s.label}
             </span>
@@ -70,59 +66,24 @@ const Checkout = () => {
   const [step, setStep] = useState('delivery'); // 'delivery', 'payment', 'review'
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card', 'gcash', 'cod'
-  
-  const [formData, setFormData] = useState(() => {
-    try {
-      const saved = localStorage.getItem('checkoutFormData');
-      const parsed = saved ? JSON.parse(saved) : {};
-      return {
-        firstName: parsed.firstName || '',
-        lastName: parsed.lastName || '',
-        email: parsed.email || '',
-        phone: parsed.phone || '',
-        address: parsed.address || '',
-        city: parsed.city || '',
-        province: parsed.province || '',
-        zipCode: parsed.zipCode || '',
-        region: parsed.region || '',
-        deliveryNotes: parsed.deliveryNotes || '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCvv: '',
-        cardholderName: ''
-      };
-    } catch (e) {
-      return {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        province: '',
-        zipCode: '',
-        region: '',
-        deliveryNotes: '',
-        cardNumber: '',
-        cardExpiry: '',
-        cardCvv: '',
-        cardholderName: ''
-      };
-    }
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: '',
+    zipCode: '',
+    region: '',
+    deliveryNotes: '',
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: '',
+    cardholderName: ''
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((p) => {
-      const updated = { ...p, [name]: value };
-      
-      // Persist only non-sensitive fields to localStorage
-      const { cardNumber, cardExpiry, cardCvv, cardholderName, ...safeData } = updated;
-      localStorage.setItem('checkoutFormData', JSON.stringify(safeData));
-      
-      return updated;
-    });
-  };
+  const handleChange = (e) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleNextStep = (e) => {
     e.preventDefault();
@@ -173,9 +134,12 @@ const Checkout = () => {
   const codHandlingFee = paymentMethod === 'cod' ? 3000 : 0; // 30 pesos in centavos
   const grandTotal = cartTotal + SHIPPING_FEE + codHandlingFee;
 
+  const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
+  const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
-
+      
       {/* Header back button */}
       <Link
         to="/cart"
@@ -186,136 +150,145 @@ const Checkout = () => {
 
       {/* Page Title */}
       <div className="mb-6">
-        <h1 className=" text-primary-dark text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Checkout</h1>
+        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Checkout</h1>
       </div>
 
       {/* Steps Indicator */}
       <Steps currentStep={step} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+        
         {/* Main Flow Form */}
         <div className="lg:col-span-2">
-
+          
           {step === 'delivery' && (
-            <Card as="form" onSubmit={handleNextStep} className="border-border/80 space-y-6">
-              <CardTitle className="flex items-center gap-2.5">
+            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                 <MapPin className="w-4 h-4 text-primary" />
                 Delivery Address
-              </CardTitle>
+              </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
+                  <label htmlFor="firstName" className={fieldLabel}>First Name</label>
+                  <input
                     id="firstName"
                     name="firstName"
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="e.g. Maria"
+                    placeholder="Maria"
+                    className={fieldInput}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
+                  <label htmlFor="lastName" className={fieldLabel}>Last Name</label>
+                  <input
                     id="lastName"
                     name="lastName"
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="e.g. Santos"
+                    placeholder="Santos"
+                    className={fieldInput}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
+                  <label htmlFor="email" className={fieldLabel}>Email Address</label>
+                  <input
                     id="email"
                     name="email"
                     type="email"
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="e.g. maria.santos@email.com"
+                    placeholder="maria@email.com"
+                    className={fieldInput}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
+                  <label htmlFor="phone" className={fieldLabel}>Phone Number</label>
+                  <input
                     id="phone"
                     name="phone"
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="e.g. +63 917 123 4567"
+                    placeholder="+63 9XX XXX XXXX"
+                    className={fieldInput}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="address">Street Address</Label>
-                  <Input
+                  <label htmlFor="address" className={fieldLabel}>Street Address</label>
+                  <input
                     id="address"
                     name="address"
                     required
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder="e.g. 123 Rizal Street, Barangay 4"
+                    placeholder="123 Rizal Street"
+                    className={fieldInput}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city">City / Municipality</Label>
-                  <Input
+                  <label htmlFor="city" className={fieldLabel}>City / Municipality</label>
+                  <input
                     id="city"
                     name="city"
                     required
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="e.g. Cagayan de Oro"
+                    placeholder="Cagayan de Oro"
+                    className={fieldInput}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="province">Province</Label>
-                  <Input
+                  <label htmlFor="province" className={fieldLabel}>Province</label>
+                  <input
                     id="province"
                     name="province"
                     required
                     value={formData.province}
                     onChange={handleChange}
-                    placeholder="e.g. Misamis Oriental"
+                    placeholder="Misamis Oriental"
+                    className={fieldInput}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zipCode">Zip Code</Label>
-                  <Input
+                  <label htmlFor="zipCode" className={fieldLabel}>Zip Code</label>
+                  <input
                     id="zipCode"
                     name="zipCode"
                     required
                     value={formData.zipCode}
                     onChange={handleChange}
-                    placeholder="e.g. 9000"
+                    placeholder="9000"
+                    className={fieldInput}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="region">Region</Label>
-                  <Input
+                  <label htmlFor="region" className={fieldLabel}>Region</label>
+                  <input
                     id="region"
                     name="region"
                     required
                     value={formData.region}
                     onChange={handleChange}
-                    placeholder="e.g. Region X (Northern Mindanao)"
+                    placeholder="Region X"
+                    className={fieldInput}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="deliveryNotes">Delivery Notes (Optional)</Label>
-                  <Textarea
+                  <label htmlFor="deliveryNotes" className={fieldLabel}>Delivery Notes (Optional)</label>
+                  <textarea
                     id="deliveryNotes"
                     name="deliveryNotes"
                     value={formData.deliveryNotes}
                     onChange={handleChange}
-                    placeholder="e.g. Leave at the front gate, or call upon arrival..."
+                    placeholder="e.g. Leave at the gate, call before delivery..."
                     rows={3}
-                    className="resize-none"
+                    className={`${fieldInput} resize-none`}
                   />
                 </div>
               </div>
@@ -326,23 +299,24 @@ const Checkout = () => {
               >
                 Continue to Payment <ChevronRight className="w-3.5 h-3.5" />
               </button>
-            </Card>
+            </form>
           )}
 
           {step === 'payment' && (
-            <Card as="form" onSubmit={handleNextStep} className="border-border/80 space-y-6">
-              <CardTitle className="flex items-center gap-2.5">
+            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                 <CreditCard className="w-4 h-4 text-primary" />
                 Payment Method
-              </CardTitle>
+              </h2>
 
               <div className="space-y-3">
                 {/* Credit / Debit Card option */}
                 <label
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${paymentMethod === 'card'
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                    paymentMethod === 'card'
                       ? 'border-primary bg-primary/5 ring-1 ring-primary'
                       : 'border-border hover:border-primary/40'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <CreditCard className={`w-4 h-4 ${paymentMethod === 'card' ? 'text-primary' : 'text-muted-foreground'}`} />
@@ -359,10 +333,11 @@ const Checkout = () => {
 
                 {/* GCash option */}
                 <label
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${paymentMethod === 'gcash'
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                    paymentMethod === 'gcash'
                       ? 'border-primary bg-primary/5 ring-1 ring-primary'
                       : 'border-border hover:border-primary/40'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center font-sans font-black text-[9px]">G</span>
@@ -379,13 +354,14 @@ const Checkout = () => {
 
                 {/* Cash on Delivery option */}
                 <label
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${paymentMethod === 'cod'
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                    paymentMethod === 'cod'
                       ? 'border-primary bg-primary/5 ring-1 ring-primary'
                       : 'border-border hover:border-primary/40'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-4.5 h-4.5 rounded-full flex items-center justify-center text-primary-foreground shrink-0"><Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} /></span>
+                    <Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} />
                     <span className="text-sm font-headline font-bold text-foreground">Cash on Delivery</span>
                   </div>
                   <input
@@ -404,31 +380,33 @@ const Checkout = () => {
                   <h3 className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Card Details</h3>
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
+                      <label htmlFor="cardNumber" className={fieldLabel}>Card Number</label>
+                      <input
                         id="cardNumber"
                         name="cardNumber"
                         required
                         value={formData.cardNumber}
                         onChange={handleChange}
                         placeholder="1234 5678 9012 3456"
+                        className={fieldInput}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="cardExpiry">Expiry</Label>
-                        <Input
+                        <label htmlFor="cardExpiry" className={fieldLabel}>Expiry</label>
+                        <input
                           id="cardExpiry"
                           name="cardExpiry"
                           required
                           value={formData.cardExpiry}
                           onChange={handleChange}
                           placeholder="MM / YY"
+                          className={fieldInput}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="cardCvv">CVV</Label>
-                        <Input
+                        <label htmlFor="cardCvv" className={fieldLabel}>CVV</label>
+                        <input
                           id="cardCvv"
                           name="cardCvv"
                           type="password"
@@ -437,18 +415,20 @@ const Checkout = () => {
                           onChange={handleChange}
                           placeholder="***"
                           maxLength={4}
+                          className={fieldInput}
                         />
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="cardholderName">Cardholder Name</Label>
-                      <Input
+                      <label htmlFor="cardholderName" className={fieldLabel}>Cardholder Name</label>
+                      <input
                         id="cardholderName"
                         name="cardholderName"
                         required
                         value={formData.cardholderName}
                         onChange={handleChange}
                         placeholder="MARIA L. SANTOS"
+                        className={fieldInput}
                       />
                     </div>
                   </div>
@@ -482,15 +462,15 @@ const Checkout = () => {
                   Review Order <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </Card>
+            </form>
           )}
 
           {step === 'review' && (
-            <Card className="border-border/80 space-y-6">
-              <CardTitle className="flex items-center gap-2.5">
+            <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                 <CheckCircle className="w-4 h-4 text-secondary-dark" />
                 Review Your Order
-              </CardTitle>
+              </h2>
 
               <div className="space-y-4">
                 <div className="p-4 bg-muted/20 border border-border/50 rounded-xl space-y-2 text-xs font-sans">
@@ -511,8 +491,8 @@ const Checkout = () => {
                     {paymentMethod === 'card'
                       ? `Credit Card Ending in **** ${formData.cardNumber.slice(-4) || '4321'}`
                       : paymentMethod === 'gcash'
-                        ? 'GCash E-Wallet'
-                        : 'Cash on Delivery'}
+                      ? 'GCash E-Wallet'
+                      : 'Cash on Delivery'}
                   </p>
                 </div>
               </div>
@@ -537,15 +517,15 @@ const Checkout = () => {
                   )}
                 </button>
               </div>
-            </Card>
+            </div>
           )}
 
         </div>
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-8 border-border/80 p-5">
-            <CardTitle className="mb-4">Order Summary</CardTitle>
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sticky top-8 shadow-sm">
+            <h2 className="text-base font-headline font-bold text-foreground mb-4">Order Summary</h2>
 
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
               {cartItems.map((item) => (
@@ -605,13 +585,12 @@ const Checkout = () => {
               <Lock className="w-3 h-3 text-secondary-dark" />
               <span>Secured by SSL encryption</span>
             </div>
-          </Card>
+          </div>
         </div>
 
       </div>
     </div>
   );
 };
-
 
 export default Checkout;

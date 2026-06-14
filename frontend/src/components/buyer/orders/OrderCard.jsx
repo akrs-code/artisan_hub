@@ -21,6 +21,11 @@ export const OrderCard = ({ order }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
 
+  const [shopReviewSubmitted, setShopReviewSubmitted] = useState(false);
+  const [isReviewingShop, setIsReviewingShop] = useState(false);
+  const [shopRating, setShopRating] = useState(5);
+  const [shopComment, setShopComment] = useState('');
+
   const handleReviewSubmit = (itemName) => {
     setReviewsSubmitted((prev) => ({
       ...prev,
@@ -90,81 +95,18 @@ export const OrderCard = ({ order }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (isReviewing) {
-                            setActiveReviewItem(null);
-                          } else {
-                            setActiveReviewItem(item.name);
-                            setRating(5);
-                            setComment('');
-                          }
+                          setActiveReviewItem(item.name);
+                          setRating(5);
+                          setComment('');
                         }}
-                        className={`text-[10px] font-sans font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all duration-200 cursor-pointer ${
-                          isReviewing
-                            ? 'bg-muted text-muted-foreground border-border'
-                            : 'bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary'
-                        }`}
+                        className="text-[10px] font-sans font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-200 cursor-pointer"
                       >
-                        {isReviewing ? 'Cancel' : 'Review'}
+                        Review
                       </button>
                     )}
                   </div>
                 )}
               </div>
-
-              {/* Review Input Box */}
-              {isReviewing && !hasReviewed && (
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="mt-2 p-4 bg-muted/20 border border-border/50 rounded-xl space-y-3.5 animate-in slide-in-from-top-1 duration-200"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">
-                      Your Rating
-                    </span>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setRating(star)}
-                          className="p-0.5 hover:scale-110 transition-transform cursor-pointer"
-                        >
-                          <Star
-                            className={`w-5 h-5 ${
-                              star <= rating
-                                ? 'fill-primary text-primary'
-                                : 'text-muted/30'
-                            }`}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label htmlFor={`comment-${idx}`} className="text-[9px] uppercase tracking-wider text-muted-foreground">
-                      Comments / Feedback
-                    </Label>
-                    <Textarea
-                      id={`comment-${idx}`}
-                      rows={2}
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Share your experience with this handcrafted item..."
-                      className="text-xs resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleReviewSubmit(item.name)}
-                    disabled={!comment.trim()}
-                    className="w-full py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-[10px] font-sans font-bold uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="w-3.5 h-3.5" /> Submit Review
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
@@ -175,6 +117,38 @@ export const OrderCard = ({ order }) => {
         )}
       </div>
 
+      {/* Shop Review Section */}
+      {order.status === 'delivered' && (
+        <div className="border-t border-border/40 pt-4 mt-2">
+          {shopReviewSubmitted ? (
+            <div className="bg-emerald-50/50 border border-emerald-100/80 rounded-xl p-3 flex items-center justify-between">
+              <span className="text-[10px] font-sans font-bold text-emerald-700 uppercase tracking-wider">
+                Artisan Shop Reviewed
+              </span>
+              <div className="flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
+                <span className="text-[10px] font-sans font-bold text-emerald-700">{shopRating}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">
+                Rate Shop
+              </span>
+              <button
+                onClick={() => {
+                  setIsReviewingShop(true);
+                  setShopRating(5);
+                  setShopComment('');
+                }}
+                className="text-[10px] font-sans font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-200 cursor-pointer"
+              >
+                Review Shop
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Footer Area */}
       <div className="mt-auto flex flex-col gap-4">
@@ -255,6 +229,171 @@ export const OrderCard = ({ order }) => {
           </div>
         )}
       </div>
+
+      {/* Product Review Dialog Overlay */}
+      {activeReviewItem && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200 relative space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest block mb-1">
+                  Product Review
+                </span>
+                <h3 className="font-headline font-bold text-foreground text-lg leading-tight">
+                  {activeReviewItem}
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveReviewItem(null)}
+                className="text-muted-foreground hover:text-foreground text-xs font-sans font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-y border-border/40">
+                <span className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">
+                  Your Rating
+                </span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="p-0.5 hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${star <= rating
+                          ? 'fill-primary text-primary'
+                          : 'text-muted/30'
+                          }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="product-review-comment" className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                  Comments / Feedback
+                </Label>
+                <Textarea
+                  id="product-review-comment"
+                  rows={4}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Share your experience with this handcrafted item..."
+                  className="text-xs placeholder:text-muted-foreground/35 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveReviewItem(null)}
+                  className="flex-1 py-2.5 bg-muted text-muted-foreground hover:bg-muted/80 rounded-lg text-xs font-sans font-bold uppercase tracking-widest transition-all duration-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleReviewSubmit(activeReviewItem)}
+                  disabled={!comment.trim()}
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-sans font-bold uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-3.5 h-3.5" /> Submit Review
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shop Review Dialog Overlay */}
+      {isReviewingShop && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200 relative space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest block mb-1">
+                  Artisan Shop Review
+                </span>
+                <h3 className="font-headline font-bold text-foreground text-lg leading-tight">
+                  {shop?.name || 'Artisan Shop'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsReviewingShop(false)}
+                className="text-muted-foreground hover:text-foreground text-xs font-sans font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-y border-border/40">
+                <span className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">
+                  Shop Rating
+                </span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setShopRating(star)}
+                      className="p-0.5 hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${star <= shopRating
+                          ? 'fill-primary text-primary'
+                          : 'text-muted/30'
+                          }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="shop-review-comment" className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                  Shop Feedback
+                </Label>
+                <Textarea
+                  id="shop-review-comment"
+                  rows={4}
+                  value={shopComment}
+                  onChange={(e) => setShopComment(e.target.value)}
+                  placeholder="Share your experience with this artisan's service, packaging, or communication..."
+                  className="text-xs placeholder:text-muted-foreground/35 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReviewingShop(false)}
+                  className="flex-1 py-2.5 bg-muted text-muted-foreground hover:bg-muted/80 rounded-lg text-xs font-sans font-bold uppercase tracking-widest transition-all duration-200 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShopReviewSubmitted(true);
+                    setIsReviewingShop(false);
+                  }}
+                  disabled={!shopComment.trim()}
+                  className="flex-1 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-sans font-bold uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-3.5 h-3.5" /> Submit Review
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

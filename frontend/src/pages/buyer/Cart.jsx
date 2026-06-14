@@ -19,8 +19,6 @@ const Cart = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
-      {/* Breadcrumb */}
-      
 
       {/* Page Header */}
       <div className="flex items-end justify-between mb-8">
