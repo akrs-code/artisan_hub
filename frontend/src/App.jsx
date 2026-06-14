@@ -3,6 +3,8 @@ import RootLayout from './layouts/RootLayout';
 import { BuyerSidebar, SellerSidebar, AdminSidebar } from './components/RoleBasedSidebar';
 import WorkspaceView from './components/WorkspaceView';
 import Dashboard from './pages/seller/dashboard';
+import Catalog from './pages/seller/catalog';
+
 const App = () => (
   <BrowserRouter>
     <Routes>
@@ -11,7 +13,8 @@ const App = () => (
       </Route>
 
       <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
-        <Route path="dashboard" element={<Dashboard />} /> 
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="catalog" element={<Catalog />} />
       </Route>
 
       <Route path="/*" element={<RootLayout sidebarContent={<BuyerSidebar />} />}>
