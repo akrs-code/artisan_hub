@@ -4,6 +4,7 @@ import { BuyerSidebar, SellerSidebar, AdminSidebar } from './components/RoleBase
 import WorkspaceView from './components/WorkspaceView';
 import Dashboard from './pages/seller/dashboard';
 import Catalog from './pages/seller/catalog';
+import Inventory from './pages/seller/inventory';
 
 const App = () => (
   <BrowserRouter>
@@ -15,6 +16,7 @@ const App = () => (
       <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="catalog" element={<Catalog />} />
+        <Route path="inventory" element={<Inventory />} />
       </Route>
 
       <Route path="/*" element={<RootLayout sidebarContent={<BuyerSidebar />} />}>
