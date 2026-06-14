@@ -104,7 +104,7 @@ export const SellerSidebar = () => (
       <SidebarNavItem to="/seller/dashboard" exact label="Dashboard & Analytics" icon={LayoutDashboard} />
       <SidebarNavItem to="/seller/catalog" label="Product Catalog" icon={FolderOpen} />
       <SidebarNavItem to="/seller/inventory" label="Inventory Management" icon={Store} />
-      <SidebarNavItem to="/seller/fulfillment" label="Order Fulfilment" icon={Truck} />
+      <SidebarNavItem to="/seller/orders" label="Order Fulfilment" icon={Truck} />
       <SidebarNavItem to="/seller/earnings" label="Earnings & Payouts" icon={DollarSign} />
     </ul>
   </div>
