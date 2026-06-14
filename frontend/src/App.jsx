@@ -6,6 +6,7 @@ import Dashboard from './pages/seller/dashboard';
 import Catalog from './pages/seller/catalog';
 import Inventory from './pages/seller/inventory';
 import Orders from './pages/seller/orders';
+import Earnings from './pages/seller/earnings';
 
 const App = () => (
   <BrowserRouter>
@@ -19,6 +20,7 @@ const App = () => (
         <Route path="catalog" element={<Catalog />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="earnings" element={<Earnings />} />
       </Route>
 
       <Route path="/*" element={<RootLayout sidebarContent={<BuyerSidebar />} />}>
