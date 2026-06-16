@@ -115,7 +115,7 @@ export const SellerSidebar = () => (
 export const AdminSidebar = () => (
   <div className="flex flex-col pb-6 pt-4">
     <ul className="flex flex-col">
-      <SidebarNavItem to="/admin" exact label="System Overview" icon={LayoutDashboard} />
+      <SidebarNavItem to="/admin/overview" exact label="System Overview" icon={LayoutDashboard} />
       <SidebarNavItem to="/admin/verify" label="Verified Shops Queue" icon={ShieldAlert} />
       <SidebarNavItem to="/admin/moderate" label="Product Moderation" icon={EyeOff} />
       <SidebarNavItem to="/admin/users" label="User & Store Management" icon={Users} />

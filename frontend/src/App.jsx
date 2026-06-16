@@ -7,12 +7,13 @@ import Catalog from './pages/seller/catalog';
 import Inventory from './pages/seller/inventory';
 import Orders from './pages/seller/orders';
 import Earnings from './pages/seller/earnings';
+import Overview from './pages/admin/overview';
 
 const App = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/admin/*" element={<RootLayout sidebarContent={<AdminSidebar />} />}>
-        <Route path="*" element={<WorkspaceView />} />
+        <Route path="overview" element={<Overview />} />
       </Route>
 
       <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
