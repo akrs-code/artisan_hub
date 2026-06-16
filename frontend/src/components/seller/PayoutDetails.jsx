@@ -1,7 +1,7 @@
 import React from 'react';
 import { Building2, ArrowRight } from 'lucide-react';
 
-const PayoutDetails = ({ nextPayoutDate, scheduleType, bankName, accountEnding }) => {
+const PayoutDetails = ({ nextPayoutDate, scheduleType, bankName, accountEnding, onManageClick }) => {
   return (
     <div className="card-custom !p-8 flex flex-col h-full group hover:card-custom-hover mt-6 lg:mt-0">
       <h3 className="text-[11px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase leading-relaxed mb-6">
@@ -45,7 +45,10 @@ const PayoutDetails = ({ nextPayoutDate, scheduleType, bankName, accountEnding }
 
       {/* Manage Link */}
       <div className="mt-auto pt-4 text-center">
-        <button className="inline-flex items-center gap-2 text-[11px] font-sans font-bold text-[#8C5233] hover:text-[#7E4A2E] tracking-widest transition-colors">
+        <button 
+          onClick={onManageClick}
+          className="inline-flex items-center gap-2 text-[11px] font-sans font-bold text-[#8C5233] hover:text-[#7E4A2E] tracking-widest transition-colors"
+        >
           Manage Payout Methods
           <ArrowRight className="w-3.5 h-3.5" />
         </button>

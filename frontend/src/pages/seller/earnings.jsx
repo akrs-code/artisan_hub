@@ -5,6 +5,8 @@ import InventoryStatCard from '../../components/seller/InventoryStatCard';
 import TransactionsTable from '../../components/seller/TransactionsTable';
 import RevenueTrendChart from '../../components/seller/RevenueTrendChart';
 import PayoutDetails from '../../components/seller/PayoutDetails';
+import ActionModal from '../../components/seller/ActionModal';
+import { useState } from 'react';
 
 // --- Dummy Data (Data Contract for Backend) ---
 const pageData = {
@@ -68,6 +70,16 @@ const pageData = {
 };
 
 const Earnings = () => {
+    const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+
+    const openModal = (title, message) => {
+        setModalState({ isOpen: true, title, message });
+    };
+
+    const closeModal = () => {
+        setModalState(prev => ({ ...prev, isOpen: false }));
+    };
+
     return (
         <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
             <DashboardHeader
@@ -89,7 +101,10 @@ const Earnings = () => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-6 py-3 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm">
+                    <button 
+                        onClick={() => openModal('Request Payout', 'Payout request form is currently under development.')}
+                        className="flex items-center gap-2 px-6 py-3 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm"
+                    >
                         <Wallet className="w-4 h-4" />
                         Request Payout
                     </button>
@@ -113,7 +128,10 @@ const Earnings = () => {
                     title="AVAILABLE FOR PAYOUT"
                     value={pageData.stats.available.value}
                     subtext={
-                        <span className="text-[#8C5233] hover:text-[#7E4A2E] hover:underline cursor-pointer transition-all">
+                        <span 
+                            onClick={() => openModal('Withdraw Funds', 'Withdrawal processing will be available soon.')}
+                            className="text-[#8C5233] hover:text-[#7E4A2E] hover:underline cursor-pointer transition-all"
+                        >
                             WITHDRAW NOW
                         </span>
                     }
@@ -152,10 +170,18 @@ const Earnings = () => {
                         scheduleType={pageData.payoutInfo.scheduleType}
                         bankName={pageData.payoutInfo.bankName}
                         accountEnding={pageData.payoutInfo.accountEnding}
+                        onManageClick={() => openModal('Manage Payout Methods', 'Bank account management settings will be added in a future update.')}
                     />
                 </div>
             </div>
 
+            {/* Action Modal */}
+            <ActionModal 
+                isOpen={modalState.isOpen}
+                onClose={closeModal}
+                title={modalState.title}
+                message={modalState.message}
+            />
         </div>
     );
 };

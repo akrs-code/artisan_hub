@@ -6,6 +6,8 @@ import InventoryStatCard from '../../components/seller/InventoryStatCard';
 import OrderQueueTable from '../../components/seller/OrderQueueTable';
 import DailyShipmentsChart from '../../components/seller/DailyShipmentsChart';
 import DeliveryPerformance from '../../components/seller/DeliveryPerformance';
+import ActionModal from '../../components/seller/ActionModal';
+import { useState } from 'react';
 
 // --- Dummy Data (Data Contract for Backend) ---
 const pageData = {
@@ -73,6 +75,16 @@ const pageData = {
 };
 
 const Orders = () => {
+  const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+
+  const openModal = (title, message) => {
+    setModalState({ isOpen: true, title, message });
+  };
+
+  const closeModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
       <DashboardHeader 
@@ -94,11 +106,17 @@ const Orders = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[13px] font-sans font-bold text-neutral-dark transition-colors">
+          <button 
+            onClick={() => openModal('Configure Carriers', 'Carrier configuration settings will be available here.')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[13px] font-sans font-bold text-neutral-dark transition-colors"
+          >
             <Settings className="w-4 h-4 text-neutral-dark/70" />
             Configure Carriers
           </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm">
+          <button 
+            onClick={() => openModal('Print Shipping Labels', 'Batch shipping label printing tool is coming.')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm"
+          >
             <Printer className="w-4 h-4" />
             Print Shipping Labels
           </button>
@@ -113,7 +131,7 @@ const Orders = () => {
           buttonText={pageData.alert.buttonText}
           variant={pageData.alert.variant}
           icon={CircleAlert}
-          onClick={() => console.log('View Priority Queue clicked')}
+          onClick={() => openModal('Priority Queue', 'The priority queue view is being prepared.')}
         />
       </div>
 
@@ -171,6 +189,13 @@ const Orders = () => {
         </div>
       </div>
 
+      {/* Action Modal */}
+      <ActionModal 
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+      />
     </div>
   );
 };

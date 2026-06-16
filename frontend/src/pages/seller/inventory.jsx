@@ -6,6 +6,8 @@ import InventoryStatCard from '../../components/seller/InventoryStatCard';
 import InventoryTable from '../../components/seller/InventoryTable';
 import RestockForecast from '../../components/seller/RestockForecast';
 import InventoryOptimizer from '../../components/seller/InventoryOptimizer';
+import ActionModal from '../../components/seller/ActionModal';
+import { useState } from 'react';
 
 // --- Dummy Data (Data Contract for Backend) ---
 const pageData = {
@@ -84,6 +86,16 @@ const pageData = {
 };
 
 const Inventory = () => {
+    const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+
+    const openModal = (title, message) => {
+        setModalState({ isOpen: true, title, message });
+    };
+
+    const closeModal = () => {
+        setModalState(prev => ({ ...prev, isOpen: false }));
+    };
+
     return (
         <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
             <DashboardHeader
@@ -105,11 +117,17 @@ const Inventory = () => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[13px] font-sans font-bold text-neutral-dark transition-colors">
+                    <button 
+                        onClick={() => openModal('Manage Suppliers', 'Supplier management tools will be available soon.')}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[13px] font-sans font-bold text-neutral-dark transition-colors"
+                    >
                         <Users className="w-4 h-4 text-neutral-dark/70" />
                         Manage Suppliers
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm">
+                    <button 
+                        onClick={() => openModal('Update Stock', 'Manual stock update functionality is coming.')}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm"
+                    >
                         <RotateCcw className="w-4 h-4" />
                         Update Stock
                     </button>
@@ -122,7 +140,7 @@ const Inventory = () => {
                     title={pageData.alert.title}
                     message={pageData.alert.message}
                     buttonText={pageData.alert.buttonText}
-                    onClick={() => console.log('Review Items clicked')}
+                    onClick={() => openModal('Review Items', 'Low stock items review panel will open here.')}
                 />
             </div>
 
@@ -179,11 +197,18 @@ const Inventory = () => {
                         title={pageData.optimizer.title}
                         description={pageData.optimizer.description}
                         buttonText={pageData.optimizer.buttonText}
-                        onOptimize={() => console.log('Optimize Orders clicked')}
+                        onOptimize={() => openModal('Optimize Orders', 'The inventory optimizer tool is currently under construction.')}
                     />
                 </div>
             </div>
 
+            {/* Action Modal */}
+            <ActionModal 
+                isOpen={modalState.isOpen}
+                onClose={closeModal}
+                title={modalState.title}
+                message={modalState.message}
+            />
         </div>
     );
 };
