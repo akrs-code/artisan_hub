@@ -8,12 +8,14 @@ import Inventory from './pages/seller/inventory';
 import Orders from './pages/seller/orders';
 import Earnings from './pages/seller/earnings';
 import Overview from './pages/admin/overview';
+import Verify from './pages/admin/verify';
 
 const App = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/admin/*" element={<RootLayout sidebarContent={<AdminSidebar />} />}>
         <Route path="overview" element={<Overview />} />
+        <Route path="verify" element={<Verify />} />
       </Route>
 
       <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
