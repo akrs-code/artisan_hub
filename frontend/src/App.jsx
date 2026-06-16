@@ -11,7 +11,8 @@ import Overview from './pages/admin/overview';
 import Verify from './pages/admin/verify';
 import Moderate from './pages/admin/moderate';
 import Users from './pages/admin/users';
-
+import Logs from './pages/admin/logs';
+import Disputes from './pages/admin/disputes';
 
 const App = () => (
   <BrowserRouter>
@@ -21,6 +22,8 @@ const App = () => (
         <Route path="verify" element={<Verify />} />
         <Route path="moderate" element={<Moderate />} />
         <Route path="users" element={<Users />} />
+        <Route path="logs" element={<Logs />} />
+        <Route path="disputes" element={<Disputes />} />
       </Route>
 
       <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
