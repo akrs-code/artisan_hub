@@ -5,6 +5,11 @@ import WorkspaceView from './components/WorkspaceView';
 
 import { CartProvider } from './context/CartContext';
 
+// Auth Pages
+import Login from './pages/shared/Login';
+import Signup from './pages/shared/Signup';
+import SellerVerification from './pages/shared/SellerVerification';
+
 // Buyer Pages
 import MapDiscovery from './pages/buyer/MapDiscovery';
 import Discover from './pages/buyer/Discover';
@@ -14,6 +19,7 @@ import ProductDetail from './pages/buyer/ProductDetail';
 import Cart from './pages/buyer/Cart';
 import Checkout from './pages/buyer/Checkout';
 import Orders from './pages/buyer/Orders';
+import BuyerProfile from './pages/buyer/BuyerProfile';
 
 // Seller Pages
 import Dashboard from './pages/seller/dashboard';
@@ -23,6 +29,10 @@ const App = () => (
   <CartProvider>
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Signup />} />
+        <Route path="/verify-seller" element={<SellerVerification />} />
+
         <Route
           path="/admin/*"
           element={<RootLayout sidebarContent={<AdminSidebar />} />}
@@ -51,6 +61,7 @@ const App = () => (
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="profile" element={<BuyerProfile />} />
           <Route path="*" element={<WorkspaceView />} />
         </Route>
       </Routes>

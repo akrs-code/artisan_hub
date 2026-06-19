@@ -431,6 +431,9 @@ h6 {
   --input: rgba(54, 46, 37, 0.15);
   --ring: #A0522D;
 
+  --muted: rgba(54, 46, 37, 0.05);
+  --muted-foreground: rgba(54, 46, 37, 0.55);
+
   --chart-1: #A0522D;
   --chart-2: #3D5A3E;
   --chart-3: #8B6914;
@@ -487,6 +490,9 @@ h6 {
   --border: rgba(245, 240, 232, 0.12);
   --input: rgba(245, 240, 232, 0.12);
   --ring: #C8744C;
+
+  --muted: rgba(245, 240, 232, 0.05);
+  --muted-foreground: rgba(245, 240, 232, 0.55);
 
   --sidebar: #241F1B;
   --sidebar-foreground: #F5F0E8;

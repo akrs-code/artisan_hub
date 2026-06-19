@@ -15,6 +15,7 @@ import {
   Truck,
   DollarSign,
   Compass,
+  User,
 } from 'lucide-react';
 
 const SidebarNavItem = ({
