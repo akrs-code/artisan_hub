@@ -6,8 +6,20 @@ import SalesPerformance from '../../components/seller/SalesPerformance';
 import TopProducts from '../../components/seller/TopProducts';
 import RecentOrders from '../../components/seller/RecentOrders';
 import DashboardFAB from '../../components/seller/DashboardFAB';
+import ActionModal from '../../components/seller/ActionModal';
+import { useState } from 'react';
 
 const Dashboard = () => {
+  const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+
+  const openModal = (title, message) => {
+    setModalState({ isOpen: true, title, message });
+  };
+
+  const closeModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
       <DashboardHeader />
@@ -24,7 +36,10 @@ const Dashboard = () => {
         </div>
 
         {/* Date Picker Button */}
-        <button className="flex items-center gap-3 bg-neutral px-4 py-2.5 rounded-lg border border-neutral-dark/15 shadow-sm text-[13px] font-sans font-bold text-neutral-dark/80 hover:bg-neutral-light transition-colors">
+        <button 
+          onClick={() => openModal('Date Filtering', 'The date filtering feature is currently under development. Check back soon!')}
+          className="flex items-center gap-3 bg-neutral px-4 py-2.5 rounded-lg border border-neutral-dark/15 shadow-sm text-[13px] font-sans font-bold text-neutral-dark/80 hover:bg-neutral-light transition-colors"
+        >
           <Calendar className="w-4 h-4 text-primary" />
           Oct 12 - Oct 19, 2023
           <ChevronDown className="w-4 h-4 text-neutral-dark/50 ml-2" />
@@ -79,7 +94,15 @@ const Dashboard = () => {
       </div>
 
       {/* Floating Action Button */}
-      <DashboardFAB />
+      <DashboardFAB onClick={() => openModal('Quick Actions', 'Quick action shortcuts will be available in a future update.')} />
+
+      {/* Action Modal */}
+      <ActionModal 
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+      />
     </div>
   );
 };

@@ -114,7 +114,7 @@ export const SellerSidebar = () => (
         icon={Store}
       />
       <SidebarNavItem
-        to="/seller/fulfillment"
+        to="/seller/orders"
         label="Order Fulfilment"
         icon={Truck}
       />
@@ -133,7 +133,7 @@ export const AdminSidebar = () => (
   <div className="flex flex-col pb-6 pt-4">
     <ul className="flex flex-col">
       <SidebarNavItem
-        to="/admin"
+        to="/admin/overview"
         exact
         label="System Overview"
         icon={LayoutDashboard}
