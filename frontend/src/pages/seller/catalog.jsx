@@ -1,10 +1,11 @@
-import React from 'react';
 import { Plus } from 'lucide-react';
 import DashboardHeader from '../../components/seller/DashboardHeader';
 import CatalogFilterBar from '../../components/seller/CatalogFilterBar';
 import ProductCard from '../../components/seller/ProductCard';
 import Pagination from '../../components/seller/Pagination';
 import DashboardFAB from '../../components/seller/DashboardFAB';
+import ActionModal from '../../components/seller/ActionModal';
+import { useState } from 'react';
 
 const dummyProducts = [
   {
@@ -82,6 +83,16 @@ const dummyProducts = [
 ];
 
 const Catalog = () => {
+  const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+
+  const openModal = (title, message) => {
+    setModalState({ isOpen: true, title, message });
+  };
+
+  const closeModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
       <DashboardHeader />
@@ -98,7 +109,10 @@ const Catalog = () => {
         </div>
 
         {/* Add Product Button */}
-        <button className="flex items-center justify-center gap-2 btn-primary px-6 py-3 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-sm font-sans font-bold transition-colors">
+        <button 
+          onClick={() => openModal('Add New Product', 'The product creation flow will be integrated here.')}
+          className="flex items-center justify-center gap-2 btn-primary px-6 py-3 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-sm font-sans font-bold transition-colors"
+        >
           <Plus className="w-4 h-4" />
           Add New Product
         </button>
@@ -115,7 +129,15 @@ const Catalog = () => {
 
       <Pagination />
 
-      <DashboardFAB />
+      <DashboardFAB onClick={() => openModal('Quick Actions', 'Quick action shortcuts will be available in a future update.')} />
+
+      {/* Action Modal */}
+      <ActionModal 
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        title={modalState.title}
+        message={modalState.message}
+      />
     </div>
   );
 };
