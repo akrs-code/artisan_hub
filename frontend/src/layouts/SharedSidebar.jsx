@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { User, X } from 'lucide-react';
+import { User, X, LogOut } from 'lucide-react';
 
 /**
  * SharedSidebar
@@ -65,10 +65,10 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
         </nav>
 
         {/* Profile footer */}
-        <div className="shrink-0 border-t border-neutral-dark/10 p-4">
+        <div className="shrink-0 border-t border-neutral-dark/10 p-4 space-y-2">
           <Link
             to="/profile"
-            className="flex items-center justify-between w-full px-3 py-3 bg-neutral-dark/5 border border-neutral-dark/10 rounded-lg hover:bg-neutral-dark/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary group shadow-sm"
+            className="flex items-center justify-between w-full px-3 py-3 bg-neutral-dark/5 border border-neutral-dark/10 rounded-md hover:bg-neutral-dark/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary group shadow-sm"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-8 h-8 rounded-full bg-white border border-neutral-dark/10 flex items-center justify-center text-neutral-dark/70 shrink-0">
@@ -76,6 +76,14 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
               </div>
               <span className="text-sm font-medium text-neutral-dark font-sans truncate">Profile</span>
             </div>
+          </Link>
+          
+          <Link
+            to="/login"
+            className="flex items-center justify-center w-full px-3 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-md hover:bg-red-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-400 font-sans font-bold text-[10px] uppercase tracking-widest"
+          >
+            <LogOut className="w-3.5 h-3.5 mr-2" />
+            Sign Out
           </Link>
         </div>
       </aside>

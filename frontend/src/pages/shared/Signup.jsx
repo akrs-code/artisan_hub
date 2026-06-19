@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Mail, Lock, User, Store, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const Signup = () => {
+  const [role, setRole] = useState('buyer'); // 'buyer' or 'seller'
+  const [formData, setFormData] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle signup logic here
+    console.log('Signup attempt', { ...formData, role });
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
+      
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-3xl" />
+
+      <div className="max-w-md w-full relative z-10">
+        <div className="bg-card p-8 md:p-10 rounded-2xl border border-border/60 shadow-soft-lg">
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-1.5 rounded-full bg-primary/80" />
+          </div>
+          
+          <div className="text-center">
+            <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
+              Create an Account
+            </h2>
+            <p className="mt-2 text-sm font-sans text-muted-foreground">
+              Join Artisan Hub today.
+            </p>
+          </div>
+          
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            
+            {/* Role Toggle */}
+            <div className="flex p-1.5 bg-neutral-light/80 rounded-xl border border-border/50 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setRole('buyer')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
+                  role === 'buyer' 
+                    ? 'bg-white shadow-sm text-foreground border border-border/50' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+                }`}
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Buyer
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('seller')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
+                  role === 'seller' 
+                    ? 'bg-white shadow-sm text-foreground border border-border/50' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+                }`}
+              >
+                <Store className="w-4 h-4" />
+                Seller
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-xs font-semibold text-foreground tracking-wide uppercase">First Name</Label>
+                  <div className="relative group">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      autoComplete="given-name"
+                      required
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="pl-10"
+                      placeholder="John"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="middleName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Middle Name</Label>
+                  <div className="relative group">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                    <Input
+                      id="middleName"
+                      name="middleName"
+                      type="text"
+                      autoComplete="additional-name"
+                      value={formData.middleName}
+                      onChange={handleChange}
+                      className="pl-10"
+                      placeholder="Robert"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Last Name</Label>
+                <div className="relative group">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    autoComplete="family-name"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="pl-10"
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs font-semibold text-foreground tracking-wide uppercase">Email Address</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="pl-10"
+                    placeholder="name@example.com"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs font-semibold text-foreground tracking-wide uppercase">Password</Label>
+                <div className="relative group">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="pl-10"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground font-sans mt-1.5">Must be at least 8 characters.</p>
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group">
+              Create {role === 'seller' ? 'Seller ' : ''}Account
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+
+            <div className="text-center mt-8 pt-6 border-t border-border/50">
+              <p className="text-sm font-sans text-muted-foreground">
+                Already have an account?{' '}
+                <Link to="/login" className="font-semibold text-primary hover:text-primary-dark transition-colors">
+                  Sign in securely
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Signup;
