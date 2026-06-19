@@ -57,7 +57,7 @@ const ProductDetail = () => {
 
   return (
     <div className="w-full pb-24 animate-in fade-in duration-500 bg-background min-h-full">
-      <div className="max-w-5xl mx-auto px-6 lg:px-10 py-10 w-full">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full">
 
         {/* Back button */}
         <button

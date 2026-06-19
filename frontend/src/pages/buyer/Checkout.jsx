@@ -66,21 +66,29 @@ const Checkout = () => {
   const [step, setStep] = useState('delivery'); // 'delivery', 'payment', 'review'
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card', 'gcash', 'cod'
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    province: '',
-    zipCode: '',
-    region: '',
-    deliveryNotes: '',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    cardholderName: ''
+  const [formData, setFormData] = useState(() => {
+    const savedProfile = localStorage.getItem('buyerProfile');
+    let parsed = null;
+    if (savedProfile) {
+        try { parsed = JSON.parse(savedProfile); } catch (e) {}
+    }
+    
+    return {
+      firstName: parsed?.firstName || '',
+      lastName: parsed?.lastName || '',
+      email: parsed?.email || '',
+      phone: parsed?.phone || '',
+      address: parsed?.address?.street || '',
+      city: parsed?.address?.city || '',
+      province: parsed?.address?.state || '',
+      zipCode: parsed?.address?.zipCode || '',
+      region: '',
+      deliveryNotes: '',
+      cardNumber: '',
+      cardExpiry: '',
+      cardCvv: '',
+      cardholderName: parsed ? `${parsed.firstName} ${parsed.lastName}`.trim().toUpperCase() : ''
+    };
   });
 
   const handleChange = (e) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
