@@ -1,4 +1,3 @@
-import React from 'react';
 import { Users, RotateCcw, Box, TrendingDown, AlertCircle, MapPin } from 'lucide-react';
 import DashboardHeader from '../../components/seller/DashboardHeader';
 import AlertBanner from '../../components/seller/AlertBanner';
