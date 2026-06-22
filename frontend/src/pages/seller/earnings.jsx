@@ -1,5 +1,4 @@
 import { Wallet, Banknote, Landmark, Clock, CheckCircle, TrendingUp } from 'lucide-react';
-import DashboardHeader from '../../components/seller/DashboardHeader';
 import InventoryStatCard from '../../components/seller/InventoryStatCard';
 import TransactionsTable from '../../components/seller/TransactionsTable';
 import RevenueTrendChart from '../../components/seller/RevenueTrendChart';
@@ -80,20 +79,15 @@ const Earnings = () => {
     };
 
     return (
-        <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
-            <DashboardHeader
-                user={pageData.userProfile}
-                searchPlaceholder="Search transactions..."
-                showSettings={true}
-            />
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mt-8 mb-6 gap-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
+                    <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
                         Earnings & Payouts
                     </h1>
-                    <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
+                    <p className="text-muted-foreground font-sans text-xs">
                         Monitor your business growth, manage withdrawals, and track transactions.
                     </p>
                 </div>

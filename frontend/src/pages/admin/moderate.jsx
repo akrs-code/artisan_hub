@@ -6,7 +6,6 @@ import {
     CheckCircle,
     TrendingDown
 } from 'lucide-react';
-import AdminHeader from '../../components/admin/AdminHeader';
 import AdminStatCard from '../../components/admin/AdminStatCard';
 import ModerationTable from '../../components/admin/ModerationTable';
 // import BulkActionOverlay from '../../components/admin/BulkActionOverlay';
@@ -69,20 +68,15 @@ const Moderate = () => {
     };
 
     return (
-        <div className="relative min-h-full bg-background px-8 pb-32 w-full max-w-[1400px] mx-auto">
-            <AdminHeader
-                searchPlaceholder="Search moderation tickets..."
-                primaryActionText="Bulk Resolve"
-                onPrimaryActionClick={() => openModal('Bulk Resolve', 'The bulk resolution wizard will open here.')}
-            />
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mt-8 mb-8 gap-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
+                    <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
                         Product Moderation
                     </h1>
-                    <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
+                    <p className="text-muted-foreground font-sans text-xs">
                         Review and manage reported items from the Artisan community.
                     </p>
                 </div>

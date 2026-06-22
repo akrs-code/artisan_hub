@@ -1,5 +1,4 @@
 import { Plus } from 'lucide-react';
-import DashboardHeader from '../../components/seller/DashboardHeader';
 import CatalogFilterBar from '../../components/seller/CatalogFilterBar';
 import ProductCard from '../../components/seller/ProductCard';
 import Pagination from '../../components/seller/Pagination';
@@ -94,16 +93,15 @@ const Catalog = () => {
   };
 
   return (
-    <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
-      <DashboardHeader />
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mt-8 mb-2 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
+          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
             Product Catalog
           </h1>
-          <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
+          <p className="text-muted-foreground font-sans text-xs">
             Manage your handcrafted inventory and listings.
           </p>
         </div>

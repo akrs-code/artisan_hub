@@ -1,5 +1,4 @@
 import { Settings, Printer, CircleAlert, ClipboardList, Package, Truck, CheckCircle } from 'lucide-react';
-import DashboardHeader from '../../components/seller/DashboardHeader';
 import AlertBanner from '../../components/seller/AlertBanner';
 import InventoryStatCard from '../../components/seller/InventoryStatCard';
 import OrderQueueTable from '../../components/seller/OrderQueueTable';
@@ -85,20 +84,15 @@ const Orders = () => {
   };
 
   return (
-    <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
-      <DashboardHeader 
-        user={pageData.userProfile} 
-        searchPlaceholder="Search inventory, SKUs, or orders..."
-        showSettings={true}
-      />
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mt-8 mb-6 gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
+          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
             Order Fulfilment
           </h1>
-          <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
+          <p className="text-muted-foreground font-sans text-xs">
             Process, ship, and track your artisan orders.
           </p>
         </div>
