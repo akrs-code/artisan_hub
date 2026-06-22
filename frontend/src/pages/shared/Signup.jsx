@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Store, ShoppingBag, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Store, ShoppingBag, ArrowRight, Loader2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,8 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,6 +34,11 @@ const Signup = () => {
     // Client-side validation
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setError('You must agree to the Terms and Policies.');
       return;
     }
 
@@ -213,9 +220,32 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Terms and Policies Checkbox */}
+            <div className="flex items-start gap-2.5 my-4">
+              <input
+                id="terms"
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                disabled={isLoading}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+              />
+              <label htmlFor="terms" className="text-xs font-sans text-muted-foreground leading-normal">
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className="font-semibold text-primary hover:underline hover:text-primary-dark transition-all cursor-pointer"
+                >
+                  Terms and Policies
+                </button>{' '}
+                of Artisan Hub.
+              </label>
+            </div>
+
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !agreedToTerms}
               className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group"
             >
               {isLoading ? (
@@ -242,6 +272,40 @@ const Signup = () => {
           </form>
         </div>
       </div>
+
+      {/* Terms and Policies Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="fixed inset-0 bg-neutral-dark/40 backdrop-blur-sm transition-opacity" onClick={() => setShowTermsModal(false)} />
+          <div className="relative bg-card rounded-2xl border border-border shadow-soft-xl w-full max-w-lg overflow-hidden transform transition-all my-8 max-h-[80vh] flex flex-col z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/80 shrink-0">
+              <h3 className="text-lg font-headline font-bold text-foreground">Terms and Policies</h3>
+              <button type="button" onClick={() => setShowTermsModal(false)} className="text-muted-foreground hover:text-foreground p-2 rounded-full hover:bg-neutral-dark/5">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 font-sans text-xs text-muted-foreground space-y-4 leading-relaxed text-left">
+              <h4 className="font-bold text-foreground">1. Acceptance of Terms</h4>
+              <p>By creating an account on Artisan Hub, you agree to comply with and be bound by these Terms and Policies. If you do not agree, you must not use our services.</p>
+              <h4 className="font-bold text-foreground">2. Seller Responsibilities</h4>
+              <p>Sellers are responsible for verifying their identities, maintaining accurate listings, pricing products in Philippine Pesos (PHP), and fulfilling buyer orders on time.</p>
+              <h4 className="font-bold text-foreground">3. Buyer Safeguards</h4>
+              <p>Buyers agree to provide valid shipping addresses and payment credentials. All transactions are final, protected by secure checkout protocols.</p>
+              <h4 className="font-bold text-foreground">4. Privacy and Location Data</h4>
+              <p>We collect store and buyer location data to optimize the marketplace delivery network and calculate distances. Your coordinates are secured and handled in compliance with privacy regulations.</p>
+            </div>
+            <div className="flex justify-end p-6 border-t border-border/80 shrink-0 bg-neutral-dark/5">
+              <button
+                type="button"
+                onClick={() => { setAgreedToTerms(true); setShowTermsModal(false); }}
+                className="px-6 py-2.5 rounded-lg bg-[#8C5233] text-white text-[12px] font-sans font-bold uppercase tracking-wider hover:bg-[#7E4A2E] cursor-pointer"
+              >
+                Accept & Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

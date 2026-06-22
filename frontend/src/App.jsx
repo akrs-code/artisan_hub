@@ -9,7 +9,7 @@ import WorkspaceView from './components/WorkspaceView';
 
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import { GuestRoute, ProtectedRoute } from './components/RouteGuards';
+import { GuestRoute, ProtectedRoute, SellerRoute } from './components/RouteGuards';
 
 // Auth Pages
 import Login from './pages/shared/Login';
@@ -72,7 +72,7 @@ const App = () => (
           </Route>
 
           {/* Seller Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['seller']} />}>
+          <Route element={<SellerRoute />}>
             <Route
               path="/seller/*"
               element={<RootLayout sidebarContent={<SellerSidebar />} />}

@@ -1,7 +1,14 @@
 import React from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 
-const CatalogFilterBar = () => {
+const CatalogFilterBar = ({
+  searchQuery,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  selectedStatus,
+  onStatusChange,
+}) => {
   return (
     <div className="card-custom !p-6 flex flex-col md:flex-row gap-6 mb-8 mt-6">
       {/* Search By Name */}
@@ -15,6 +22,8 @@ const CatalogFilterBar = () => {
           </div>
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-transparent border border-neutral-dark/15 rounded-md py-2.5 pl-9 pr-4 text-[13px] font-sans text-neutral-dark placeholder:text-neutral-dark/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             placeholder="e.g. Stoneware Bowl"
           />
@@ -27,14 +36,18 @@ const CatalogFilterBar = () => {
           Category
         </label>
         <div className="relative">
-          <select className="w-full bg-transparent border border-neutral-dark/15 rounded-md py-2.5 pl-4 pr-10 text-[13px] font-sans text-neutral-dark appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer">
-            <option>All Categories</option>
-            <option>Ceramics</option>
-            <option>Textiles</option>
-            <option>Woodwork</option>
-            <option>Home Decor</option>
-            <option>Glassware</option>
-            <option>Stationery</option>
+          <select
+            value={selectedCategory}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            className="w-full bg-transparent border border-neutral-dark/15 rounded-md py-2.5 pl-4 pr-10 text-[13px] font-sans text-neutral-dark appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer"
+          >
+            <option value="All">All Categories</option>
+            <option value="Ceramics">Ceramics</option>
+            <option value="Textiles">Textiles</option>
+            <option value="Woodwork">Woodwork</option>
+            <option value="Home Decor">Home Decor</option>
+            <option value="Glassware">Glassware</option>
+            <option value="Stationery">Stationery</option>
           </select>
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <ChevronDown className="h-4 w-4 text-neutral-dark/40" />
@@ -48,23 +61,19 @@ const CatalogFilterBar = () => {
           Stock Status
         </label>
         <div className="relative">
-          <select className="w-full bg-transparent border border-neutral-dark/15 rounded-md py-2.5 pl-4 pr-10 text-[13px] font-sans text-neutral-dark appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Draft</option>
-            <option>Out of Stock</option>
+          <select
+            value={selectedStatus}
+            onChange={(e) => onStatusChange(e.target.value)}
+            className="w-full bg-transparent border border-neutral-dark/15 rounded-md py-2.5 pl-4 pr-10 text-[13px] font-sans text-neutral-dark appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer"
+          >
+            <option value="All">All Status</option>
+            <option value="Active">Active (In Stock)</option>
+            <option value="OutOfStock">Out of Stock</option>
           </select>
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <ChevronDown className="h-4 w-4 text-neutral-dark/40" />
           </div>
         </div>
-      </div>
-
-      {/* Filter Button */}
-      <div className="flex items-end">
-        <button className="btn-primary w-full md:w-auto h-[42px] px-6 text-[11px] tracking-widest uppercase font-bold bg-[#5B4F43] hover:bg-[#4A4036]">
-          Filter Results
-        </button>
       </div>
     </div>
   );

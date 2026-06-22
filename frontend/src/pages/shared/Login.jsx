@@ -41,7 +41,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
-      
+
       {/* Decorative background elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl" />
@@ -51,7 +51,7 @@ const Login = () => {
           <div className="flex justify-center mb-6">
             <div className="w-12 h-1.5 rounded-full bg-primary/80" />
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
               Welcome Back
@@ -68,7 +68,7 @@ const Login = () => {
               <p className="text-xs font-sans text-destructive font-medium">{error}</p>
             </div>
           )}
-          
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               <div className="space-y-2">
@@ -89,13 +89,10 @@ const Login = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-xs font-semibold text-foreground tracking-wide uppercase">Password</Label>
-                  <Link to="/forgot-password" className="text-xs font-sans font-medium text-primary hover:text-primary-dark transition-colors">
-                    Forgot password?
-                  </Link>
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />

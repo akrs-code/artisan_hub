@@ -1,22 +1,59 @@
-import React, { useState } from 'react';
-import { Upload, MapPin, Store, FileText, CheckCircle, ArrowRight, ArrowLeft, ShieldCheck, Map as MapIcon, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, MapPin, Store, FileText, CheckCircle, ArrowRight, ArrowLeft, ShieldCheck, Map as MapIcon, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Map, MapMarker, MapControls, MarkerContent, MarkerLabel } from '@/components/ui/map';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { shopsAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const SellerVerification = () => {
+    const navigate = useNavigate();
+    const { isAuthenticated, user, loading: authLoading } = useAuth();
+    const [isCheckingShop, setIsCheckingShop] = useState(true);
+
     const [step, setStep] = useState(1);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+
+    useEffect(() => {
+        const checkAccess = async () => {
+            if (authLoading) return;
+            
+            if (!isAuthenticated) {
+                navigate('/login', { replace: true });
+                return;
+            }
+
+            if (user?.role !== 'seller') {
+                navigate(user?.role === 'admin' ? '/admin/overview' : '/', { replace: true });
+                return;
+            }
+
+            // Check if seller already has a shop
+            try {
+                const response = await shopsAPI.getOwned();
+                if (response && response.data) {
+                    // Already has a shop -> verified! Redirect to dashboard
+                    navigate('/seller/dashboard', { replace: true });
+                }
+            } catch (err) {
+                // If 404, we let them verify!
+                setIsCheckingShop(false);
+            }
+        };
+        checkAccess();
+    }, [isAuthenticated, user, authLoading, navigate]);
     const [formData, setFormData] = useState({
         firstName: '',
         middleName: '',
         lastName: '',
         phone: '',
         storeName: '',
-        category: '',
+        category: 'Ceramics',
         description: '',
         address: {
             street: '',
@@ -27,7 +64,7 @@ const SellerVerification = () => {
         permitFile: null,
         idFile: null,
         location: {
-            lng: 121.0215, // Manila coordinates
+            lng: 121.0215,
             lat: 14.5995,
         }
     });
@@ -78,11 +115,49 @@ const SellerVerification = () => {
     const nextStep = () => setStep(step + 1);
     const prevStep = () => setStep(step - 1);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Seller Verification Submitted', formData);
-        setIsSubmitted(true);
+        setSubmitError('');
+        setIsSubmitting(true);
+
+        try {
+            // Build the compound address
+            const fullAddress = `${formData.address.street}, ${formData.address.city}, ${formData.address.state} ${formData.address.zipCode}`;
+
+            // Create FormData object
+            const data = new FormData();
+            data.append('name', formData.storeName);
+            data.append('description', formData.description);
+            data.append('category', formData.category || 'Ceramics');
+            data.append('address', fullAddress);
+            data.append('lat', formData.location.lat.toString());
+            data.append('lng', formData.location.lng.toString());
+
+            // Files mapping: permit to cover, ID to logo
+            if (formData.permitFile) {
+                data.append('cover', formData.permitFile);
+            }
+            if (formData.idFile) {
+                data.append('logo', formData.idFile);
+            }
+
+            await shopsAPI.createShop(data);
+            setIsSubmitted(true);
+        } catch (err) {
+            setSubmitError(err.message || 'Failed to submit seller verification. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    if (authLoading || isCheckingShop) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-sm font-sans text-muted-foreground">Checking store credentials...</p>
+            </div>
+        );
+    }
 
     if (isSubmitted) {
         return (
@@ -372,9 +447,15 @@ const SellerVerification = () => {
                             </div>
                         )}
 
+                        {submitError && (
+                            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs font-sans text-destructive font-medium">
+                                {submitError}
+                            </div>
+                        )}
+
                         <div className="flex gap-4 pt-4 border-t border-border/50">
                             {step > 1 && (
-                                <Button type="button" onClick={prevStep} variant="outline" className="w-1/3 rounded-xl font-sans font-bold text-xs uppercase tracking-widest border-border/60 hover:bg-neutral-light">
+                                <Button type="button" onClick={prevStep} variant="outline" className="w-1/3 rounded-xl font-sans font-bold text-xs uppercase tracking-widest border-border/60 hover:bg-neutral-light" disabled={isSubmitting}>
                                     <ArrowLeft className="w-4 h-4 mr-2" />
                                     Back
                                 </Button>
@@ -386,9 +467,18 @@ const SellerVerification = () => {
                                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             ) : (
-                                <Button type="button" onClick={handleSubmit} className="flex-1 rounded-xl font-sans font-bold text-xs uppercase tracking-widest group bg-secondary hover:bg-secondary-dark text-white">
-                                    Submit Application
-                                    <CheckCircle className="w-4 h-4 ml-2" />
+                                <Button type="button" onClick={handleSubmit} className="flex-1 rounded-xl font-sans font-bold text-xs uppercase tracking-widest group bg-secondary hover:bg-secondary-dark text-white" disabled={isSubmitting}>
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Submit Application
+                                            <CheckCircle className="w-4 h-4 ml-2" />
+                                        </>
+                                    )}
                                 </Button>
                             )}
                         </div>

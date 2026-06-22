@@ -62,3 +62,56 @@ export const ProtectedRoute = ({ allowedRoles }) => {
 
   return <Outlet />;
 };
+
+/**
+ * Route guard specifically for sellers that requires them to have verified/created a shop.
+ * If they do not have a shop, redirects them to /verify-seller.
+ */
+import { useState, useEffect } from 'react';
+import { shopsAPI } from '../services/api';
+
+export const SellerRoute = () => {
+  const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const [shop, setShop] = useState(null);
+  const [loadingShop, setLoadingShop] = useState(true);
+
+  useEffect(() => {
+    const checkShop = async () => {
+      if (isAuthenticated && user?.role === 'seller') {
+        try {
+          const response = await shopsAPI.getOwned();
+          setShop(response.data);
+        } catch (err) {
+          setShop(null);
+        } finally {
+          setLoadingShop(false);
+        }
+      } else {
+        setLoadingShop(false);
+      }
+    };
+    checkShop();
+  }, [isAuthenticated, user]);
+
+  if (authLoading || (isAuthenticated && user?.role === 'seller' && loadingShop)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'seller') {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!shop) {
+    return <Navigate to="/verify-seller" replace />;
+  }
+
+  return <Outlet />;
+};

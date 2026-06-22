@@ -58,4 +58,74 @@ export const authAPI = {
     }),
 };
 
+// ─── Shops API ───────────────────────────────────────────────────────────────
+
+export const shopsAPI = {
+  getOwned: () =>
+    request('/shops/owned', {
+      method: 'GET',
+    }),
+  createShop: (formData) =>
+    request('/shops', {
+      method: 'POST',
+      body: formData,
+    }),
+};
+
+// ─── Products API ────────────────────────────────────────────────────────────
+
+export const productsAPI = {
+  getShopProducts: (shopId) =>
+    request(`/products/shops/${shopId}/get_products`, {
+      method: 'GET',
+    }),
+
+  createProduct: (shopId, formData) =>
+    request(`/products/shops/${shopId}/products`, {
+      method: 'POST',
+      body: formData,
+    }),
+
+  updateProduct: (productId, formData) =>
+    request(`/products/products/${productId}/edit_product`, {
+      method: 'PUT',
+      body: formData,
+    }),
+
+  deleteProduct: (productId) =>
+    request(`/products/products/${productId}/delete_product`, {
+      method: 'DELETE',
+    }),
+};
+
+// ─── Orders API ──────────────────────────────────────────────────────────────
+
+export const ordersAPI = {
+  getShopOrders: (shopId) =>
+    request(`/orders/shops/${shopId}/orders`, {
+      method: 'GET',
+    }),
+
+  confirmOrder: (orderId) =>
+    request(`/orders/${orderId}/confirm`, {
+      method: 'PUT',
+    }),
+
+  shipOrder: (orderId, shippingData) =>
+    request(`/orders/${orderId}/ship`, {
+      method: 'PUT',
+      body: JSON.stringify(shippingData),
+    }),
+
+  deliverOrder: (orderId) =>
+    request(`/orders/${orderId}/deliver`, {
+      method: 'PUT',
+    }),
+
+  cancelOrder: (orderId) =>
+    request(`/orders/${orderId}/cancel`, {
+      method: 'PUT',
+    }),
+};
+
 export default request;
