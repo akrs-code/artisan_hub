@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
 import DashboardHeader from '../../components/seller/DashboardHeader';
 import StatCard from '../../components/seller/StatCard';

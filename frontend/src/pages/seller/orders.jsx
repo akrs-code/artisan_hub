@@ -1,4 +1,3 @@
-import React from 'react';
 import { Settings, Printer, CircleAlert, ClipboardList, Package, Truck, CheckCircle } from 'lucide-react';
 import DashboardHeader from '../../components/seller/DashboardHeader';
 import AlertBanner from '../../components/seller/AlertBanner';

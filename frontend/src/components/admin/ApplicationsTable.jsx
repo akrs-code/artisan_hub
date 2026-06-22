@@ -1,6 +1,6 @@
 import React from 'react';
 import { Filter, Download, ChevronRight } from 'lucide-react';
-import Pagination from '../seller/Pagination';
+import Pagination from './Pagination';
 
 const StatusBadge = ({ status }) => {
   const isFlagged = status === 'FLAGGED';
@@ -21,7 +21,7 @@ const ScoreBar = ({ score }) => {
         {score}
       </div>
       <div className="h-1 w-full bg-[#EBE5D9] rounded-full overflow-hidden flex">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
           style={{ width: `${score}%` }}
         />
@@ -37,13 +37,13 @@ const ApplicationsTable = ({ data, onFilterClick, onDownloadClick, onRowClick })
       <div className="flex justify-between items-center p-6 border-b border-neutral-dark/10">
         <h2 className="text-lg font-headline font-bold text-neutral-dark">Applications Overview</h2>
         <div className="flex items-center gap-4 text-neutral-dark/60">
-          <button 
+          <button
             onClick={onFilterClick}
             className="hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-1"
           >
             <Filter className="w-4 h-4" />
           </button>
-          <button 
+          <button
             onClick={onDownloadClick}
             className="hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-1"
           >
@@ -67,8 +67,8 @@ const ApplicationsTable = ({ data, onFilterClick, onDownloadClick, onRowClick })
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr 
-                key={i} 
+              <tr
+                key={i}
                 onClick={() => onRowClick(row.name)}
                 className={`border-b border-neutral-dark/5 hover:bg-neutral-dark/5 transition-colors group/row cursor-pointer ${i === data.length - 1 ? 'border-b-0' : ''}`}
               >

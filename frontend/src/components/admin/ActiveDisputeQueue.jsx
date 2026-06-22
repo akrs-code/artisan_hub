@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowUpDown, SlidersHorizontal } from 'lucide-react';
-import Pagination from '../seller/Pagination';
+import Pagination from './Pagination';
 
 const ReasonBadge = ({ reason }) => {
   return (
@@ -17,13 +17,13 @@ const ActiveDisputeQueue = ({ data, onRowClick, onFilterClick, onSortClick }) =>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-neutral-dark/10 gap-4">
         <h2 className="text-lg font-headline font-bold text-neutral-dark">Active Dispute Queue</h2>
         <div className="flex items-center gap-4 text-neutral-dark/60">
-          <button 
+          <button
             onClick={onSortClick}
             className="text-neutral-dark/40 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
           >
             <ArrowUpDown className="w-4 h-4" />
           </button>
-          <button 
+          <button
             onClick={onFilterClick}
             className="text-neutral-dark/40 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
           >
@@ -50,8 +50,8 @@ const ActiveDisputeQueue = ({ data, onRowClick, onFilterClick, onSortClick }) =>
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr 
-                key={i} 
+              <tr
+                key={i}
                 onClick={() => onRowClick(row.id)}
                 className={`border-b border-neutral-dark/5 hover:bg-neutral-dark/5 transition-colors cursor-pointer group/row ${i === data.length - 1 ? 'border-b-0' : ''}`}
               >

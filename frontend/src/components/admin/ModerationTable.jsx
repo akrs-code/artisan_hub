@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, Download } from 'lucide-react';
-import Pagination from '../seller/Pagination';
+import Pagination from './Pagination';
 
 const ViolationBadge = ({ type }) => {
   let styleClass = "bg-neutral-dark/10 text-neutral-dark/60"; // Default
@@ -33,7 +33,7 @@ const SeverityBar = ({ score }) => {
         {score}
       </div>
       <div className="h-1 w-full bg-[#EBE5D9] rounded-full overflow-hidden flex">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-500 ${colorClass.split(' ')[0]}`}
           style={{ width: `${score}%` }}
         />
@@ -67,14 +67,14 @@ const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-neutral-dark/10 gap-4">
         <h2 className="text-lg font-headline font-bold text-neutral-dark">Moderation Queue</h2>
         <div className="flex items-center gap-4 text-neutral-dark/60">
-          <button 
+          <button
             onClick={() => onFilterClick('Violation')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
           >
             ALL VIOLATION TYPES
             <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
           </button>
-          <button 
+          <button
             onClick={() => onFilterClick('Severity')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
           >
@@ -82,7 +82,7 @@ const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }
             <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
           </button>
           <div className="w-px h-5 bg-neutral-dark/10 mx-1"></div>
-          <button 
+          <button
             onClick={onDownloadClick}
             className="hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-1"
           >
@@ -106,8 +106,8 @@ const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr 
-                key={i} 
+              <tr
+                key={i}
                 className={`border-b border-neutral-dark/5 hover:bg-neutral-dark/5 transition-colors group/row ${i === data.length - 1 ? 'border-b-0' : ''}`}
               >
                 <td className="py-5 px-6 flex items-center gap-4">
@@ -145,7 +145,7 @@ const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }
                 <td className="py-5 px-6">
                   <div className="flex items-center justify-between gap-4">
                     <StatusDisplay status={row.status} />
-                    <button 
+                    <button
                       onClick={() => onReviewClick(row.productName)}
                       className="px-4 py-1.5 rounded-md border border-neutral-dark/20 text-neutral-dark text-[11px] font-sans font-bold hover:bg-neutral-dark/5 transition-colors shadow-sm bg-background shrink-0"
                     >

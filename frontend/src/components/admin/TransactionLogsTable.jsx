@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, Eye } from 'lucide-react';
-import Pagination from '../seller/Pagination';
+import Pagination from './Pagination';
 
 const TypeBadge = ({ type }) => {
   return (

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Wallet, Banknote, Landmark, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 import DashboardHeader from '../../components/seller/DashboardHeader';
 import InventoryStatCard from '../../components/seller/InventoryStatCard';

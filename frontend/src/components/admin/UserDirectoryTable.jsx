@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, Pencil, Store, Ban, CheckCircle, RefreshCw } from 'lucide-react';
-import Pagination from '../seller/Pagination';
+import Pagination from './Pagination';
 
 const RoleBadge = ({ role }) => {
   return (
@@ -32,14 +32,14 @@ const UserDirectoryTable = ({ data, onFilterClick, onActionClick }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-neutral-dark/10 gap-4">
         <h2 className="text-lg font-headline font-bold text-neutral-dark">Directory</h2>
         <div className="flex items-center gap-4 text-neutral-dark/60">
-          <button 
+          <button
             onClick={() => onFilterClick('Role')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
           >
             ALL ROLES
             <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
           </button>
-          <button 
+          <button
             onClick={() => onFilterClick('Status')}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
           >
@@ -67,8 +67,8 @@ const UserDirectoryTable = ({ data, onFilterClick, onActionClick }) => {
           </thead>
           <tbody>
             {data.map((row, i) => (
-              <tr 
-                key={i} 
+              <tr
+                key={i}
                 className={`border-b border-neutral-dark/5 hover:bg-neutral-dark/5 transition-colors group/row ${i === data.length - 1 ? 'border-b-0' : ''}`}
               >
                 <td className="py-5 px-6 flex items-center gap-4">
@@ -96,7 +96,7 @@ const UserDirectoryTable = ({ data, onFilterClick, onActionClick }) => {
                 <td className="py-5 px-6">
                   <div className="flex items-center justify-end gap-5">
                     {/* Common Edit Action */}
-                    <button 
+                    <button
                       onClick={() => onActionClick('Edit', row.name)}
                       className="text-neutral-dark/40 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                     >
@@ -105,14 +105,14 @@ const UserDirectoryTable = ({ data, onFilterClick, onActionClick }) => {
 
                     {/* Role-specific Action */}
                     {row.role === 'SELLER' ? (
-                      <button 
+                      <button
                         onClick={() => onActionClick('View Shop', row.name)}
                         className="text-[#8C5233] hover:text-[#7E4A2E] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                       >
                         <Store className="w-4 h-4" />
                       </button>
                     ) : row.status === 'PENDING' ? (
-                      <button 
+                      <button
                         onClick={() => onActionClick('Approve', row.name)}
                         className="text-primary hover:text-primary-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                       >
@@ -124,14 +124,14 @@ const UserDirectoryTable = ({ data, onFilterClick, onActionClick }) => {
 
                     {/* Status-specific Action (Suspend / Restore) */}
                     {row.status === 'SUSPENDED' ? (
-                      <button 
+                      <button
                         onClick={() => onActionClick('Restore', row.name)}
                         className="text-primary hover:text-primary-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                       >
                         <RefreshCw className="w-4 h-4" />
                       </button>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => onActionClick('Suspend', row.name)}
                         className="text-destructive hover:text-red-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                       >
