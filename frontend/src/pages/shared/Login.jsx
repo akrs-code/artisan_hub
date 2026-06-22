@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt', { email, password });
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const data = await login({ email, password });
+
+      // Route based on user role
+      const role = data.user?.role;
+      if (role === 'admin') {
+        navigate('/admin/overview');
+      } else if (role === 'seller') {
+        navigate('/seller/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,6 +60,14 @@ const Login = () => {
               Sign in to continue your journey.
             </p>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              <p className="text-xs font-sans text-destructive font-medium">{error}</p>
+            </div>
+          )}
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
@@ -49,6 +81,7 @@ const Login = () => {
                     type="email"
                     autoComplete="email"
                     required
+                    disabled={isLoading}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -72,6 +105,7 @@ const Login = () => {
                     type="password"
                     autoComplete="current-password"
                     required
+                    disabled={isLoading}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -81,9 +115,22 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group">
-              Sign In
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </Button>
 
             <div className="text-center mt-8 pt-6 border-t border-border/50">

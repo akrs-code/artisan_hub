@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
-import { User, X, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, X, LogOut, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * SharedSidebar
@@ -8,6 +9,19 @@ import { User, X, LogOut } from 'lucide-react';
  * Desktop (≥md): Static column in the flex layout — always visible, no overlay.
  */
 export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen }) => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = (e) => {
+    e.preventDefault();
+    logout();
+    navigate('/login');
+  };
+
+  const getInitial = () => {
+    if (!user?.name) return 'U';
+    return user.name.charAt(0).toUpperCase();
+  };
   return (
     <>
       {/* Mobile overlay backdrop */}
@@ -66,25 +80,43 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
 
         {/* Profile footer */}
         <div className="shrink-0 border-t border-neutral-dark/10 p-4 space-y-2">
-          <Link
-            to="/profile"
-            className="flex items-center justify-between w-full px-3 py-3 bg-neutral-dark/5 border border-neutral-dark/10 rounded-md hover:bg-neutral-dark/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary group shadow-sm"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-white border border-neutral-dark/10 flex items-center justify-center text-neutral-dark/70 shrink-0">
-                <User className="w-4 h-4" />
+          {isAuthenticated && user ? (
+            <>
+              <div className="flex items-center gap-3 px-3 py-2.5 bg-neutral-dark/5 border border-neutral-dark/10 rounded-xl shadow-sm">
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full object-cover border border-neutral-dark/10 shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold font-headline shrink-0">
+                    {getInitial()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-foreground font-sans truncate">{user.name}</p>
+                  <p className="text-[9px] font-sans font-semibold text-muted-foreground uppercase tracking-wider">{user.role}</p>
+                </div>
               </div>
-              <span className="text-sm font-medium text-neutral-dark font-sans truncate">Profile</span>
-            </div>
-          </Link>
-          
-          <Link
-            to="/login"
-            className="flex items-center justify-center w-full px-3 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-md hover:bg-red-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-400 font-sans font-bold text-[10px] uppercase tracking-widest"
-          >
-            <LogOut className="w-3.5 h-3.5 mr-2" />
-            Sign Out
-          </Link>
+              
+              <button
+                onClick={handleSignOut}
+                className="flex items-center justify-center w-full px-3 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-md hover:bg-red-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-400 font-sans font-bold text-[10px] uppercase tracking-widest cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5 mr-2" />
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center justify-center w-full px-3 py-2.5 text-white bg-primary hover:bg-primary-dark rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans font-bold text-[10px] uppercase tracking-widest"
+            >
+              <LogIn className="w-3.5 h-3.5 mr-2" />
+              Sign In
+            </Link>
+          )}
         </div>
       </aside>
     </>

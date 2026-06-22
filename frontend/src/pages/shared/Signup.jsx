@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, User, Store, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, Store, ShoppingBag, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+
   const [role, setRole] = useState('buyer'); // 'buyer' or 'seller'
   const [formData, setFormData] = useState({
     firstName: '',
@@ -14,15 +18,40 @@ const Signup = () => {
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Signup attempt', { ...formData, role });
+    setError('');
+
+    // Client-side validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const data = await register({ ...formData, role });
+
+      // Route based on role after successful registration
+      const userRole = data.user?.role;
+      if (userRole === 'seller') {
+        navigate('/verify-seller');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,6 +75,14 @@ const Signup = () => {
               Join Artisan Hub today.
             </p>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              <p className="text-xs font-sans text-destructive font-medium">{error}</p>
+            </div>
+          )}
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             
@@ -54,6 +91,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={() => setRole('buyer')}
+                disabled={isLoading}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
                   role === 'buyer' 
                     ? 'bg-white shadow-sm text-foreground border border-border/50' 
@@ -66,6 +104,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={() => setRole('seller')}
+                disabled={isLoading}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
                   role === 'seller' 
                     ? 'bg-white shadow-sm text-foreground border border-border/50' 
@@ -89,6 +128,7 @@ const Signup = () => {
                       type="text"
                       autoComplete="given-name"
                       required
+                      disabled={isLoading}
                       value={formData.firstName}
                       onChange={handleChange}
                       className="pl-10"
@@ -105,6 +145,7 @@ const Signup = () => {
                       name="middleName"
                       type="text"
                       autoComplete="additional-name"
+                      disabled={isLoading}
                       value={formData.middleName}
                       onChange={handleChange}
                       className="pl-10"
@@ -123,6 +164,7 @@ const Signup = () => {
                     type="text"
                     autoComplete="family-name"
                     required
+                    disabled={isLoading}
                     value={formData.lastName}
                     onChange={handleChange}
                     className="pl-10"
@@ -141,6 +183,7 @@ const Signup = () => {
                     type="email"
                     autoComplete="email"
                     required
+                    disabled={isLoading}
                     value={formData.email}
                     onChange={handleChange}
                     className="pl-10"
@@ -159,6 +202,7 @@ const Signup = () => {
                     type="password"
                     autoComplete="new-password"
                     required
+                    disabled={isLoading}
                     value={formData.password}
                     onChange={handleChange}
                     className="pl-10"
@@ -169,9 +213,22 @@ const Signup = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group">
-              Create {role === 'seller' ? 'Seller ' : ''}Account
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Create {role === 'seller' ? 'Seller ' : ''}Account
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </Button>
 
             <div className="text-center mt-8 pt-6 border-t border-border/50">

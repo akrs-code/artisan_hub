@@ -7,8 +7,9 @@ import {
 } from './components/RoleBasedSidebar';
 import WorkspaceView from './components/WorkspaceView';
 
-
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { GuestRoute, ProtectedRoute } from './components/RouteGuards';
 
 // Auth Pages
 import Login from './pages/shared/Login';
@@ -42,59 +43,75 @@ import Logs from './pages/admin/logs';
 import Disputes from './pages/admin/disputes';
 
 const App = () => (
-  <CartProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Signup />} />
-        <Route path="/verify-seller" element={<SellerVerification />} />
+  <AuthProvider>
+    <CartProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Guest Only Routes */}
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Signup />} />
+          </Route>
+          
+          <Route path="/verify-seller" element={<SellerVerification />} />
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin/*"
-          element={<RootLayout sidebarContent={<AdminSidebar />} />}
-        >
-          <Route path="overview" element={<Overview />} />
-          <Route path="verify" element={<Verify />} />
-          <Route path="moderate" element={<Moderate />} />
-          <Route path="users" element={<Users />} />
-          <Route path="logs" element={<Logs />} />
-          <Route path="disputes" element={<Disputes />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route
+              path="/admin/*"
+              element={<RootLayout sidebarContent={<AdminSidebar />} />}
+            >
+              <Route path="overview" element={<Overview />} />
+              <Route path="verify" element={<Verify />} />
+              <Route path="moderate" element={<Moderate />} />
+              <Route path="users" element={<Users />} />
+              <Route path="logs" element={<Logs />} />
+              <Route path="disputes" element={<Disputes />} />
+              <Route path="*" element={<WorkspaceView />} />
+            </Route>
+          </Route>
 
-        {/* Seller Routes */}
-        <Route
-          path="/seller/*"
-          element={<RootLayout sidebarContent={<SellerSidebar />} />}
-        >
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="catalog" element={<Catalog />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="orders" element={<SellerOrders />} />
-          <Route path="earnings" element={<Earnings />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
+          {/* Seller Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['seller']} />}>
+            <Route
+              path="/seller/*"
+              element={<RootLayout sidebarContent={<SellerSidebar />} />}
+            >
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="catalog" element={<Catalog />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="orders" element={<SellerOrders />} />
+              <Route path="earnings" element={<Earnings />} />
+              <Route path="*" element={<WorkspaceView />} />
+            </Route>
+          </Route>
 
-        {/* Buyer Routes */}
-        <Route
-          path="/*"
-          element={<RootLayout sidebarContent={<BuyerSidebar />} />}
-        >
-          <Route index element={<MapDiscovery />} />
-          <Route path="discover" element={<Discover />} />
-          <Route path="product/:id" element={<ProductDetail />} />
-          <Route path="shops" element={<SavedShops />} />
-          <Route path="shop/:id" element={<ShopDetail />} />
-          <Route path="cart" element={<Cart />} />
-          <Route path="checkout" element={<Checkout />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="profile" element={<BuyerProfile />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </CartProvider>
+          {/* Public & Private Buyer Routes */}
+          <Route
+            path="/*"
+            element={<RootLayout sidebarContent={<BuyerSidebar />} />}
+          >
+            {/* Public Buyer Routes */}
+            <Route index element={<MapDiscovery />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="product/:id" element={<ProductDetail />} />
+            <Route path="shop/:id" element={<ShopDetail />} />
+            <Route path="cart" element={<Cart />} />
+
+            {/* Authenticated Buyer Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['buyer']} />}>
+              <Route path="checkout" element={<Checkout />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="profile" element={<BuyerProfile />} />
+              <Route path="shops" element={<SavedShops />} />
+            </Route>
+
+            <Route path="*" element={<WorkspaceView />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
+  </AuthProvider>
 );
 
 export default App;
