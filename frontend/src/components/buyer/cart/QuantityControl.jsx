@@ -1,24 +1,25 @@
 import { Plus, Minus } from 'lucide-react';
 
-export const QuantityControl = ({ quantity, onDecrement, onIncrement }) => (
-  <div className="flex items-center border border-border rounded-md overflow-hidden h-8 bg-background shadow-sm">
+export const QuantityControl = ({ quantity, onDecrement, onIncrement, max }) => (
+  <div className="inline-flex items-center border border-border rounded-lg overflow-hidden bg-card shadow-sm h-9">
     <button
       onClick={onDecrement}
       disabled={quantity <= 1}
       aria-label="Decrease quantity"
-      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors duration-150 disabled:opacity-30 disabled:cursor-not-allowed"
+      className="w-9 h-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
     >
-      <Minus className="w-2.5 h-2.5" />
+      <Minus className="w-3 h-3" />
     </button>
-    <div className="w-9 h-full flex items-center justify-center font-bold text-xs border-x border-border font-sans select-none">
+    <span className="w-9 h-full flex items-center justify-center text-sm font-semibold font-sans text-foreground select-none border-x border-border">
       {quantity}
-    </div>
+    </span>
     <button
       onClick={onIncrement}
+      disabled={max != null && quantity >= max}
       aria-label="Increase quantity"
-      className="w-8 h-full flex items-center justify-center text-foreground hover:bg-muted transition-colors duration-150"
+      className="w-9 h-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
     >
-      <Plus className="w-2.5 h-2.5" />
+      <Plus className="w-3 h-3" />
     </button>
   </div>
 );

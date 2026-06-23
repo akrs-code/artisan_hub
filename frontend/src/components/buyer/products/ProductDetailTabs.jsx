@@ -1,9 +1,9 @@
 import { MapPin, Star } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export const ProductDetailTabs = ({ product, shop, activeTab, onTabChange }) => (
-  <Card className="p-4.5 mb-7">
+  <div className="ec-card p-5 mb-7">
     <Tabs>
       
       <TabsList className="pb-2 mb-3 gap-4">
@@ -59,6 +59,6 @@ export const ProductDetailTabs = ({ product, shop, activeTab, onTabChange }) => 
         </TabsContent>
       </div>
     </Tabs>
-  </Card>
+  </div>
 );
 

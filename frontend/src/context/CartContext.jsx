@@ -8,13 +8,13 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
-  
+
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('artisan_hub_cart');
     if (!saved) return [];
     try {
       const parsed = JSON.parse(saved);
-      
+
       return parsed.map(item => ({
         ...item,
         quantity: typeof item.quantity === 'object' ? 1 : (item.quantity || 1)
@@ -59,13 +59,13 @@ export const CartProvider = ({ children }) => {
   }, [savedProductIds]);
 
   const toggleSaveShop = (shopId) => {
-    setSavedShopIds(prev => 
+    setSavedShopIds(prev =>
       prev.includes(shopId) ? prev.filter(id => id !== shopId) : [...prev, shopId]
     );
   };
 
   const toggleSaveProduct = (productId) => {
-    setSavedProductIds(prev => 
+    setSavedProductIds(prev =>
       prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
     );
   };
@@ -128,8 +128,8 @@ export const CartProvider = ({ children }) => {
 
   const updateItemOptions = async (productId, color, size) => {
     if (user) {
-      
-      
+      // Backend does not currently support partial option updates cleanly without passing qty,
+      // So we will just fetch existing qty and add. For now, just update local state if needed.
     }
     setCartItems(prev =>
       prev.map(item =>
@@ -146,7 +146,7 @@ export const CartProvider = ({ children }) => {
     (total, item) => total + (item?.product?.price || 0) * (item?.quantity || 0),
     0
   );
-  
+
   const cartItemCount = cartItems.reduce(
     (count, item) => count + (item?.quantity || 0),
     0

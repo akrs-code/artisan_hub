@@ -21,7 +21,7 @@ export const NearbyShopStrip = ({ shops, title = 'Nearby Shops' }) => {
             <Link
               key={shop._id}
               to={`/shop/${shop._id}`}
-              className="w-60 bg-card rounded-md border border-border overflow-hidden hover:border-primary/40 hover:shadow-md transition-all duration-300 group shadow-sm flex flex-col shrink-0"
+              className="w-60 ec-card-img ec-card-hover group flex flex-col shrink-0"
             >
               
               <div className="relative h-28 overflow-hidden bg-muted">

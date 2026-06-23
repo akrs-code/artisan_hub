@@ -80,6 +80,128 @@ h6 {
   }
 }
 
+/* ── E-commerce page layout ───────────────────────────────────── */
+@utility page-section {
+  @apply px-4 sm:px-6 lg:px-10 py-8 max-w-7xl mx-auto w-full;
+}
+
+@utility page-header {
+  @apply mb-6 sm:mb-8;
+}
+
+@utility page-title {
+  @apply text-2xl sm:text-3xl font-headline font-bold text-foreground tracking-tight mb-1;
+}
+
+@utility page-subtitle {
+  @apply text-xs sm:text-sm text-muted-foreground font-sans;
+}
+
+/* ── Standardized field components ───────────────────────────── */
+@utility field-label {
+  @apply block text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest mb-1.5;
+}
+
+@utility field-input {
+  @apply w-full px-3.5 py-2.5 bg-card border border-border rounded-xl text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all;
+}
+
+@utility field-select {
+  @apply w-full px-3.5 py-2.5 bg-card border border-border rounded-xl text-sm font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all cursor-pointer;
+}
+
+@utility field-textarea {
+  @apply w-full px-3.5 py-2.5 bg-card border border-border rounded-xl text-sm font-sans text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all resize-none;
+}
+
+/* ── Standardized button variants ────────────────────────────── */
+@utility btn-sm {
+  @apply inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-sans font-semibold transition-colors cursor-pointer;
+}
+
+@utility btn-md {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-sans font-semibold transition-colors cursor-pointer;
+}
+
+@utility btn-lg {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-sans font-semibold transition-colors cursor-pointer;
+}
+
+@utility btn-solid {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm;
+}
+
+@utility btn-outline {
+  @apply border border-border bg-card text-foreground hover:bg-muted;
+}
+
+@utility btn-ghost {
+  @apply text-muted-foreground hover:text-foreground hover:bg-muted;
+}
+
+@utility btn-danger {
+  @apply border border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20;
+}
+
+/* ── E-commerce card ─────────────────────────────────────────── */
+@utility ec-card {
+  @apply bg-card border border-border rounded-xl transition-all duration-200;
+}
+
+@utility ec-card-img {
+  /* For cards that contain images — overflow hidden clips the image zoom effect */
+  @apply bg-card border border-border rounded-xl overflow-hidden transition-all duration-200;
+}
+
+@utility ec-card-hover {
+  @apply hover:border-primary/30 hover:shadow-md;
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+@utility empty-state {
+  @apply flex flex-col items-center justify-center py-16 px-4 text-center;
+}
+
+@utility empty-state-icon {
+  @apply w-12 h-12 text-muted-foreground/25 mb-4;
+}
+
+@utility empty-state-title {
+  @apply text-base font-headline font-bold text-foreground mb-2;
+}
+
+@utility empty-state-desc {
+  @apply text-sm text-muted-foreground font-sans max-w-xs mx-auto leading-relaxed;
+}
+
+/* ── Section card header ─────────────────────────────────────── */
+@utility card-header {
+  @apply px-5 py-4 border-b border-border flex items-center justify-between;
+}
+
+@utility card-title {
+  @apply text-sm font-headline font-bold text-foreground;
+}
+
+@utility card-footer {
+  @apply px-5 py-3 border-t border-border bg-muted/20;
+}
+
+/* ── E-commerce card ─────────────────────────────────────────── */
+@utility ec-card {
+  /* Base card — NO overflow-hidden so expanded content never clips */
+  @apply bg-card border border-border rounded-xl transition-all duration-200;
+}
+
+@utility ec-card-img {
+  /* Use on cards with image zoom — overflow-hidden needed to clip scale effect */
+  @apply bg-card border border-border rounded-xl overflow-hidden transition-all duration-200;
+}
+
+@utility ec-card-hover {
+  @apply hover:border-primary/30 hover:shadow-md;
+}
+
 @utility btn-base {
   display: inline-flex;
   align-items: center;

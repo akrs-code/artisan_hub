@@ -74,7 +74,7 @@ export const ShopPopupContent = ({
         <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50">
           <button
             onClick={() => onDirections(artisan)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-tertiary hover:bg-tertiary-dark text-neutral rounded-md text-[10px] font-sans font-bold uppercase tracking-wider transition-colors border border-border/50"
+            className="btn-sm btn-outline flex-1 text-[10px]"
           >
             <Navigation className="w-3 h-3" />
             Directions
@@ -82,7 +82,7 @@ export const ShopPopupContent = ({
 
           <Link
             to={`/shop/${artisan._id}`}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-primary hover:bg-primary-dark text-primary-foreground rounded-md text-[10px] font-sans font-bold uppercase tracking-wider transition-colors shadow-sm"
+            className="btn-sm btn-solid flex-1 text-[10px]"
           >
             Visit Shop
             <ArrowRight className="w-3 h-3" />
