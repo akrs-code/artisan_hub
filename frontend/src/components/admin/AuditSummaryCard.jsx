@@ -1,9 +1,9 @@
 import React from 'react';
 
-const AuditSummaryCard = ({ onReviewClick, onDownloadClick }) => {
+const AuditSummaryCard = ({ onReviewClick }) => {
   return (
     <div className="card-custom !p-8 h-full flex flex-col justify-between relative overflow-hidden group hover:card-custom-hover">
-      {/* Background Graphic Suggestion */}
+      
       <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-l from-neutral-dark/5 to-transparent pointer-events-none"></div>
 
       <div className="relative z-10">
@@ -21,12 +21,6 @@ const AuditSummaryCard = ({ onReviewClick, onDownloadClick }) => {
           className="px-6 py-2.5 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[11px] tracking-widest font-sans font-bold uppercase transition-colors shadow-sm"
         >
           Review Flags
-        </button>
-        <button 
-          onClick={onDownloadClick}
-          className="px-6 py-2.5 rounded-md border border-[#8C5233] text-[#8C5233] hover:bg-[#8C5233]/5 text-[11px] tracking-widest font-sans font-bold uppercase transition-colors"
-        >
-          Download Audit
         </button>
       </div>
     </div>

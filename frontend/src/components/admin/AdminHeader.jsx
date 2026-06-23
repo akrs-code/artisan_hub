@@ -11,7 +11,7 @@ const AdminHeader = ({
 }) => {
   return (
     <header className="flex justify-between items-center py-6">
-      {/* Search Bar */}
+      
       <div className="relative w-full max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-dark/40" />
         <input

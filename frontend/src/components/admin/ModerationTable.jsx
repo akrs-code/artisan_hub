@@ -3,13 +3,13 @@ import { ChevronDown, Download } from 'lucide-react';
 import Pagination from './Pagination';
 
 const ViolationBadge = ({ type }) => {
-  let styleClass = "bg-neutral-dark/10 text-neutral-dark/60"; // Default
+  let styleClass = "bg-neutral-dark/10 text-neutral-dark/60"; 
   if (type === 'COPYRIGHT') {
-    styleClass = "bg-[#F8E2DF] text-destructive"; // Pink/Red
+    styleClass = "bg-[#F8E2DF] text-destructive"; 
   } else if (type === 'QUALITY') {
-    styleClass = "bg-[#FDF3E1] text-[#B7791F]"; // Yellow/Orange
+    styleClass = "bg-[#FDF3E1] text-[#B7791F]"; 
   } else if (type === 'PROHIBITED') {
-    styleClass = "bg-[#E2E8F0] text-[#4A5568]"; // Gray
+    styleClass = "bg-[#E2E8F0] text-[#4A5568]"; 
   }
 
   return (
@@ -22,9 +22,9 @@ const ViolationBadge = ({ type }) => {
 const SeverityBar = ({ score }) => {
   let colorClass = "bg-[#CBD5E1] text-[#64748B]"; // Default gray (<30)
   if (score >= 80) {
-    colorClass = "bg-destructive text-destructive"; // High (red)
+    colorClass = "bg-destructive text-destructive"; 
   } else if (score >= 40) {
-    colorClass = "bg-[#ED8936] text-[#DD6B20]"; // Medium (orange)
+    colorClass = "bg-[#ED8936] text-[#DD6B20]"; 
   }
 
   return (
@@ -60,10 +60,10 @@ const StatusDisplay = ({ status }) => {
   );
 };
 
-const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }) => {
+const ModerationTable = ({ data, onFilterClick, onReviewClick }) => {
   return (
     <div className="card-custom !p-0 overflow-hidden flex flex-col h-full group hover:card-custom-hover">
-      {/* Header */}
+      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-neutral-dark/10 gap-4">
         <h2 className="text-lg font-headline font-bold text-neutral-dark">Moderation Queue</h2>
         <div className="flex items-center gap-4 text-neutral-dark/60">
@@ -80,13 +80,6 @@ const ModerationTable = ({ data, onFilterClick, onDownloadClick, onReviewClick }
           >
             SEVERITY: HIGH FIRST
             <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
-          </button>
-          <div className="w-px h-5 bg-neutral-dark/10 mx-1"></div>
-          <button
-            onClick={onDownloadClick}
-            className="hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-1"
-          >
-            <Download className="w-4 h-4" />
           </button>
         </div>
       </div>

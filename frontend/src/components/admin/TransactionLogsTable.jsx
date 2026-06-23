@@ -1,126 +1,83 @@
-import React from 'react';
-import { ChevronDown, Eye } from 'lucide-react';
-import Pagination from './Pagination';
+import React, { useState } from 'react';
 
-const TypeBadge = ({ type }) => {
-  return (
-    <span className="inline-flex px-3 py-1 rounded-full bg-[#EBE5D9] text-[#8C5233] text-[9px] font-bold tracking-widest uppercase">
-      {type}
-    </span>
-  );
+const statusColor = (status) => {
+  if (status === 'DELIVERED' || status === 'COMPLETED') return 'bg-green-100 text-green-700';
+  if (status === 'PENDING') return 'bg-amber-100 text-amber-700';
+  if (status === 'CANCELLED') return 'bg-red-100 text-red-700';
+  if (status === 'CONFIRMED' || status === 'ACCEPTED') return 'bg-blue-100 text-blue-700';
+  return 'bg-muted text-muted-foreground';
 };
 
-const AmountDisplay = ({ amount, type }) => {
-  let colorClass = "text-neutral-dark";
-  if (type === 'SALE') colorClass = "text-[#16A34A]"; // Green
-  if (type === 'REFUND') colorClass = "text-destructive"; // Red
+const TransactionLogsTable = ({ data }) => {
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [search, setSearch] = useState('');
+
+  const filtered = data.filter(row => {
+    const matchStatus = statusFilter === 'All' || row.status === statusFilter;
+    const matchSearch = row.shopName.toLowerCase().includes(search.toLowerCase()) ||
+      row.id.toLowerCase().includes(search.toLowerCase());
+    return matchStatus && matchSearch;
+  });
+
+  const uniqueStatuses = ['All', ...new Set(data.map(r => r.status))];
 
   return (
-    <span className={`text-[13px] font-headline font-bold ${colorClass}`}>
-      {amount}
-    </span>
-  );
-};
-
-const StatusDisplay = ({ status }) => {
-  let colorClass = "bg-[#16A34A] text-[#16A34A]"; // COMPLETED (Green)
-  if (status === 'PENDING') colorClass = "bg-[#D97706] text-[#D97706]";
-  if (status === 'DISPUTED') colorClass = "bg-destructive text-destructive";
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className={`w-1.5 h-1.5 rounded-full ${colorClass.split(' ')[0]}`}></div>
-      <span className={`text-[9px] font-bold tracking-widest uppercase ${colorClass.split(' ')[1]}`}>
-        {status}
-      </span>
-    </div>
-  );
-};
-
-const TransactionLogsTable = ({ data, onFilterClick, onActionClick }) => {
-  return (
-    <div className="card-custom !p-0 overflow-hidden flex flex-col h-full group hover:card-custom-hover">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-neutral-dark/10 gap-4">
-        <h2 className="text-lg font-headline font-bold text-neutral-dark">Recent Financial Activities</h2>
-        <div className="flex items-center gap-4 text-neutral-dark/60">
-          <button
-            onClick={() => onFilterClick('Type')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
+    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 border-b border-border gap-3">
+        <h2 className="text-base font-headline font-bold text-foreground">All Transactions</h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search by shop or ID..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="text-xs font-sans px-3 py-1.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all w-44"
+          />
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="text-[11px] font-sans font-bold px-3 py-1.5 rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
           >
-            ALL TYPES
-            <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
-          </button>
-          <button
-            onClick={() => onFilterClick('Status')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-dark/10 bg-neutral-dark/5 hover:bg-neutral-dark/10 text-[11px] font-sans font-bold text-neutral-dark transition-colors uppercase tracking-wider"
-          >
-            STATUS: ALL
-            <ChevronDown className="w-3 h-3 text-neutral-dark/50" />
-          </button>
-          <div className="w-px h-5 bg-neutral-dark/10 mx-2"></div>
-          <span className="text-[11px] font-sans text-neutral-dark/60">
-            1-5 of 1,284
-          </span>
+            {uniqueStatuses.map(s => (
+              <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse min-w-[900px]">
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[700px]">
           <thead>
-            <tr className="bg-neutral-dark/5 border-b border-neutral-dark/10">
-              <th className="py-4 px-6 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Date</th>
-              <th className="py-4 px-4 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Transaction ID</th>
-              <th className="py-4 px-4 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Shop Name</th>
-              <th className="py-4 px-4 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Type</th>
-              <th className="py-4 px-4 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Amount</th>
-              <th className="py-4 px-4 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase">Status</th>
-              <th className="py-4 px-6 text-[10px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase text-right">Actions</th>
+            <tr className="bg-muted/40 border-b border-border">
+              <th className="py-3 px-5 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Date</th>
+              <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Order ID</th>
+              <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Shop</th>
+              <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Amount</th>
+              <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Status</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((row, i) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-16 text-center text-sm font-sans text-muted-foreground">
+                  No transactions found.
+                </td>
+              </tr>
+            ) : filtered.map((row, i) => (
               <tr
                 key={i}
-                className={`border-b border-neutral-dark/5 hover:bg-neutral-dark/5 transition-colors group/row ${i === data.length - 1 ? 'border-b-0' : ''}`}
+                className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${i === filtered.length - 1 ? 'border-b-0' : ''}`}
               >
-                <td className="py-5 px-6">
-                  <div className="text-[13px] font-sans text-neutral-dark/60 font-medium mb-0.5">
-                    {row.date.split(',')[0]},
-                  </div>
-                  <div className="text-[13px] font-sans text-neutral-dark/60 font-medium">
-                    {row.date.split(',')[1]}
-                  </div>
-                </td>
-                <td className="py-5 px-4">
-                  <span className="text-[10px] font-sans text-neutral-dark/40 uppercase tracking-widest">
-                    {row.id}
+                <td className="py-4 px-5 text-[13px] font-sans text-muted-foreground">{row.date}</td>
+                <td className="py-4 px-4 text-[10px] font-sans text-muted-foreground uppercase tracking-widest font-mono">#{row.id}</td>
+                <td className="py-4 px-4 text-[13px] font-sans font-bold text-foreground">{row.shopName}</td>
+                <td className="py-4 px-4 text-[13px] font-headline font-bold text-green-600">{row.amount}</td>
+                <td className="py-4 px-4">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase ${statusColor(row.status)}`}>
+                    {row.status}
                   </span>
-                </td>
-                <td className="py-5 px-4">
-                  <span className="text-[13px] font-sans font-bold text-neutral-dark">
-                    {row.shopName}
-                  </span>
-                </td>
-                <td className="py-5 px-4">
-                  <TypeBadge type={row.type} />
-                </td>
-                <td className="py-5 px-4">
-                  <AmountDisplay amount={row.amount} type={row.type} />
-                </td>
-                <td className="py-5 px-4">
-                  <StatusDisplay status={row.status} />
-                </td>
-                <td className="py-5 px-6">
-                  <div className="flex items-center justify-end gap-5">
-                    <button
-                      onClick={() => onActionClick('View Details', row.id)}
-                      className="text-neutral-dark/40 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
                 </td>
               </tr>
             ))}
@@ -128,14 +85,10 @@ const TransactionLogsTable = ({ data, onFilterClick, onActionClick }) => {
         </table>
       </div>
 
-      {/* Footer / Pagination */}
-      <div className="border-t border-neutral-dark/10 p-4 px-6 flex items-center justify-between bg-neutral-dark/5">
-        <div className="text-[11px] font-sans text-neutral-dark/60">
-          Showing <span className="font-bold text-neutral-dark">1</span> to <span className="font-bold text-neutral-dark">5</span> of <span className="font-bold text-neutral-dark">1,284</span> transactions
-        </div>
-        <div className="scale-90 origin-right">
-          <Pagination />
-        </div>
+      {/* Footer */}
+      <div className="border-t border-border p-4 bg-muted/20 text-[11px] font-sans text-muted-foreground">
+        Showing <span className="font-bold text-foreground">{filtered.length}</span> of{' '}
+        <span className="font-bold text-foreground">{data.length}</span> transactions
       </div>
     </div>
   );

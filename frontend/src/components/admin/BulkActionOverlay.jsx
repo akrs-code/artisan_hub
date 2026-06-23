@@ -8,7 +8,7 @@ const BulkActionOverlay = ({ selectedCount = 4, onActionClick }) => {
     <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 fade-in duration-300">
       <div className="bg-white rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-neutral-dark/10 px-4 py-3 flex items-center gap-6">
         
-        {/* Selection Count */}
+        
         <div className="flex items-center gap-3 shrink-0">
           <div className="w-8 h-8 rounded-full bg-[#EBE5D9] flex items-center justify-center text-[#8C5233] font-headline font-bold text-[13px]">
             {selectedCount}
