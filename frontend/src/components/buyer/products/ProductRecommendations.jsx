@@ -1,18 +1,41 @@
-import { mockProducts } from '@/lib/mockData';
+import { useState, useEffect } from 'react';
+import { productsAPI } from '@/services/api';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
+import { Loader2 } from 'lucide-react';
 
 export const ProductRecommendations = ({ product }) => {
-  // Pick up to 3 products from the same shop, excluding current
-  const related = mockProducts
-    .filter((p) => p.shop === product.shop && p._id !== product._id)
-    .slice(0, 3);
+  const [related, setRelated] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // If not enough from same shop, fill with other products
-  if (related.length < 3) {
-    const others = mockProducts
-      .filter((p) => p._id !== product._id && p.shop !== product.shop)
-      .slice(0, 3 - related.length);
-    related.push(...others);
+  useEffect(() => {
+    if (!product?.shop) return;
+
+    const shopId = typeof product.shop === 'object' ? product.shop._id : product.shop;
+
+    const fetchRelated = async () => {
+      try {
+        setIsLoading(true);
+        const res = await productsAPI.getShopProducts(shopId);
+        const all = res?.data || [];
+        
+        const filtered = all.filter((p) => p._id !== product._id).slice(0, 3);
+        setRelated(filtered);
+      } catch (err) {
+        console.error('Failed to load recommendations:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRelated();
+  }, [product?._id, product?.shop]);
+
+  if (isLoading) {
+    return (
+      <div className="mb-8 flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (related.length === 0) return null;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Truck, ChevronRight, Star, Send } from 'lucide-react';
-import { mockShops } from '../../../lib/mockData';
+import { ordersAPI, shopsAPI, productsAPI } from '../../../services/api';
 import { StatusBadge } from './StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,8 +12,10 @@ const formatPrice = (c) =>
 const formatDate = (d) =>
   new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d));
 
-export const OrderCard = ({ order }) => {
-  const shop = mockShops.find((s) => s._id === order.shop);
+export const OrderCard = ({ order, onOrderUpdate }) => {
+  
+  const shop = typeof order.shop === 'object' ? order.shop : null;
+  const shopId = shop?._id || order.shop;
   const [expanded, setExpanded] = useState(false);
 
   const [reviewsSubmitted, setReviewsSubmitted] = useState({});
@@ -26,26 +28,67 @@ export const OrderCard = ({ order }) => {
   const [shopRating, setShopRating] = useState(5);
   const [shopComment, setShopComment] = useState('');
 
-  const handleReviewSubmit = (itemName) => {
-    setReviewsSubmitted((prev) => ({
-      ...prev,
-      [itemName]: { rating, comment },
-    }));
-    setActiveReviewItem(null);
-    setComment('');
-    setRating(5);
+  const handleReviewSubmit = async (item) => {
+    try {
+      const productId = typeof item.product === 'object' ? item.product._id : item.product;
+      await productsAPI.addProductReview(productId, rating, comment);
+      
+      setReviewsSubmitted((prev) => ({
+        ...prev,
+        [item.name]: { rating, comment },
+      }));
+      setActiveReviewItem(null);
+      setComment('');
+      setRating(5);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit product review. You may have already reviewed this product.');
+    }
+  };
+
+  const submitShopReview = async () => {
+    try {
+      await shopsAPI.createReview(shopId, shopRating, shopComment);
+      setShopReviewSubmitted(true);
+      setIsReviewingShop(false);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit review');
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    try {
+      await ordersAPI.cancelOrder(order._id);
+      if (onOrderUpdate) onOrderUpdate();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to cancel order');
+    }
+  };
+
+  const handleReceiveOrder = async () => {
+    if (!window.confirm('Confirm that you have received this order?')) return;
+    try {
+      await ordersAPI.receiveOrder(order._id);
+      if (onOrderUpdate) onOrderUpdate();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to mark order as received');
+    }
   };
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-[var(--shadow-soft-lg)] transition-all duration-400 flex flex-col h-full group">
 
-      {/* Header */}
+      
       <div className="flex justify-between items-start mb-5 pb-4 border-b border-border/60">
         <div>
           <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest mb-1.5 block">
             Order #{order._id.split('_').pop().toUpperCase()}
           </span>
-          <Link to={`/shop/${order.shop}`} className="font-headline font-bold text-foreground text-sm leading-tight block mb-1 hover:text-primary transition-colors">
+          <Link to={`/shop/${shopId}`} className="font-headline font-bold text-foreground text-sm leading-tight block mb-1 hover:text-primary transition-colors">
             {shop?.name || 'Artisan Shop'}
           </Link>
           <span className="text-[10px] text-muted-foreground font-sans">
@@ -62,7 +105,7 @@ export const OrderCard = ({ order }) => {
         {order.items.slice(0, expanded ? order.items.length : 2).map((item, idx) => {
           const isDelivered = order.status === 'delivered';
           const hasReviewed = reviewsSubmitted[item.name];
-          const isReviewing = activeReviewItem === item.name;
+          const isReviewing = activeReviewItem?.name === item.name;
 
           return (
             <div key={idx} className="flex flex-col gap-3 py-2 border-b border-border/30 last:border-0">
@@ -95,7 +138,7 @@ export const OrderCard = ({ order }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveReviewItem(item.name);
+                          setActiveReviewItem(item);
                           setRating(5);
                           setComment('');
                         }}
@@ -175,6 +218,22 @@ export const OrderCard = ({ order }) => {
             </span>
           </div>
 
+          {order.status === 'pending' && (
+            <button
+              onClick={handleCancelOrder}
+              className="px-3 py-1.5 rounded-lg border border-destructive/20 text-destructive text-[10px] font-sans font-bold uppercase tracking-widest hover:bg-destructive/5 transition-all mr-2"
+            >
+              Cancel Order
+            </button>
+          )}
+          {(order.status === 'shipped' || order.status === 'out_for_delivery') && (
+            <button
+              onClick={handleReceiveOrder}
+              className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-[10px] font-sans font-bold uppercase tracking-widest shadow-sm hover:shadow transition-all mr-2"
+            >
+              Order Received
+            </button>
+          )}
           <button
             onClick={() => setExpanded(!expanded)}
             className="w-8 h-8 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer"
@@ -240,7 +299,7 @@ export const OrderCard = ({ order }) => {
                   Product Review
                 </span>
                 <h3 className="font-headline font-bold text-foreground text-lg leading-tight">
-                  {activeReviewItem}
+                  {activeReviewItem.name}
                 </h3>
               </div>
               <button
@@ -380,10 +439,7 @@ export const OrderCard = ({ order }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShopReviewSubmitted(true);
-                    setIsReviewingShop(false);
-                  }}
+                  onClick={submitShopReview}
                   disabled={!shopComment.trim()}
                   className="flex-1 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-sans font-bold uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >

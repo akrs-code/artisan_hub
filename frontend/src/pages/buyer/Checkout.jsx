@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { CreditCard, Banknote, MapPin, Truck, CheckCircle, ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
+import { CreditCard, Banknote, MapPin, Truck, CheckCircle, ArrowLeft, Lock, Check, ChevronRight, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { ordersAPI, usersAPI } from '../../services/api';
+import { usePHLocations } from '../../hooks/usePHLocations';
+import { useEffect } from 'react';
 
 const formatPrice = (c) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(c / 100);
 
-const SHIPPING_FEE = 15000; // 150 pesos
+const SHIPPING_FEE = 15000; 
 
 const Steps = ({ currentStep }) => {
   const steps = [
@@ -63,9 +66,15 @@ const Steps = ({ currentStep }) => {
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
-  const [step, setStep] = useState('delivery'); // 'delivery', 'payment', 'review'
+  const [step, setStep] = useState('delivery'); 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card', 'gcash', 'cod'
+  const [paymentMethod, setPaymentMethod] = useState('card'); 
+  const [errorMsg, setErrorMsg] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState(null);
+
+  const { provinces, cities, getCities, loadingProvinces, loadingCities } = usePHLocations();
+
   const [formData, setFormData] = useState(() => {
     const savedProfile = localStorage.getItem('buyerProfile');
     let parsed = null;
@@ -91,7 +100,57 @@ const Checkout = () => {
     };
   });
 
+  const [userAddresses, setUserAddresses] = useState([]);
+  const [saveAddress, setSaveAddress] = useState(false);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const res = await usersAPI.getProfile();
+        if (res?.data?.addresses) {
+          setUserAddresses(res.data.addresses);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchAddresses();
+  }, []);
+
+  const handleSelectSavedAddress = (e) => {
+    const addr = userAddresses[e.target.value];
+    if (!addr) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      firstName: addr.fullName.split(' ')[0] || prev.firstName,
+      lastName: addr.fullName.split(' ').slice(1).join(' ') || prev.lastName,
+      phone: addr.phone || prev.phone,
+      address: addr.addressLine || prev.address,
+      province: addr.province || prev.province,
+      city: addr.city || prev.city,
+      zipCode: addr.postalCode || prev.zipCode
+    }));
+    
+    if (addr.province) {
+      const prov = provinces.find(p => p.name === addr.province);
+      if (prov) getCities(prov.code);
+    }
+  };
+
   const handleChange = (e) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  
+  const handleProvinceChange = (e) => {
+    const selectedProvName = e.target.value;
+    setFormData((p) => ({ ...p, province: selectedProvName, city: '' })); 
+    const prov = provinces.find(p => p.name === selectedProvName);
+    if (prov) {
+      getCities(prov.code);
+    } else {
+      getCities(null);
+    }
+  };
 
   const handleNextStep = (e) => {
     e.preventDefault();
@@ -110,37 +169,130 @@ const Checkout = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      const orderDetails = {
-        items: cartItems.map(item => ({
-          product: item.product._id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          color: item.color,
-          size: item.size
-        })),
-        total: grandTotal,
-        deliveryAddress: `${formData.address}, ${formData.city}, ${formData.province}, ${formData.zipCode}`,
-        paymentMethod: paymentMethod,
-        shop: cartItems[0]?.product?.shop || 'shop_1'
-      };
-      clearCart();
-      navigate('/orders', { state: { orderPlaced: true, orderDetails } });
-    }, 2000);
+  const handleAutoDetectLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await response.json();
+            if (data && data.address) {
+              const road = data.address.road || data.address.suburb || '';
+              const city = data.address.city || data.address.town || data.address.municipality || '';
+              const province = data.address.province || data.address.state || '';
+              const zip = data.address.postcode || '';
+              
+              setFormData(prev => ({
+                ...prev,
+                address: road || prev.address,
+                city: city || prev.city,
+                province: province || prev.province,
+                zipCode: zip || prev.zipCode
+              }));
+              alert("Location access granted! Address populated successfully.");
+            }
+          } catch (err) {
+            console.error("Reverse geocoding failed:", err);
+            alert(`Location coordinates detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}.`);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("Could not access your location. Please check browser permissions.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
   };
 
-  if (cartItems.length === 0) {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setErrorMsg('');
+
+    try {
+      const payload = {
+        shopId: cartItems[0]?.product?.shop?._id || cartItems[0]?.product?.shop,
+        items: cartItems.map(item => ({
+          productId: item.product._id,
+          quantity: item.quantity,
+          color: item.color || '',
+          size: item.size || ''
+        })),
+        deliveryAddress: `${formData.address}, ${formData.city}, ${formData.province}, ${formData.zipCode}`,
+        deliveryNotes: formData.deliveryNotes || '',
+        shippingFee: SHIPPING_FEE,
+        paymentMethod: paymentMethod
+      };
+
+      const res = await ordersAPI.placeOrder(payload);
+      
+      
+      const buyerProfile = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: {
+          street: formData.address,
+          city: formData.city,
+          state: formData.province,
+          zipCode: formData.zipCode
+        }
+      };
+      localStorage.setItem('buyerProfile', JSON.stringify(buyerProfile));
+
+      if (saveAddress) {
+        const newAddress = {
+          fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone,
+          addressLine: formData.address,
+          city: formData.city,
+          province: formData.province,
+          postalCode: formData.zipCode,
+          isDefault: userAddresses.length === 0
+        };
+        try {
+          await usersAPI.updateProfile({ addresses: [...userAddresses, newAddress] });
+        } catch (e) {
+          console.error("Failed to save address", e);
+        }
+      }
+
+      
+      const payRes = await fetch('http://localhost:5000/api/payments/create-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('artisan_hub_token')}`
+        },
+        body: JSON.stringify({ orderId: res.data._id })
+      });
+      const payData = await payRes.json();
+      
+      if (payData.status === 'success' && payData.data.checkoutUrl) {
+        clearCart();
+        window.location.href = payData.data.checkoutUrl;
+        return;
+      } else {
+        throw new Error('Failed to initialize payment gateway.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to place order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (cartItems.length === 0 && !showSuccessModal) {
     navigate('/cart');
     return null;
   }
 
-  const codHandlingFee = paymentMethod === 'cod' ? 3000 : 0; // 30 pesos in centavos
-  const grandTotal = cartTotal + SHIPPING_FEE + codHandlingFee;
+  const codHandlingFee = 0;
+  const grandTotal = cartTotal + SHIPPING_FEE;
 
   const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
   const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
@@ -148,7 +300,7 @@ const Checkout = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
       
-      {/* Header back button */}
+      
       <Link
         to="/cart"
         className="inline-flex items-center gap-1.5 text-xs font-sans font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest mb-6"
@@ -161,6 +313,13 @@ const Checkout = () => {
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Checkout</h1>
       </div>
 
+      {errorMsg && (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-xs font-sans flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
       {/* Steps Indicator */}
       <Steps currentStep={step} />
 
@@ -171,10 +330,38 @@ const Checkout = () => {
           
           {step === 'delivery' && (
             <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
-              <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-primary" />
-                Delivery Address
-              </h2>
+              <div className="flex items-center justify-between border-b border-border/40 pb-3 flex-wrap gap-2">
+                <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  Delivery Address
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleAutoDetectLocation}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 rounded-xl text-[10px] font-sans font-bold uppercase tracking-wider transition-all"
+                >
+                  <MapPin className="w-3 h-3" />
+                  Auto-Detect Location
+                </button>
+              </div>
+
+              {userAddresses.length > 0 && (
+                <div className="mb-4">
+                  <label className={fieldLabel}>Select Saved Address</label>
+                  <select 
+                    onChange={handleSelectSavedAddress}
+                    className={fieldInput}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Choose an address from your address book...</option>
+                    {userAddresses.map((addr, idx) => (
+                      <option key={idx} value={idx}>
+                        {addr.fullName} - {addr.addressLine}, {addr.city}, {addr.province}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -240,28 +427,38 @@ const Checkout = () => {
                   />
                 </div>
                 <div>
+                  <label htmlFor="province" className={fieldLabel}>Province</label>
+                  <select
+                    id="province"
+                    name="province"
+                    required
+                    value={formData.province}
+                    onChange={handleProvinceChange}
+                    className={fieldInput}
+                    disabled={loadingProvinces}
+                  >
+                    <option value="" disabled>Select Province</option>
+                    {provinces.map(prov => (
+                      <option key={prov.code} value={prov.name}>{prov.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
                   <label htmlFor="city" className={fieldLabel}>City / Municipality</label>
-                  <input
+                  <select
                     id="city"
                     name="city"
                     required
                     value={formData.city}
                     onChange={handleChange}
-                    placeholder="Cagayan de Oro"
                     className={fieldInput}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="province" className={fieldLabel}>Province</label>
-                  <input
-                    id="province"
-                    name="province"
-                    required
-                    value={formData.province}
-                    onChange={handleChange}
-                    placeholder="Misamis Oriental"
-                    className={fieldInput}
-                  />
+                    disabled={!formData.province || loadingCities}
+                  >
+                    <option value="" disabled>{loadingCities ? 'Loading...' : 'Select City'}</option>
+                    {cities.map(city => (
+                      <option key={city.code} value={city.name}>{city.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="zipCode" className={fieldLabel}>Zip Code</label>
@@ -299,6 +496,19 @@ const Checkout = () => {
                     className={`${fieldInput} resize-none`}
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="saveAddress"
+                  checked={saveAddress}
+                  onChange={(e) => setSaveAddress(e.target.checked)}
+                  className="w-4 h-4 rounded border-border/70 text-primary focus:ring-primary"
+                />
+                <label htmlFor="saveAddress" className="text-xs font-sans text-muted-foreground cursor-pointer">
+                  Save this delivery details to my address book for next time
+                </label>
               </div>
 
               <button
@@ -360,26 +570,6 @@ const Checkout = () => {
                   />
                 </label>
 
-                {/* Cash on Delivery option */}
-                <label
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
-                    paymentMethod === 'cod'
-                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                      : 'border-border hover:border-primary/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className="text-sm font-headline font-bold text-foreground">Cash on Delivery</span>
-                  </div>
-                  <input
-                    type="radio"
-                    name="paymentMethodSelect"
-                    checked={paymentMethod === 'cod'}
-                    onChange={() => setPaymentMethod('cod')}
-                    className="accent-primary w-4 h-4 cursor-pointer"
-                  />
-                </label>
               </div>
 
               {/* Progressive Disclosures */}
@@ -445,13 +635,13 @@ const Checkout = () => {
 
               {paymentMethod === 'gcash' && (
                 <div className="p-4 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl font-sans mt-3 animate-in fade-in duration-200">
-                  You will be redirected to GCash to complete your payment after confirming your order.
+                  You will be redirected to GCash secure checkout portal to confirm details.
                 </div>
               )}
 
               {paymentMethod === 'cod' && (
                 <div className="p-4 bg-amber-50 border border-amber-100 text-amber-800 text-xs rounded-xl font-sans mt-3 animate-in fade-in duration-200">
-                  Prepare exact change upon delivery. COD orders are subject to a ₱30 handling fee.
+                  Prepare exact amount upon delivery. COD orders are subject to handling fees.
                 </div>
               )}
 
@@ -597,6 +787,54 @@ const Checkout = () => {
         </div>
 
       </div>
+
+      {/* Successful Payment Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          
+          <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 border border-border/80 text-center space-y-6 transform scale-in duration-300">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600 shadow-inner">
+              <Check className="w-8 h-8 stroke-[3]" />
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-headline font-bold text-foreground">Payment Successful!</h2>
+              <p className="text-muted-foreground text-xs font-sans mt-1">Thank you for supporting local artisans.</p>
+            </div>
+
+            {createdOrder && (
+              <div className="bg-muted/30 border border-border/60 rounded-xl p-4 text-left space-y-3 font-sans text-xs">
+                <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                  <span className="text-muted-foreground uppercase tracking-wider text-[10px] font-bold">Order ID</span>
+                  <span className="font-bold text-foreground">#{createdOrder._id?.substring(createdOrder._id.length - 8).toUpperCase()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Total Paid</span>
+                  <span className="font-bold text-primary">{formatPrice(createdOrder.total)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Payment Method</span>
+                  <span className="font-semibold text-foreground uppercase">{createdOrder.paymentMethod}</span>
+                </div>
+                <div className="pt-2 border-t border-border/40 text-[11px]">
+                  <span className="text-muted-foreground block text-[9px] font-bold uppercase tracking-wider mb-1">Delivering to</span>
+                  <p className="text-foreground font-medium leading-relaxed">{createdOrder.deliveryAddress}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => navigate('/orders', { replace: true })}
+              className="w-full btn-base btn-primary py-3 rounded-xl text-xs font-sans font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 shadow-md"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Track My Order
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

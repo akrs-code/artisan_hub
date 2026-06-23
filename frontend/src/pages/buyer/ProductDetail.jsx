@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { mockProducts, mockShops } from '../../lib/mockData';
 import { ChevronLeft, Star } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { productsAPI } from '../../services/api';
 
 import { ProductImagePanel }   from '@/components/buyer/products/ProductImagePanel';
 import { ProductDetailTabs }   from '@/components/buyer/products/ProductDetailTabs';
@@ -27,13 +27,21 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab]       = useState('product');
 
   useEffect(() => {
-    const found = mockProducts.find((p) => p._id === id);
-    if (found) {
-      setProduct(found);
-      setShop(mockShops.find((s) => s._id === found.shop));
-      setSelectedSize(found.sizes?.[0] || '');
-      setSelectedColor(found.colors?.[0] || '');
-    }
+    const loadProduct = async () => {
+      try {
+        const res = await productsAPI.getProductBySlug(id);
+        const prod = res?.data;
+        if (prod) {
+          setProduct(prod);
+          setShop(prod.shop);
+          setSelectedSize(prod.sizes?.[0] || '');
+          setSelectedColor(prod.colors?.[0] || '');
+        }
+      } catch (err) {
+        console.error("Failed to load product detail:", err);
+      }
+    };
+    loadProduct();
   }, [id]);
 
   if (!product || !shop) {

@@ -13,9 +13,9 @@ export const ProductPurchaseCard = ({
   product, quantity, onDecrement, onIncrement, onAddToCart, onBuyNow, addedFeedback,
 }) => (
   <div className="space-y-4">
-    {/* Quantity + Actions row */}
+    
     <div className="flex items-center gap-3">
-      {/* Stepper */}
+      
       <div className="flex items-center border border-border rounded-full overflow-hidden bg-card shadow-sm shrink-0">
         <button
           onClick={onDecrement}
@@ -37,7 +37,7 @@ export const ProductPurchaseCard = ({
         </button>
       </div>
 
-      {/* Add to Cart */}
+      
       <button
         onClick={onAddToCart}
         disabled={!product.inStock}

@@ -1,7 +1,7 @@
 import { Card, CardTitle } from '@/components/ui/card';
 
 export const ProductAboutSection = ({ product }) => {
-  // Build a details table from available product fields
+  
   const details = [
     product.material && { label: 'Material', value: product.material },
     product.dimensions && { label: 'Dimensions', value: product.dimensions },
@@ -13,7 +13,7 @@ export const ProductAboutSection = ({ product }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-      {/* About this piece */}
+      
       <Card className="border-border/70">
         <CardTitle className="text-lg mb-3">About this piece</CardTitle>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
-import { mockShops } from '../../../lib/mockData';
 import { QuantityControl } from './QuantityControl';
 
 const formatPrice = (centavos) =>
@@ -8,11 +7,13 @@ const formatPrice = (centavos) =>
 
 export const CartItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions }) => {
   if (!item || !item.product) return null;
-  const shop = mockShops.find((s) => s._id === item.product.shop);
+  
+  const shop = typeof item.product.shop === 'object' ? item.product.shop : null;
+  const shopId = shop?._id || item.product.shop;
 
   return (
     <div className="flex items-center gap-4 px-5 py-4 border-b border-border/60 last:border-b-0 hover:bg-muted/20 transition-colors duration-200 group">
-      {/* Thumbnail */}
+      
       <Link
         to={`/product/${item.product._id}`}
         className="w-14 h-14 shrink-0 rounded-xl overflow-hidden block bg-muted border border-border/50 group-hover:shadow-sm transition-all duration-300"
@@ -27,7 +28,7 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions }) 
       {/* Details */}
       <div className="flex-1 min-w-0">
         <Link
-          to={`/shop/${shop?._id}`}
+          to={`/shop/${shopId}`}
           className="text-[9px] font-bold font-sans text-primary uppercase tracking-widest mb-0.5 block hover:opacity-80 transition-opacity"
         >
           {shop?.name || 'Artisan Shop'}

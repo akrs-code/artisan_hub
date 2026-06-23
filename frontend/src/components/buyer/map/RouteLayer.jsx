@@ -23,7 +23,7 @@ export const RouteLayer = ({ geojson }) => {
         features: []
       };
 
-    // Source
+    
     if (map.getSource('route')) {
       map.getSource('route').setData(routeData);
     } else {
@@ -32,7 +32,7 @@ export const RouteLayer = ({ geojson }) => {
         data: routeData
       });
 
-      // Glow layer
+      
       map.addLayer({
         id: 'route-glow',
         type: 'line',
@@ -48,7 +48,7 @@ export const RouteLayer = ({ geojson }) => {
         }
       });
 
-      // Main route
+      
       map.addLayer({
         id: 'route-layer',
         type: 'line',

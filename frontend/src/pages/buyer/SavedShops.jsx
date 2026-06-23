@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Store, Package } from 'lucide-react';
-import { mockShops, mockProducts } from '../../lib/mockData';
+import { Search, Filter, Store, Package, Loader2 } from 'lucide-react';
+import { shopsAPI, productsAPI } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { ShopCard } from '@/components/buyer/shops/ShopCard';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
@@ -14,36 +14,66 @@ const SavedShops = () => {
   const [activeTab, setActiveTab] = useState('shops');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [allShops, setAllShops] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const baseShops = mockShops.filter((shop) => savedShopIds.includes(shop._id));
-  const baseProducts = mockProducts.filter((prod) => savedProductIds?.includes(prod._id));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [shopsRes, productsRes] = await Promise.all([
+          shopsAPI.getShops(),
+          productsAPI.getProducts(),
+        ]);
+        setAllShops(shopsRes?.data || []);
+        setAllProducts(productsRes?.data || []);
+      } catch (err) {
+        console.error('Failed to load saved items:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const baseShops = allShops.filter((shop) => savedShopIds.includes(shop._id));
+  const baseProducts = allProducts.filter((prod) => savedProductIds?.includes(prod._id));
 
   const categories = ['All', ...new Set(
-    activeTab === 'shops' ? baseShops.map(s => s.category) : baseProducts.map(p => p.category)
+    activeTab === 'shops' ? baseShops.map(s => s.category).filter(Boolean) : baseProducts.map(p => p.category).filter(Boolean)
   )];
 
   const handleTabChange = (tab) => { setActiveTab(tab); setSelectedCategory('All'); setSearchQuery(''); };
 
   const filteredShops = baseShops.filter(shop => {
     const q = searchQuery.toLowerCase();
-    return (shop.name.toLowerCase().includes(q) || shop.description.toLowerCase().includes(q))
+    return (shop.name?.toLowerCase().includes(q) || shop.description?.toLowerCase().includes(q))
       && (selectedCategory === 'All' || shop.category === selectedCategory);
   });
 
   const filteredProducts = baseProducts.filter(prod => {
     const q = searchQuery.toLowerCase();
-    return (prod.name.toLowerCase().includes(q) || prod.description.toLowerCase().includes(q))
+    return (prod.name?.toLowerCase().includes(q) || prod.description?.toLowerCase().includes(q))
       && (selectedCategory === 'All' || prod.category === selectedCategory);
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm font-sans text-muted-foreground">Loading your saved items...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
-      {/* Page Header */}
+      
       <div className="mb-8">
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Saved Items</h1>
         <p className="text-muted-foreground font-sans text-xs">Your curated collection of favourite artisans and products.</p>
-
       </div>
 
       {/* TABS */}
@@ -93,7 +123,6 @@ const SavedShops = () => {
           )}
         </div>
       )}
-
 
       {/* CONTENT */}
       {activeTab === 'shops' ? (

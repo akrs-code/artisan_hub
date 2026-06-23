@@ -1,57 +1,95 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockShops, mockProducts } from '../../lib/mockData';
-import { Star, Heart, Package, MessageSquare } from 'lucide-react';
+import { Star, Heart, Package, MessageSquare, Loader2, Send } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { shopsAPI, productsAPI } from '../../services/api';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-
-const mockShopReviews = [
-  {
-    id: 1,
-    userName: "Elena R.",
-    rating: 5,
-    date: "2026-05-12",
-    comment: "This shop has the best handcrafted pottery. The packaging was extremely secure and the quality is outstanding! Will definitely order again."
-  },
-  {
-    id: 2,
-    userName: "Mark T.",
-    rating: 4,
-    date: "2026-06-01",
-    comment: "Very unique designs and friendly communication. Delivery took a bit longer but the craftsmanship makes it worth the wait."
-  },
-  {
-    id: 3,
-    userName: "Sofia G.",
-    rating: 5,
-    date: "2026-06-10",
-    comment: "Absolutely stunning pieces. You can feel the passion and detail put into each item. Highly recommend this artisan!"
-  }
-];
 
 const ShopDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, savedShopIds, toggleSaveShop } = useCart();
+
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeTab, setActiveTab] = useState('creations');
+  const [isLoading, setIsLoading] = useState(true);
+
+  
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+
+  const loadShopData = async () => {
+    try {
+      setIsLoading(true);
+      const [shopRes, productsRes, reviewsRes] = await Promise.all([
+        shopsAPI.getShopById(id),
+        productsAPI.getShopProducts(id),
+        shopsAPI.getReviews(id).catch(() => ({ data: [] }))
+      ]);
+      setShop(shopRes?.data);
+      setProducts(productsRes?.data || []);
+      setReviews(reviewsRes?.data || []);
+    } catch (err) {
+      console.error("Failed to load shop details:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const foundShop = mockShops.find((s) => s._id === id);
-    if (foundShop) {
-      setShop(foundShop);
-      setProducts(mockProducts.filter((p) => p.shop === id));
-    }
+    loadShopData();
   }, [id]);
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!rating) {
+      setReviewError('Please select a rating');
+      return;
+    }
+    try {
+      setIsSubmittingReview(true);
+      setReviewError('');
+      await shopsAPI.createReview(id, rating, comment);
+      setComment('');
+      setRating(5);
+      
+      const [shopRes, reviewsRes] = await Promise.all([
+        shopsAPI.getShopById(id),
+        shopsAPI.getReviews(id)
+      ]);
+      setShop(shopRes?.data);
+      setReviews(reviewsRes?.data || []);
+      alert('Thank you! Your review has been submitted.');
+    } catch (err) {
+      setReviewError(err.message || 'Failed to submit review. You may have already reviewed this shop or you must be logged in as a buyer.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <p className="text-sm font-sans text-muted-foreground">Loading artisan shop...</p>
+      </div>
+    );
+  }
 
   if (!shop) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-t-primary border-border" />
+      <div className="flex flex-col items-center justify-center h-full p-10">
+        <p className="text-muted-foreground mb-4">Artisan shop not found.</p>
+        <button onClick={() => navigate('/discover')} className="btn-base btn-primary text-xs rounded-xl font-sans font-bold">
+          Go back to marketplace
+        </button>
       </div>
     );
   }
@@ -61,11 +99,19 @@ const ShopDetail = () => {
   const filteredProducts =
     activeCategory === 'All' ? products : products.filter((p) => p.category === activeCategory);
 
+  // Calculate review averages dynamically
+  const reviewCount = reviews.length;
+  const ratingDistribution = [5, 4, 3, 2, 1].map(stars => {
+    const count = reviews.filter(r => Math.round(r.rating) === stars).length;
+    const percentage = reviewCount > 0 ? Math.round((count / reviewCount) * 100) : 0;
+    return { stars, percentage, count };
+  });
+
   return (
     <div className="w-full pb-24 animate-in fade-in duration-500 bg-background min-h-full">
       <div className="relative h-[55vh] w-full overflow-hidden">
         <img
-          src={shop.coverUrl}
+          src={shop.coverUrl || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1920&q=80'}
           alt={`${shop.name} cover`}
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -84,9 +130,9 @@ const ShopDetail = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-white bg-white/15 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-white text-white" />
+                <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(shop.rating || 0) ? 'fill-white text-white' : 'text-white/30'}`} />
               ))}
-              <span className="text-xs font-sans font-bold ml-1">{shop.rating || '4.9'}</span>
+              <span className="text-xs font-sans font-bold ml-1">{(shop.rating || 0).toFixed(1)}</span>
             </div>
             <button
               onClick={() => toggleSaveShop(shop._id)}
@@ -120,7 +166,7 @@ const ShopDetail = () => {
               onClick={() => setActiveTab('reviews')}
             >
               <MessageSquare className="w-3.5 h-3.5 mr-1" />
-              Reviews ({mockShopReviews.length})
+              Reviews ({reviews.length})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -185,28 +231,22 @@ const ShopDetail = () => {
                   <div>
                     <h3 className="text-sm font-sans font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Shop Rating</h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-headline font-bold text-foreground">{shop.rating || '4.9'}</span>
+                      <span className="text-5xl font-headline font-bold text-foreground">{(shop.rating || 0).toFixed(1)}</span>
                       <span className="text-sm text-muted-foreground font-sans">out of 5</span>
                     </div>
                     <div className="flex gap-0.5 mt-2.5">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="w-5 h-5 fill-primary text-primary" />
+                        <Star key={star} className={`w-5 h-5 ${star <= Math.round(shop.rating || 0) ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} />
                       ))}
                     </div>
                     <p className="text-[10px] text-muted-foreground font-sans mt-2">
-                      Based on {mockShopReviews.length} customer reviews
+                      Based on {reviews.length} customer reviews
                     </p>
                   </div>
 
                   {/* Rating Distribution Bars */}
                   <div className="space-y-2.5 pt-4 border-t border-border/40">
-                    {[
-                      { stars: 5, percentage: 80, count: 2 },
-                      { stars: 4, percentage: 20, count: 1 },
-                      { stars: 3, percentage: 0, count: 0 },
-                      { stars: 2, percentage: 0, count: 0 },
-                      { stars: 1, percentage: 0, count: 0 }
-                    ].map((bar) => (
+                    {ratingDistribution.map((bar) => (
                       <div key={bar.stars} className="flex items-center gap-3 text-xs font-sans">
                         <span className="w-3 text-right text-muted-foreground font-bold">{bar.stars}</span>
                         <Star className="w-3 h-3 text-primary fill-primary" />
@@ -224,29 +264,84 @@ const ShopDetail = () => {
               </Card>
 
               {/* Individual Reviews List */}
-              <div className="lg:col-span-2 space-y-4">
-                <h3 className="text-sm font-sans font-bold text-muted-foreground uppercase tracking-widest mb-2.5">Customer Reviews</h3>
-                {mockShopReviews.map((rev) => (
-                  <Card key={rev.id} className="p-5">
-                    <CardContent className="p-0 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-headline font-bold text-foreground text-sm">{rev.userName}</h4>
-                          <span className="text-[10px] text-muted-foreground font-sans">
-                            {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(rev.date))}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-0.5 bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10">
-                          <Star className="w-2.5 h-2.5 fill-primary text-primary" />
-                          <span className="text-[10px] font-sans font-bold text-primary">{rev.rating}.0</span>
-                        </div>
+              <div className="lg:col-span-2 space-y-6">
+                {/* Submit New Review Form */}
+                <Card className="p-5 border border-primary/20 bg-primary/5">
+                  <CardContent className="p-0">
+                    <form onSubmit={handleSubmitReview} className="space-y-4">
+                      <h3 className="font-headline font-bold text-base text-neutral-dark">Write a Review</h3>
+                      <p className="text-xs text-muted-foreground font-sans">Share your experience with this artisan shop.</p>
+                      
+                      {/* Rating selection */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-sans text-muted-foreground font-bold uppercase tracking-wider mr-2">Your Rating:</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            type="button"
+                            key={star}
+                            onClick={() => setRating(star)}
+                            className="hover:scale-110 transition-transform focus:outline-none"
+                          >
+                            <Star className={`w-6 h-6 ${star <= rating ? 'fill-primary text-primary' : 'text-neutral-dark/20'}`} />
+                          </button>
+                        ))}
                       </div>
-                      <p className="text-xs text-muted-foreground font-body leading-relaxed">
-                        {rev.comment}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      {/* Comment Box */}
+                      <div className="space-y-1">
+                        <textarea
+                          placeholder="What did you think of their products, customization, or service?"
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          rows={3}
+                          className="w-full text-xs font-sans p-3 border border-neutral-dark/10 rounded-xl bg-background text-neutral-dark focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+                        />
+                      </div>
+
+                      {reviewError && (
+                        <p className="text-xs font-sans text-destructive">{reviewError}</p>
+                      )}
+
+                      <div className="flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={isSubmittingReview}
+                          className="btn-base btn-primary text-xs font-bold font-sans rounded-xl uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Submit Review
+                        </button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                <h3 className="text-sm font-sans font-bold text-muted-foreground uppercase tracking-widest mb-2.5">Customer Reviews</h3>
+                {reviews.length === 0 ? (
+                  <p className="text-xs text-muted-foreground font-sans py-4">No reviews yet. Be the first to review this shop!</p>
+                ) : (
+                  reviews.map((rev) => (
+                    <Card key={rev._id} className="p-5">
+                      <CardContent className="p-0 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-headline font-bold text-foreground text-sm">{rev.user?.name || 'Anonymous Customer'}</h4>
+                            <span className="text-[10px] text-muted-foreground font-sans">
+                              {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(rev.createdAt))}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-0.5 bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10">
+                            <Star className="w-2.5 h-2.5 fill-primary text-primary" />
+                            <span className="text-[10px] font-sans font-bold text-primary">{(rev.rating || 0).toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-body leading-relaxed">
+                          {rev.comment}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           </div>

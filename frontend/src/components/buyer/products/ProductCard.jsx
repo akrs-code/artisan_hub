@@ -48,7 +48,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
     >
 
 
-      {/* IMAGE */}
+      
       <Link to={`/product/${product._id}`} className="relative h-40 bg-muted overflow-hidden block shrink-0">
         <img
           src={product.imageUrl}
@@ -56,7 +56,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
 
-        {/* Save Button */}
+        
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSaveProduct(product._id); }}
           className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-card/90 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-sm hover:text-primary transition-colors"
@@ -64,7 +64,7 @@ export const ProductCard = ({ product, onAddToCart }) => {
           <Heart className={`w-3 h-3 ${isSaved ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
         </button>
 
-        {/* Out of Stock */}
+        
         {!product.inStock && (
           <div className="absolute inset-0 bg-background/75 backdrop-blur-[2px] flex items-center justify-center">
             <span className="px-2.5 py-1 rounded-full bg-card border border-border text-[9px] uppercase tracking-widest font-bold text-muted-foreground">

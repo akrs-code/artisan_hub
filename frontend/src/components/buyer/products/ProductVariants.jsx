@@ -25,7 +25,7 @@ export const ProductVariants = ({
   onSizeChange,
 }) => (
   <div className="space-y-5 mb-6 bg-card border border-border/80 p-4 rounded-xl">
-    {/* Color */}
+    
     {product.colors?.length > 0 && (
       <div>
         <p className="text-xs font-sans font-bold text-foreground uppercase tracking-widest mb-3 flex items-center justify-between">

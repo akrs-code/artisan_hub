@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Heart, Share2, ZoomIn } from 'lucide-react';
 
-// Generates a small set of "gallery" images from the single imageUrl
+
 const getGalleryImages = (imageUrl) => [
   imageUrl,
   imageUrl.replace('w=800', 'w=400').replace('q=80', 'q=60'),
@@ -16,7 +16,7 @@ export const ProductImagePanel = ({ product, isSaved, onToggleSave }) => {
 
   return (
     <div className="flex gap-3">
-      {/* Thumbnails strip */}
+      
       <div className="flex flex-col gap-2 shrink-0">
         {gallery.map((src, i) => (
           <button

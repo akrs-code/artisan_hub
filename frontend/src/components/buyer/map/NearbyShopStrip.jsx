@@ -7,14 +7,14 @@ export const NearbyShopStrip = ({ shops, title = 'Nearby Shops' }) => {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none flex flex-col bg-linear-to-t from-background/30 via-background/10 to-transparent pt-12 pb-6">
       <div className="pointer-events-auto w-full px-6">
-        {/* Header */}
+        
         <div className="flex items-end gap-2.5 mb-3 px-1">
           <h3 className="text-lg font-headline font-extrabold text-foreground leading-none">{title}</h3>
           <span className="text-xs text-muted-foreground font-sans font-medium mb-0.5">{shops.length} shops</span>
         </div>
       </div>
 
-      {/* Cards Scroll Container */}
+      
       <div className="pointer-events-auto w-full overflow-x-auto hide-scrollbar">
         <div className="flex gap-4 px-6 pb-2 w-max">
           {shops.map((shop) => (
@@ -23,14 +23,14 @@ export const NearbyShopStrip = ({ shops, title = 'Nearby Shops' }) => {
               to={`/shop/${shop._id}`}
               className="w-60 bg-card rounded-md border border-border overflow-hidden hover:border-primary/40 hover:shadow-md transition-all duration-300 group shadow-sm flex flex-col shrink-0"
             >
-              {/* Image */}
+              
               <div className="relative h-28 overflow-hidden bg-muted">
                 <img
                   src={shop.coverUrl}
                   alt={shop.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                {/* Rating pill */}
+                
                 <div className="absolute top-2 right-2 flex items-center gap-1 bg-card/95 backdrop-blur-sm rounded-md px-1.5 py-0.5 shadow-sm">
                   <Star className="w-2.5 h-2.5 fill-primary text-primary" />
                   <span className="text-[10px] font-sans font-bold text-primary">{shop.rating}</span>

@@ -32,7 +32,7 @@ export const DiscoverFilters = ({
 
   const currentSort = SORT_OPTIONS.find((o) => o.value === sortBy) ?? SORT_OPTIONS[0];
 
-  // Close dropdown on outside click
+  
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -50,7 +50,7 @@ export const DiscoverFilters = ({
 
   return (
     <>
-      {/* ── Tabs ─────────────────────────────────────────────────── */}
+      
       <Tabs>
         <TabsList>
           {[
@@ -77,9 +77,9 @@ export const DiscoverFilters = ({
         </TabsList>
       </Tabs>
 
-      {/* ── Search + Sort ─────────────────────────────────────────── */}
+      
       <div className="flex flex-col sm:flex-row gap-2.5 mb-5">
-        {/* Search input */}
+        
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
           <Input
@@ -137,7 +137,7 @@ export const DiscoverFilters = ({
         </div>
       </div>
 
-      {/* ── Category pills ────────────────────────────────────────── */}
+      
       <div className="flex flex-wrap gap-2 mb-6">
         {categories.map((cat) => (
           <button

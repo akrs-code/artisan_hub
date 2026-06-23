@@ -12,7 +12,7 @@ export const ShopPopupContent = ({
 
   return (
     <div className="flex flex-col h-full bg-card">
-      {/* Image Section */}
+      
       <div className="relative h-32 w-full overflow-hidden shrink-0 bg-muted">
         <img
           src={artisan.coverUrl}

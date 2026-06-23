@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 export const ProductDetailTabs = ({ product, shop, activeTab, onTabChange }) => (
   <Card className="p-4.5 mb-7">
     <Tabs>
-      {/* Tab headers */}
+      
       <TabsList className="pb-2 mb-3 gap-4">
         {['product', 'store'].map((tab) => (
           <TabsTrigger
@@ -19,7 +19,7 @@ export const ProductDetailTabs = ({ product, shop, activeTab, onTabChange }) => 
         ))}
       </TabsList>
 
-      {/* Tab body */}
+      
       <div className="max-h-32 overflow-y-auto pr-1.5 text-xs text-muted-foreground leading-relaxed custom-scrollbar font-body">
         <TabsContent active={activeTab === 'product'}>
           <div>

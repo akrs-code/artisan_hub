@@ -11,7 +11,7 @@ export const ShopCard = ({ shop }) => {
       to={`/shop/${shop._id}`}
       className="bg-card border border-border/80 rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-[var(--shadow-soft-lg)] transition-all duration-300 group flex flex-col h-full cursor-pointer"
     >
-      {/* Cover Image */}
+      
       <div className="relative h-40 overflow-hidden bg-muted shrink-0">
         <img
           src={shop.coverUrl}
@@ -20,7 +20,7 @@ export const ShopCard = ({ shop }) => {
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
 
-        {/* Save Button */}
+        
         <button
           onClick={(e) => {
             e.preventDefault();

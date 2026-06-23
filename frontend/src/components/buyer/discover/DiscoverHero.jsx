@@ -6,19 +6,19 @@ export const DiscoverHero = ({ onExploreShops }) => (
     className="relative rounded-xl overflow-hidden mb-6 min-h-[320px] md:min-h-[400px] flex items-center shadow-lg"
     aria-label="Discover Artisan Marketplace"
   >
-    {/* Background Image */}
+    
     <img
       src=""
       className="absolute inset-0 w-full h-full object-cover"
     />
     
-    {/* Gradient Overlay - Fixed direction for left-aligned text readability */}
+    
     <div className="absolute inset-0 bg-linear-to-r from-[#2C1A0E]/95 via-[#2C1A0E]/70 to-[#2C1A0E]/10" />
 
-    {/* Content Container */}
+    
     <div className="relative z-10 p-6 md:p-10 lg:p-12 w-full max-w-2xl flex flex-col items-start">
       
-      {/* Badge/Eyebrow */}
+      
       <span className="inline-flex items-center gap-1.5 mb-5 px-3 py-1.5 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-[10px] sm:text-xs font-sans font-bold text-primary uppercase tracking-widest shadow-sm">
         <Sparkles className="w-3 h-3" />
         Artisan Marketplace

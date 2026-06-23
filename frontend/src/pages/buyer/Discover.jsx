@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { Compass, Package } from 'lucide-react';
-import { mockShops, mockProducts } from '../../lib/mockData';
+import { useState, useEffect, useMemo } from 'react';
+import { Compass, Package, Loader2 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { shopsAPI, productsAPI, ordersAPI } from '../../services/api';
 
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 import { DiscoverHero } from '@/components/buyer/discover/DiscoverHero';
@@ -17,27 +17,55 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
 
+  const [products, setProducts] = useState([]);
+  const [shops, setShops] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadMarketplaceData = async () => {
+      try {
+        setIsLoading(true);
+        const [shopsRes, productsRes, ordersRes] = await Promise.all([
+          shopsAPI.getShops(),
+          productsAPI.getProducts(),
+          ordersAPI.getMyOrders()
+        ]);
+
+        const verifiedShops = (shopsRes?.data || []).filter(s => s.isVerified);
+        setShops(verifiedShops);
+        setProducts(productsRes?.data || []);
+        setOrders(ordersRes?.data || []);
+      } catch (err) {
+        console.error("Failed to load marketplace data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadMarketplaceData();
+  }, []);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setSelectedCategory('All');
     setSearchQuery('');
   };
 
-  // ── Derived category lists ────────────────────────────────────────────────
+  
   const productCategories = useMemo(
-    () => ['All', ...new Set(mockProducts.map((p) => p.category))],
-    []
+    () => ['All', ...new Set(products.map((p) => p.category))],
+    [products]
   );
   const shopCategories = useMemo(
-    () => ['All', ...new Set(mockShops.map((s) => s.category))],
-    []
+    () => ['All', ...new Set(shops.map((s) => s.category))],
+    [shops]
   );
   const categories = activeTab === 'products' ? productCategories : shopCategories;
 
-  // ── Filter + sort ─────────────────────────────────────────────────────────
+  
   const filteredProducts = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    let list = mockProducts.filter((p) => {
+    let list = products.filter((p) => {
       const matchSearch =
         p.name.toLowerCase().includes(q) ||
         p.description?.toLowerCase().includes(q) ||
@@ -50,11 +78,11 @@ const Discover = () => {
     if (sortBy === 'price_desc') list = [...list].sort((a, b) => b.price - a.price);
     if (sortBy === 'newest') list = [...list].reverse();
     return list;
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, sortBy, products]);
 
   const filteredShops = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    let list = mockShops.filter((s) => {
+    let list = shops.filter((s) => {
       const matchSearch =
         s.name.toLowerCase().includes(q) ||
         s.description?.toLowerCase().includes(q) ||
@@ -66,7 +94,7 @@ const Discover = () => {
     if (sortBy === 'rating_desc') list = [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0));
     if (sortBy === 'newest') list = [...list].reverse();
     return list;
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, sortBy, shops]);
 
   const hasActiveFilters = searchQuery !== '' || selectedCategory !== 'All' || sortBy !== 'featured';
 
@@ -78,21 +106,30 @@ const Discover = () => {
 
   const resultCount = activeTab === 'products' ? filteredProducts.length : filteredShops.length;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <p className="text-sm font-sans text-muted-foreground">Loading marketplace...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
-      {/* Hero banner */}
+      
       <DiscoverHero onExploreShops={() => handleTabChange('shops')} />
 
       {/* Stats strip */}
       <DiscoverStats
-        shopCount={mockShops.length}
-        productCount={mockProducts.length}
+        shopCount={shops.length}
+        productCount={products.length}
         savedCount={(savedShopIds?.length || 0) + (savedProductIds?.length || 0)}
-        ordersCount={2}
+        ordersCount={orders.length}
       />
 
-      {/* Tabs + Search + Sort + Category pills */}
+      
       <DiscoverFilters
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -106,8 +143,8 @@ const Discover = () => {
         hasActiveFilters={hasActiveFilters}
         onClearFilters={clearFilters}
         resultCount={resultCount}
-        shopCount={mockShops.length}
-        productCount={mockProducts.length}
+        shopCount={shops.length}
+        productCount={products.length}
       />
 
       {/* ── Product Grid ─────────────────────────────────────────────── */}

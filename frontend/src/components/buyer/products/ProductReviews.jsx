@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react';
 
-// Static mock reviews — swap for real API data when ready
+
 const getMockReviews = (productId) => [
   {
     id: `${productId}_r1`,
