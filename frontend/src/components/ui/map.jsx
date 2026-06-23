@@ -23,7 +23,7 @@ const defaultStyles = {
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 };
 
-// Check document class for theme (works with next-themes, etc.)
+
 function getDocumentTheme() {
   if (typeof document === "undefined") return null;
   if (document.documentElement.classList.contains("dark")) return "dark";
@@ -31,7 +31,7 @@ function getDocumentTheme() {
   return null;
 }
 
-// Get system preference
+
 function getSystemTheme() {
   if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -43,9 +43,9 @@ function useResolvedTheme(themeProp) {
   const [detectedTheme, setDetectedTheme] = useState(() => getDocumentTheme() ?? getSystemTheme());
 
   useEffect(() => {
-    if (themeProp) return; // Skip detection if theme is provided via prop
+    if (themeProp) return; 
 
-    // Watch for document class changes (e.g., next-themes toggling dark class)
+    
     const observer = new MutationObserver(() => {
       const docTheme = getDocumentTheme();
       if (docTheme) {
@@ -57,10 +57,10 @@ function useResolvedTheme(themeProp) {
       attributeFilter: ["class"],
     });
 
-    // Also watch for system preference changes
+    
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemChange = (e) => {
-      // Only use system preference if no document class is set
+      
       if (!getDocumentTheme()) {
         setDetectedTheme(e.matches ? "dark" : "light");
       }
@@ -144,7 +144,7 @@ const Map = forwardRef(function Map(
     light: styles?.light ?? defaultStyles.light,
   }), [styles]);
 
-  // Expose the map instance to the parent component
+  
   useImperativeHandle(ref, () => mapInstance, [mapInstance]);
 
   const clearStyleTimeout = useCallback(() => {
@@ -154,7 +154,7 @@ const Map = forwardRef(function Map(
     }
   }, []);
 
-  // Initialize the map
+  
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -175,9 +175,9 @@ const Map = forwardRef(function Map(
 
     const styleDataHandler = () => {
       clearStyleTimeout();
-      // Delay to ensure style is fully processed before allowing layer operations
-      // This is a workaround to avoid race conditions with the style loading
-      // else we have to force update every layer on setStyle change
+      
+      
+      
       styleTimeoutRef.current = setTimeout(() => {
         setIsStyleLoaded(true);
         if (projection) {
@@ -187,7 +187,7 @@ const Map = forwardRef(function Map(
     };
     const loadHandler = () => setIsLoaded(true);
 
-    // Viewport change handler - skip if triggered by internal update
+    
     const handleMove = () => {
       if (internalUpdateRef.current) return;
       onViewportChangeRef.current?.(getViewport(map));
@@ -208,10 +208,10 @@ const Map = forwardRef(function Map(
       setIsStyleLoaded(false);
       setMapInstance(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
-  // Sync controlled viewport to map
+  
   useEffect(() => {
     if (!mapInstance || !isControlled || !viewport) return;
     if (mapInstance.isMoving()) return;
@@ -239,7 +239,7 @@ const Map = forwardRef(function Map(
     internalUpdateRef.current = false;
   }, [mapInstance, isControlled, viewport]);
 
-  // Handle style change
+  
   useEffect(() => {
     if (!mapInstance || !resolvedTheme) return;
 
@@ -264,7 +264,7 @@ const Map = forwardRef(function Map(
     <MapContext.Provider value={contextValue}>
       <div ref={containerRef} className={cn("relative h-full w-full", className)}>
         {(!isLoaded || loading) && <DefaultLoader />}
-        {/* SSR-safe: children render only when map is loaded on client */}
+        
         {mapInstance && children}
       </div>
     </MapContext.Provider>
@@ -353,7 +353,7 @@ function MapMarker({
 
     return markerInstance;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -365,7 +365,7 @@ function MapMarker({
       marker.remove();
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [map]);
 
   if (
@@ -468,7 +468,7 @@ function MarkerPopup({
     return () => {
       marker.setPopup(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [map]);
 
   if (popup.isOpen()) {
@@ -515,7 +515,7 @@ function MarkerTooltip({
     }).setMaxWidth("none");
 
     return tooltipInstance;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -536,7 +536,7 @@ function MarkerTooltip({
       marker.getElement()?.removeEventListener("mouseleave", handleMouseLeave);
       tooltip.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [map]);
 
   if (tooltip.isOpen()) {

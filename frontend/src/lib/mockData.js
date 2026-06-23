@@ -106,7 +106,7 @@ export const mockShops = [
 ];
 
 export const mockProducts = [
-  // ── The Iron Loom (shop_1) ──────────────────────────────────────────────
+  
   {
     _id: 'prod_1',
     shop: 'shop_1',
@@ -153,7 +153,7 @@ export const mockProducts = [
     stockQuantity: 5,
   },
 
-  // ── Maranao Woodworks (shop_2) ──────────────────────────────────────────
+  
   {
     _id: 'prod_4',
     shop: 'shop_2',
@@ -200,7 +200,7 @@ export const mockProducts = [
     stockQuantity: 0,
   },
 
-  // ── Isla Pottery (shop_3) ───────────────────────────────────────────────
+  
   {
     _id: 'prod_7',
     shop: 'shop_3',
@@ -247,7 +247,7 @@ export const mockProducts = [
     stockQuantity: 14,
   },
 
-  // ── Lumad Metalcraft (shop_4) ───────────────────────────────────────────
+  
   {
     _id: 'prod_10',
     shop: 'shop_4',
@@ -294,7 +294,7 @@ export const mockProducts = [
     stockQuantity: 0,
   },
 
-  // ── Agusan Rattan Guild (shop_5) ─────────────────────────────────────────
+  
   {
     _id: 'prod_13',
     shop: 'shop_5',
@@ -326,7 +326,7 @@ export const mockProducts = [
     stockQuantity: 8,
   },
 
-  // ── Yakan Heritage Weavers (shop_6) ──────────────────────────────────────
+  
   {
     _id: 'prod_15',
     shop: 'shop_6',
@@ -358,7 +358,7 @@ export const mockProducts = [
     stockQuantity: 12,
   },
 
-  // ── Inaul Legacy Textiles (shop_7) ───────────────────────────────────────
+  
   {
     _id: 'prod_17',
     shop: 'shop_7',
@@ -390,7 +390,7 @@ export const mockProducts = [
     stockQuantity: 15,
   },
 
-  // ── Maria Cristina Metal Arts (shop_8) ───────────────────────────────────
+  
   {
     _id: 'prod_19',
     shop: 'shop_8',

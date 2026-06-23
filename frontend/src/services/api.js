@@ -1,9 +1,6 @@
 const API_BASE = 'http://localhost:5000/api';
 
-/**
- * Core fetch wrapper with auth token injection.
- * All API calls go through this function.
- */
+
 const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem('artisan_hub_token');
 
@@ -11,7 +8,7 @@ const request = async (endpoint, options = {}) => {
     ...(options.headers || {}),
   };
 
-  // Only set Content-Type for non-FormData requests
+  
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
@@ -37,7 +34,7 @@ const request = async (endpoint, options = {}) => {
   return data;
 };
 
-// ─── Auth API ────────────────────────────────────────────────────────────────
+
 
 export const authAPI = {
   register: (formData) =>
@@ -58,11 +55,32 @@ export const authAPI = {
     }),
 };
 
-// ─── Shops API ───────────────────────────────────────────────────────────────
+
+
+export const usersAPI = {
+  getProfile: () =>
+    request('/users/profile', {
+      method: 'GET',
+    }),
+  updateProfile: (data) => {
+    
+    const isFormData = data instanceof FormData;
+    return request('/users/profile', {
+      method: 'PUT',
+      body: isFormData ? data : JSON.stringify(data),
+    });
+  },
+};
+
+
 
 export const shopsAPI = {
   getOwned: () =>
     request('/shops/owned', {
+      method: 'GET',
+    }),
+  getShopStats: (shopId) =>
+    request(`/shops/${shopId}/stats`, {
       method: 'GET',
     }),
   createShop: (formData) =>
@@ -70,13 +88,49 @@ export const shopsAPI = {
       method: 'POST',
       body: formData,
     }),
+  updateShop: (shopId, formData) =>
+    request(`/shops/${shopId}`, {
+      method: 'PUT',
+      body: formData,
+    }),
+  getShops: () =>
+    request('/shops', {
+      method: 'GET',
+    }),
+  getNearbyShops: (lat, lng, radius) =>
+    request(`/shops/nearby?lat=${lat}&lng=${lng}&radius=${radius}`, {
+      method: 'GET',
+    }),
+  getShopById: (shopId) =>
+    request(`/shops/${shopId}`, {
+      method: 'GET',
+    }),
+  getReviews: (shopId) =>
+    request(`/shops/${shopId}/reviews`, {
+      method: 'GET',
+    }),
+  createReview: (shopId, rating, comment) =>
+    request(`/shops/${shopId}/add_reviews`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment }),
+    }),
 };
 
-// ─── Products API ────────────────────────────────────────────────────────────
+
 
 export const productsAPI = {
+  getProducts: (category) =>
+    request(`/products${category ? `?category=${category}` : ''}`, {
+      method: 'GET',
+    }),
+
   getShopProducts: (shopId) =>
     request(`/products/shops/${shopId}/get_products`, {
+      method: 'GET',
+    }),
+
+  getProductBySlug: (slugOrId) =>
+    request(`/products/products/${slugOrId}`, {
       method: 'GET',
     }),
 
@@ -96,11 +150,33 @@ export const productsAPI = {
     request(`/products/products/${productId}/delete_product`, {
       method: 'DELETE',
     }),
+
+  getProductReviews: (productId) =>
+    request(`/products/products/${productId}/reviews`, {
+      method: 'GET',
+    }),
+
+  addProductReview: (productId, rating, comment) =>
+    request(`/products/products/${productId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment }),
+    }),
 };
 
-// ─── Orders API ──────────────────────────────────────────────────────────────
+
 
 export const ordersAPI = {
+  placeOrder: (orderData) =>
+    request('/orders', {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    }),
+
+  getMyOrders: () =>
+    request('/orders/my', {
+      method: 'GET',
+    }),
+
   getShopOrders: (shopId) =>
     request(`/orders/shops/${shopId}/orders`, {
       method: 'GET',
@@ -117,8 +193,9 @@ export const ordersAPI = {
       body: JSON.stringify(shippingData),
     }),
 
-  deliverOrder: (orderId) =>
-    request(`/orders/${orderId}/deliver`, {
+
+  receiveOrder: (orderId) =>
+    request(`/orders/${orderId}/receive`, {
       method: 'PUT',
     }),
 
@@ -127,5 +204,149 @@ export const ordersAPI = {
       method: 'PUT',
     }),
 };
+
+
+
+export const adminAPI = {
+  getStats: () =>
+    request('/admin/stats', {
+      method: 'GET',
+    }),
+
+  getUsers: () =>
+    request('/admin/users', {
+      method: 'GET',
+    }),
+
+  toggleUser: (userId) =>
+    request(`/admin/users/${userId}/toggle`, {
+      method: 'PUT',
+    }),
+
+  deleteUser: (userId) =>
+    request(`/admin/users/${userId}`, {
+      method: 'DELETE',
+    }),
+
+  getShops: () =>
+    request('/admin/shops', {
+      method: 'GET',
+    }),
+
+  toggleShop: (shopId) =>
+    request(`/admin/shops/${shopId}/toggle`, {
+      method: 'PUT',
+    }),
+
+  verifyShop: (shopId, status) =>
+    request(`/admin/shops/${shopId}/verify`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+
+  getOrders: () =>
+    request('/admin/orders', {
+      method: 'GET',
+    }),
+
+  getWithdrawals: () =>
+    request('/admin/withdrawals', {
+      method: 'GET',
+    }),
+
+  updateWithdrawalStatus: (withdrawalId, status, notes) =>
+    request(`/admin/withdrawals/${withdrawalId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, notes }),
+    }),
+
+  getLogs: () =>
+    request('/admin/logs', {
+      method: 'GET',
+    }),
+
+  getProducts: () =>
+    request('/admin/products', {
+      method: 'GET',
+    }),
+
+  moderateProduct: (productId, action) =>
+    request(`/admin/products/${productId}/moderate`, {
+      method: 'PUT',
+      body: JSON.stringify({ action }),
+    }),
+
+  toggleProduct: (productId) =>
+    request(`/admin/products/${productId}/moderate`, {
+      method: 'PUT',
+      body: JSON.stringify({ action: 'toggle' }),
+    }),
+
+  getLogs: () =>
+    request('/admin/logs', {
+      method: 'GET',
+    }),
+};
+
+
+
+export const cartAPI = {
+  getCart: () =>
+    request('/cart', {
+      method: 'GET',
+    }),
+  addToCart: (itemData) =>
+    request('/cart/add', {
+      method: 'POST',
+      body: JSON.stringify(itemData),
+    }),
+  updateCartItem: (itemData) =>
+    request('/cart/update', {
+      method: 'PUT',
+      body: JSON.stringify(itemData),
+    }),
+  removeFromCart: (itemData) =>
+    request('/cart/remove', {
+      method: 'POST',
+      body: JSON.stringify(itemData),
+    }),
+};
+
+
+
+export const walletAPI = {
+  getWalletStats: (shopId) =>
+    request(`/wallet/shops/${shopId}/stats`, {
+      method: 'GET',
+    }),
+  requestWithdrawal: (shopId, withdrawalData) =>
+    request(`/wallet/shops/${shopId}/withdraw`, {
+      method: 'POST',
+      body: JSON.stringify(withdrawalData),
+    }),
+  getWithdrawalHistory: (shopId) =>
+    request(`/wallet/shops/${shopId}/history`, {
+      method: 'GET',
+    }),
+};
+
+
+
+export const notificationsAPI = {
+  getNotifications: () =>
+    request('/notifications', {
+      method: 'GET',
+    }),
+  markAllAsRead: () =>
+    request('/notifications/mark-all-read', {
+      method: 'PUT',
+    }),
+  markAsRead: (id) =>
+    request(`/notifications/${id}/read`, {
+      method: 'PUT',
+    }),
+};
+
+
 
 export default request;

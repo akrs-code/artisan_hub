@@ -8,12 +8,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Fonts */
+  
   --font-headline: "Playfair Display", serif;
   --font-body: "Literata", serif;
   --font-label: "Literata", serif;
 
-  /* Simplified Core Color Palette (Light, Base, Dark) */
+  
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
@@ -37,7 +37,7 @@
   --shadow-soft-lg: 0 10px 30px -5px rgba(90, 70, 40, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
 }
 
-/* Base resets & typography */
+
 html,
 body,
 #root {
@@ -69,21 +69,14 @@ h6 {
   font-weight: 600;
 }
 
-/* Custom Components Utilities */
+
 @utility card-custom {
-  background-color: var(--color-neutral);
-  border: 1px solid rgba(54, 46, 37, 0.15);
-  border-radius: 0.75rem;
-  padding: 2.25rem;
-  box-shadow: var(--shadow-soft);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  @apply bg-card border border-border/80 rounded-2xl p-6 shadow-sm transition-all duration-300;
 }
 
 @utility card-custom-hover {
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft-lg);
-    border-color: rgba(54, 46, 37, 0.3);
+    @apply shadow-md border-primary/30 transform -translate-y-0.5;
   }
 }
 
@@ -142,26 +135,15 @@ h6 {
 }
 
 @utility input-search {
-  font-family: var(--font-body);
-  background-color: var(--color-neutral-light);
-  border: 1px solid rgba(54, 46, 37, 0.2);
-  border-radius: 0.25rem;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
-  color: var(--color-neutral-dark);
-  width: 100%;
-  font-size: 0.95rem;
-  transition: all 0.2s;
+  @apply pl-9 pr-4 py-2 bg-card border border-border/80 rounded-full text-xs font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 w-full transition-all;
+}
 
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(160, 82, 45, 0.15);
-  }
+@utility badge-custom {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase text-center;
+}
 
-  &::placeholder {
-    color: rgba(54, 46, 37, 0.5);
-  }
+@utility table-header-custom {
+  @apply px-6 py-4 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap;
 }
 
 @utility nav-pill {
@@ -196,7 +178,7 @@ h6 {
   }
 }
 
-/* Custom scrollbar: thin thumb, transparent track */
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(54, 46, 37, 0.22) transparent;
@@ -217,7 +199,7 @@ h6 {
   background-clip: content-box;
 }
 
-/* Hide scrollbar entirely while preserving scrolling - for sidebar navigation */
+
 .nav-hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -227,7 +209,7 @@ h6 {
   scrollbar-width: none;
 }
 
-/* Optional: hide scrollbar entirely while preserving scrolling (uncomment to use) */
+
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -311,7 +293,7 @@ h6 {
   color: #ffffff;
 }
 
-/* MapLibre GL Customization */
+
 .maplibregl-popup-content {
   background-color: var(--color-neutral);
   border: 1px solid rgba(54, 46, 37, 0.15);
@@ -351,7 +333,7 @@ h6 {
   color: white;
 }
 
-/* SHADCN THEME CONFIGURATION */
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Inter Variable', sans-serif;

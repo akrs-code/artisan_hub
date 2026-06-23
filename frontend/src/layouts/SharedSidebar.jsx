@@ -1,13 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { User, X, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from '../components/shared/NotificationBell';
 
-/**
- * SharedSidebar
- *
- * Mobile  (<md): Fixed overlay drawer — slides in from left over content.
- * Desktop (≥md): Static column in the flex layout — always visible, no overlay.
- */
+
 export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
@@ -24,7 +20,7 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
   };
   return (
     <>
-      {/* Mobile overlay backdrop */}
+      
       <div
         className={`
           fixed inset-0 bg-black/40 z-30 transition-opacity duration-300
@@ -44,10 +40,10 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
           flex flex-col shadow-lg select-none overflow-hidden
           transition-transform duration-300 ease-in-out
 
-          /* Mobile: translate in/out */
+          
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
 
-          /* Desktop: always visible, part of flex flow */
+          
           md:static md:translate-x-0 md:flex md:shrink-0 md:shadow-none
         `}
       >
@@ -63,14 +59,17 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
             </span>
           </Link>
 
-          {/* Close button — mobile only */}
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden p-1.5 text-neutral-dark/60 hover:text-neutral-dark hover:bg-neutral-dark/5 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label="Close menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            {/* Close button — mobile only */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden p-1.5 text-neutral-dark/60 hover:text-neutral-dark hover:bg-neutral-dark/5 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Close menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable nav content */}
