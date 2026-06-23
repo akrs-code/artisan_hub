@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Store, Ban, UserPlus, Loader2 } from 'lucide-react';
-import AdminStatCard from '../../components/admin/AdminStatCard';
-import UserDirectoryTable from '../../components/admin/UserDirectoryTable';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
+import UserDirectoryTable from '../../components/admin/users/UserDirectoryTable';
 import { adminAPI } from '../../services/api';
 
 const UsersPage = () => {
@@ -113,7 +113,7 @@ const UsersPage = () => {
           title="Total Users" 
           value={totalUsersCount} 
           subtext={
-            <span className="flex items-center gap-1 text-[#8C5233] font-bold text-xs">
+            <span className="flex items-center gap-1 text-primary font-semibold text-xs">
               System Record
             </span>
           }
@@ -129,8 +129,8 @@ const UsersPage = () => {
           title="Suspended" 
           value={suspendedCount} 
           subtext={
-            <span className="text-destructive font-bold text-xs">
-              Immediate Action
+            <span className="text-destructive font-semibold text-xs">
+              Requires Action
             </span>
           }
           icon={Ban}
@@ -139,7 +139,7 @@ const UsersPage = () => {
           title="New Registrations" 
           value={newRegCount} 
           subtext={
-            <span className="text-[#8C5233] font-bold tracking-widest text-[9px] uppercase">
+            <span className="text-primary font-bold tracking-widest text-[9px] uppercase">
               LAST 24H
             </span>
           }

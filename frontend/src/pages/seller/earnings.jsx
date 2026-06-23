@@ -1,7 +1,7 @@
 import { Wallet, Banknote, Landmark, Clock, CheckCircle, TrendingUp, Loader2 } from 'lucide-react';
-import InventoryStatCard from '../../components/seller/InventoryStatCard';
-import TransactionsTable from '../../components/seller/TransactionsTable';
-import WithdrawModal from '../../components/seller/WithdrawModal';
+import InventoryStatCard from '../../components/seller/inventory/InventoryStatCard';
+import TransactionsTable from '../../components/seller/finance/TransactionsTable';
+import WithdrawModal from '../../components/seller/finance/WithdrawModal';
 import { useState, useEffect } from 'react';
 import { shopsAPI, ordersAPI, walletAPI } from '../../services/api';
 

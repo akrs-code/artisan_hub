@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Hourglass, Flag, CheckCircle, Eye, EyeOff, X, Loader2, ExternalLink } from 'lucide-react';
-import AdminStatCard from '../../components/admin/AdminStatCard';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import { adminAPI } from '../../services/api';
 
 
@@ -64,10 +64,10 @@ const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
                     </button>
                     <button
                         onClick={() => onToggleVisibility(product)}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-sans font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all flex items-center justify-center gap-2 ${
                             product.status === 'ACTIVE'
                                 ? 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20'
-                                : 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                         }`}
                     >
                         {product.status === 'ACTIVE' ? (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Banknote, CheckCircle, Hourglass, TrendingUp, Loader2 } from 'lucide-react';
-import AdminStatCard from '../../components/admin/AdminStatCard';
-import TransactionLogsTable from '../../components/admin/TransactionLogsTable';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
+import TransactionLogsTable from '../../components/admin/finance/TransactionLogsTable';
 import { adminAPI } from '../../services/api';
 
 const LogsPage = () => {
@@ -66,7 +66,7 @@ const LogsPage = () => {
                     title="Total Revenue"
                     value={(totalRevenue / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
                     subtext={
-                        <span className="flex items-center gap-1 text-neutral-dark text-xs">
+                        <span className="flex items-center gap-1 text-muted-foreground text-xs">
                             From delivered orders
                         </span>
                     }
@@ -76,7 +76,7 @@ const LogsPage = () => {
                     title="Success Rate"
                     value={`${successRate}%`}
                     subtext={
-                        <span className="text-neutral-dark/60 font-bold text-[9px] uppercase tracking-widest">
+                        <span className="text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
                             {deliveredCount} of {totalOrders} ORDERS
                         </span>
                     }
@@ -86,7 +86,7 @@ const LogsPage = () => {
                     title="Pending Orders"
                     value={pendingCount.toString()}
                     subtext={
-                        <span className="text-neutral-dark/60 font-bold text-[9px] uppercase tracking-widest">
+                        <span className="text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
                             AWAITING PROCESSING
                         </span>
                     }

@@ -1,6 +1,6 @@
 import { Printer, Package, Truck, CheckCircle, Loader2, X, ClipboardList } from 'lucide-react';
-import InventoryStatCard from '../../components/seller/InventoryStatCard';
-import OrderQueueTable from '../../components/seller/OrderQueueTable';
+import InventoryStatCard from '../../components/seller/inventory/InventoryStatCard';
+import OrderQueueTable from '../../components/seller/orders/OrderQueueTable';
 import { useState, useEffect } from 'react';
 import { shopsAPI, ordersAPI } from '../../services/api';
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Store, Banknote, BadgeCheck, Users, Loader2 } from 'lucide-react';
-import AdminStatCard from '../../components/admin/AdminStatCard';
-import PlatformGrowthChart from '../../components/admin/PlatformGrowthChart';
-import SystemAlerts from '../../components/admin/SystemAlerts';
-import CategoryPerformanceTable from '../../components/admin/CategoryPerformanceTable';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
+import PlatformGrowthChart from '../../components/admin/analytics/PlatformGrowthChart';
+import SystemAlerts from '../../components/admin/dashboard/SystemAlerts';
+import CategoryPerformanceTable from '../../components/admin/analytics/CategoryPerformanceTable';
 import { adminAPI } from '../../services/api';
 
 const Overview = () => {

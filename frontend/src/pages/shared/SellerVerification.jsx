@@ -10,54 +10,52 @@ const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground upperca
 const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed';
 
 const Steps = ({ currentStep }) => {
-  const steps = [
-    { id: 1, label: 'Store Basics' },
-    { id: 2, label: 'Location' },
-    { id: 3, label: 'Documents' }
-  ];
+    const steps = [
+        { id: 1, label: 'Store Basics' },
+        { id: 2, label: 'Location' },
+        { id: 3, label: 'Documents' }
+    ];
 
-  const getStepStatus = (stepId) => {
-    if (stepId < currentStep) return 'completed';
-    if (stepId === currentStep) return 'active';
-    return 'inactive';
-  };
+    const getStepStatus = (stepId) => {
+        if (stepId < currentStep) return 'completed';
+        if (stepId === currentStep) return 'active';
+        return 'inactive';
+    };
 
-  return (
-    <div className="flex items-center justify-center gap-2 mb-8 select-none">
-      {steps.map((s, idx) => {
-        const status = getStepStatus(s.id);
-        return (
-          <div key={s.id} className="flex items-center gap-2">
-            <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-sans font-bold transition-all duration-300 border ${
-                status === 'completed'
-                  ? 'bg-secondary text-white border-secondary'
-                  : status === 'active'
-                  ? 'border-primary text-primary ring-2 ring-primary/20 bg-primary/5'
-                  : 'border-border text-muted-foreground bg-muted/20'
-              }`}
-            >
-              {status === 'completed' ? (
-                <CheckCircle className="w-3.5 h-3.5" />
-              ) : (
-                idx + 1
-              )}
-            </div>
-            <span
-              className={`text-[10px] font-sans font-bold uppercase tracking-widest ${
-                status === 'inactive' ? 'text-muted-foreground' : 'text-foreground'
-              }`}
-            >
-              {s.label}
-            </span>
-            {idx < steps.length - 1 && (
-              <div className="w-8 md:w-12 h-px bg-border/60 mx-1" />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+    return (
+        <div className="flex items-center justify-center gap-2 mb-8 select-none">
+            {steps.map((s, idx) => {
+                const status = getStepStatus(s.id);
+                return (
+                    <div key={s.id} className="flex items-center gap-2">
+                        <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-sans font-bold transition-all duration-300 border ${status === 'completed'
+                                    ? 'bg-secondary text-white border-secondary'
+                                    : status === 'active'
+                                        ? 'border-primary text-primary ring-2 ring-primary/20 bg-primary/5'
+                                        : 'border-border text-muted-foreground bg-muted/20'
+                                }`}
+                        >
+                            {status === 'completed' ? (
+                                <CheckCircle className="w-3.5 h-3.5" />
+                            ) : (
+                                idx + 1
+                            )}
+                        </div>
+                        <span
+                            className={`text-[10px] font-sans font-bold uppercase tracking-widest ${status === 'inactive' ? 'text-muted-foreground' : 'text-foreground'
+                                }`}
+                        >
+                            {s.label}
+                        </span>
+                        {idx < steps.length - 1 && (
+                            <div className="w-8 md:w-12 h-px bg-border/60 mx-1" />
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
 };
 
 const SellerVerification = () => {
@@ -75,7 +73,7 @@ const SellerVerification = () => {
     useEffect(() => {
         const checkAccess = async () => {
             if (authLoading) return;
-            
+
             if (!isAuthenticated) {
                 navigate('/login', { replace: true });
                 return;
@@ -86,15 +84,15 @@ const SellerVerification = () => {
                 return;
             }
 
-            
+
             try {
                 const response = await shopsAPI.getOwned();
                 if (response && response.data) {
-                    
+
                     navigate('/seller/dashboard', { replace: true });
                 }
             } catch (err) {
-                
+
                 setIsCheckingShop(false);
             }
         };
@@ -121,8 +119,8 @@ const SellerVerification = () => {
 
     const handleAddressChange = (e) => {
         const { name, value } = e.target;
-        
-        if (name === 'state') { 
+
+        if (name === 'state') {
             setFormData(prev => ({
                 ...prev,
                 address: { ...prev.address, state: value, city: '' }
@@ -183,10 +181,10 @@ const SellerVerification = () => {
         setIsSubmitting(true);
 
         try {
-            
+
             const fullAddress = `${formData.address.street}, ${formData.address.city}, ${formData.address.state} ${formData.address.zipCode}`;
 
-            
+
             const data = new FormData();
             data.append('name', formData.storeName);
             data.append('description', formData.description);
@@ -195,7 +193,7 @@ const SellerVerification = () => {
             data.append('lat', formData.location.lat.toString());
             data.append('lng', formData.location.lng.toString());
 
-            
+
             if (formData.permitFile) {
                 data.append('businessPermit', formData.permitFile);
                 data.append('cover', formData.permitFile);
@@ -249,7 +247,7 @@ const SellerVerification = () => {
     return (
         <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-background/50 animate-in fade-in duration-700 relative overflow-hidden flex items-center justify-center">
 
-            
+
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl -z-10" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl -z-10" />
 
@@ -273,7 +271,7 @@ const SellerVerification = () => {
 
                     <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
 
-                        
+
                         {step === 1 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                                 <div>
@@ -319,7 +317,7 @@ const SellerVerification = () => {
                             </div>
                         )}
 
-                        
+
                         {step === 2 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                                 <div className="space-y-4">

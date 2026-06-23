@@ -1,8 +1,8 @@
 import { Loader2, Banknote, ShoppingCart, TrendingUp, Package } from 'lucide-react';
-import StatCard from '../../components/seller/StatCard';
-import SalesPerformance from '../../components/seller/SalesPerformance';
-import TopProducts from '../../components/seller/TopProducts';
-import RecentOrders from '../../components/seller/RecentOrders';
+import StatCard from '../../components/seller/dashboard/StatCard';
+import SalesPerformance from '../../components/seller/analytics/SalesPerformance';
+import TopProducts from '../../components/seller/products/TopProducts';
+import RecentOrders from '../../components/seller/orders/RecentOrders';
 import { useState, useEffect } from 'react';
 import { shopsAPI, ordersAPI } from '../../services/api';
 

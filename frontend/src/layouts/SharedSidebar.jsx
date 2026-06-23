@@ -82,17 +82,9 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
           {isAuthenticated && user ? (
             <>
               <div className="flex items-center gap-3 px-3 py-2.5 bg-neutral-dark/5 border border-neutral-dark/10 rounded-xl shadow-sm">
-                {user.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover border border-neutral-dark/10 shrink-0"
-                  />
-                ) : (
                   <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold font-headline shrink-0">
                     {getInitial()}
                   </div>
-                )}
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-foreground font-sans truncate">{user.name}</p>
                   <p className="text-[9px] font-sans font-semibold text-muted-foreground uppercase tracking-wider">{user.role}</p>

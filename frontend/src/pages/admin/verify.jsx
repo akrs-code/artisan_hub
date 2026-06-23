@@ -13,8 +13,8 @@ import {
     AlertCircle,
     User
 } from 'lucide-react';
-import AdminStatCard from '../../components/admin/AdminStatCard';
-import ApplicationsTable from '../../components/admin/ApplicationsTable';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
+import ApplicationsTable from '../../components/admin/shops/ApplicationsTable';
 import { adminAPI } from '../../services/api';
 
 const Verify = () => {
@@ -168,9 +168,9 @@ const Verify = () => {
                     />
                     
                     {/* Modal Dialog */}
-                    <div className="relative bg-background rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto transform transition-all border border-border">
+                    <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto transform transition-all">
                         {/* Header */}
-                        <div className="sticky top-0 bg-background flex items-center justify-between p-6 border-b border-border z-10">
+                        <div className="sticky top-0 bg-card flex items-center justify-between p-6 border-b border-border z-10">
                             <div>
                                 <h3 className="text-lg font-headline font-bold text-foreground flex items-center gap-2">
                                     <BadgeCheck className="w-5 h-5 text-primary" />
@@ -292,10 +292,10 @@ const Verify = () => {
                         </div>
 
                         {/* Footer Controls */}
-                        <div className="sticky bottom-0 bg-muted/20 p-6 border-t border-border flex justify-between items-center gap-3">
+                        <div className="sticky bottom-0 bg-muted/30 p-5 border-t border-border flex justify-between items-center gap-3">
                             <button
                                 onClick={() => setSelectedShop(null)}
-                                className="px-5 py-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-sans text-xs font-bold uppercase tracking-widest transition-all cursor-pointer"
+                                className="px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-sans text-xs font-semibold transition-all cursor-pointer"
                             >
                                 Back to Queue
                             </button>
@@ -305,7 +305,7 @@ const Verify = () => {
                                     <button
                                         onClick={() => handleVerifyAction(selectedShop._id, 'rejected')}
                                         disabled={isActioning}
-                                        className="px-5 py-3 rounded-xl bg-destructive hover:bg-red-700 text-white font-sans text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+                                        className="px-4 py-2.5 rounded-xl bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 font-sans text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
                                     >
                                         <XIcon className="w-4 h-4" />
                                         Reject
@@ -313,10 +313,10 @@ const Verify = () => {
                                     <button
                                         onClick={() => handleVerifyAction(selectedShop._id, 'verified')}
                                         disabled={isActioning}
-                                        className="px-5 py-3 rounded-xl bg-green-700 hover:bg-green-800 text-white font-sans text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+                                        className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
                                     >
                                         <Check className="w-4 h-4" />
-                                        Approve & Verify
+                                        Approve
                                     </button>
                                 </div>
                             )}

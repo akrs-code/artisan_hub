@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Store, Loader2, Sparkles } from 'lucide-react';
-import CatalogFilterBar from '../../components/seller/CatalogFilterBar';
-import ProductCard from '../../components/seller/ProductCard';
-import ProductModal from '../../components/seller/ProductModal';
+import CatalogFilterBar from '../../components/seller/products/CatalogFilterBar';
+import ProductCard from '../../components/seller/products/ProductCard';
+import ProductModal from '../../components/seller/products/ProductModal';
 import { shopsAPI, productsAPI } from '../../services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

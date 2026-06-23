@@ -1,6 +1,6 @@
 import { Box, TrendingDown, AlertCircle, MapPin, Loader2 } from 'lucide-react';
-import InventoryStatCard from '../../components/seller/InventoryStatCard';
-import InventoryTable from '../../components/seller/InventoryTable';
+import InventoryStatCard from '../../components/seller/inventory/InventoryStatCard';
+import InventoryTable from '../../components/seller/inventory/InventoryTable';
 import { useState, useEffect } from 'react';
 import { shopsAPI, productsAPI } from '../../services/api';
 
