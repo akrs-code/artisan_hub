@@ -3,10 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-/**
- * Route guard for routes that should only be accessible to non-logged-in users (like Login, Register).
- * Redirects logged-in users to their corresponding dashboards/pages based on role.
- */
+
 export const GuestRoute = () => {
   const { isAuthenticated, user, loading } = useAuth();
 

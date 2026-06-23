@@ -8,9 +8,9 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('artisan_hub_token'));
-  const [loading, setLoading] = useState(true); // true while restoring session
+  const [loading, setLoading] = useState(true); 
 
-  // ── Persist token to localStorage ────────────────────────────────────────
+  
   const saveToken = (newToken) => {
     setToken(newToken);
     if (newToken) {
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ── Restore session on mount ─────────────────────────────────────────────
+  
   const restoreSession = useCallback(async () => {
     if (!token) {
       setLoading(false);
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authAPI.getMe();
       setUser(data.user);
     } catch (err) {
-      // Token is invalid or expired — clear it
+      
       console.warn('Session restore failed:', err.message);
       saveToken(null);
       setUser(null);
@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, [restoreSession]);
 
-  // ── Register ─────────────────────────────────────────────────────────────
-  const register = async ({ firstName, middleName, lastName, email, password, role }) => {
-    const name = [firstName, middleName, lastName].filter(Boolean).join(' ');
+  
+  const register = async ({ firstName, lastName, email, password, role }) => {
+    const name = [firstName, lastName].filter(Boolean).join(' ');
 
     const data = await authAPI.register({
       name,
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // ── Login ────────────────────────────────────────────────────────────────
+  
   const login = async ({ email, password }) => {
     const data = await authAPI.login({ email, password });
 
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // ── Logout ───────────────────────────────────────────────────────────────
+  
   const logout = () => {
     saveToken(null);
     setUser(null);

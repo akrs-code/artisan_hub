@@ -10,13 +10,13 @@ const Signup = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  const [role, setRole] = useState('buyer'); // 'buyer' or 'seller'
+  const [role, setRole] = useState('buyer'); 
   const [formData, setFormData] = useState({
     firstName: '',
-    middleName: '',
     lastName: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,9 +31,14 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
-    // Client-side validation
+    
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
@@ -47,7 +52,7 @@ const Signup = () => {
     try {
       const data = await register({ ...formData, role });
 
-      // Route based on role after successful registration
+      
       const userRole = data.user?.role;
       if (userRole === 'seller') {
         navigate('/verify-seller');
@@ -63,8 +68,8 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
+
       
-      {/* Decorative background elements */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-3xl" />
 
@@ -73,7 +78,7 @@ const Signup = () => {
           <div className="flex justify-center mb-6">
             <div className="w-12 h-1.5 rounded-full bg-primary/80" />
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
               Create an Account
@@ -83,27 +88,26 @@ const Signup = () => {
             </p>
           </div>
 
-          {/* Error Banner */}
+          
           {error && (
             <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
               <p className="text-xs font-sans text-destructive font-medium">{error}</p>
             </div>
           )}
-          
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
             
-            {/* Role Toggle */}
             <div className="flex p-1.5 bg-neutral-light/80 rounded-xl border border-border/50 shadow-sm">
               <button
                 type="button"
                 onClick={() => setRole('buyer')}
                 disabled={isLoading}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
-                  role === 'buyer' 
-                    ? 'bg-white shadow-sm text-foreground border border-border/50' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${role === 'buyer'
+                  ? 'bg-white shadow-sm text-foreground border border-border/50'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+                  }`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 Buyer
@@ -112,11 +116,10 @@ const Signup = () => {
                 type="button"
                 onClick={() => setRole('seller')}
                 disabled={isLoading}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${
-                  role === 'seller' 
-                    ? 'bg-white shadow-sm text-foreground border border-border/50' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${role === 'seller'
+                  ? 'bg-white shadow-sm text-foreground border border-border/50'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
+                  }`}
               >
                 <Store className="w-4 h-4" />
                 Seller
@@ -144,39 +147,22 @@ const Signup = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="middleName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Middle Name</Label>
+                  <Label htmlFor="lastName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Last Name</Label>
                   <div className="relative group">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
                     <Input
-                      id="middleName"
-                      name="middleName"
+                      id="lastName"
+                      name="lastName"
                       type="text"
-                      autoComplete="additional-name"
+                      autoComplete="family-name"
+                      required
                       disabled={isLoading}
-                      value={formData.middleName}
+                      value={formData.lastName}
                       onChange={handleChange}
                       className="pl-10"
-                      placeholder="Robert"
+                      placeholder="Doe"
                     />
                   </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Last Name</Label>
-                <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    autoComplete="family-name"
-                    required
-                    disabled={isLoading}
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="pl-10"
-                    placeholder="Doe"
-                  />
                 </div>
               </div>
 
@@ -198,25 +184,45 @@ const Signup = () => {
                   />
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-semibold text-foreground tracking-wide uppercase">Password</Label>
-                <div className="relative group">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    disabled={isLoading}
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10"
-                    placeholder="••••••••"
-                  />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-xs font-semibold text-foreground tracking-wide uppercase">Password</Label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      disabled={isLoading}
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="pl-10"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1.5">Must be at least 8 characters.</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground font-sans mt-1.5">Must be at least 8 characters.</p>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-xs font-semibold text-foreground tracking-wide uppercase">Confirm Password</Label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      disabled={isLoading}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="pl-10"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

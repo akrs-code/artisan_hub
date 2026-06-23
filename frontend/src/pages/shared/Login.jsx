@@ -23,7 +23,7 @@ const Login = () => {
     try {
       const data = await login({ email, password });
 
-      // Route based on user role
+      
       const role = data.user?.role;
       if (role === 'admin') {
         navigate('/admin/overview');
@@ -42,7 +42,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
 
-      {/* Decorative background elements */}
+      
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl" />
 
@@ -61,7 +61,7 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Error Banner */}
+          
           {error && (
             <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0" />

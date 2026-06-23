@@ -1,18 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, MapPin, Store, FileText, CheckCircle, ArrowRight, ArrowLeft, ShieldCheck, Map as MapIcon, User, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Map, MapMarker, MapControls, MarkerContent, MarkerLabel } from '@/components/ui/map';
 import { Link, useNavigate } from 'react-router-dom';
 import { shopsAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { usePHLocations } from '../../hooks/usePHLocations';
+
+const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
+const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed';
+
+const Steps = ({ currentStep }) => {
+  const steps = [
+    { id: 1, label: 'Store Basics' },
+    { id: 2, label: 'Location' },
+    { id: 3, label: 'Documents' }
+  ];
+
+  const getStepStatus = (stepId) => {
+    if (stepId < currentStep) return 'completed';
+    if (stepId === currentStep) return 'active';
+    return 'inactive';
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 mb-8 select-none">
+      {steps.map((s, idx) => {
+        const status = getStepStatus(s.id);
+        return (
+          <div key={s.id} className="flex items-center gap-2">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-sans font-bold transition-all duration-300 border ${
+                status === 'completed'
+                  ? 'bg-secondary text-white border-secondary'
+                  : status === 'active'
+                  ? 'border-primary text-primary ring-2 ring-primary/20 bg-primary/5'
+                  : 'border-border text-muted-foreground bg-muted/20'
+              }`}
+            >
+              {status === 'completed' ? (
+                <CheckCircle className="w-3.5 h-3.5" />
+              ) : (
+                idx + 1
+              )}
+            </div>
+            <span
+              className={`text-[10px] font-sans font-bold uppercase tracking-widest ${
+                status === 'inactive' ? 'text-muted-foreground' : 'text-foreground'
+              }`}
+            >
+              {s.label}
+            </span>
+            {idx < steps.length - 1 && (
+              <div className="w-8 md:w-12 h-px bg-border/60 mx-1" />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const SellerVerification = () => {
     const navigate = useNavigate();
     const { isAuthenticated, user, loading: authLoading } = useAuth();
     const [isCheckingShop, setIsCheckingShop] = useState(true);
+
+    const { provinces, cities, getCities, loadingProvinces, loadingCities } = usePHLocations();
 
     const [step, setStep] = useState(1);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -33,24 +86,21 @@ const SellerVerification = () => {
                 return;
             }
 
-            // Check if seller already has a shop
+            
             try {
                 const response = await shopsAPI.getOwned();
                 if (response && response.data) {
-                    // Already has a shop -> verified! Redirect to dashboard
+                    
                     navigate('/seller/dashboard', { replace: true });
                 }
             } catch (err) {
-                // If 404, we let them verify!
+                
                 setIsCheckingShop(false);
             }
         };
         checkAccess();
     }, [isAuthenticated, user, authLoading, navigate]);
     const [formData, setFormData] = useState({
-        firstName: '',
-        middleName: '',
-        lastName: '',
         phone: '',
         storeName: '',
         category: 'Ceramics',
@@ -70,13 +120,25 @@ const SellerVerification = () => {
     });
 
     const handleAddressChange = (e) => {
-        setFormData({
-            ...formData,
-            address: {
-                ...formData.address,
-                [e.target.name]: e.target.value
+        const { name, value } = e.target;
+        
+        if (name === 'state') { 
+            setFormData(prev => ({
+                ...prev,
+                address: { ...prev.address, state: value, city: '' }
+            }));
+            const prov = provinces.find(p => p.name === value);
+            if (prov) {
+                getCities(prov.code);
+            } else {
+                getCities(null);
             }
-        });
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                address: { ...prev.address, [name]: value }
+            }));
+        }
     };
 
     const [mapViewport, setMapViewport] = useState({
@@ -121,10 +183,10 @@ const SellerVerification = () => {
         setIsSubmitting(true);
 
         try {
-            // Build the compound address
+            
             const fullAddress = `${formData.address.street}, ${formData.address.city}, ${formData.address.state} ${formData.address.zipCode}`;
 
-            // Create FormData object
+            
             const data = new FormData();
             data.append('name', formData.storeName);
             data.append('description', formData.description);
@@ -133,11 +195,13 @@ const SellerVerification = () => {
             data.append('lat', formData.location.lat.toString());
             data.append('lng', formData.location.lng.toString());
 
-            // Files mapping: permit to cover, ID to logo
+            
             if (formData.permitFile) {
+                data.append('businessPermit', formData.permitFile);
                 data.append('cover', formData.permitFile);
             }
             if (formData.idFile) {
+                data.append('governmentId', formData.idFile);
                 data.append('logo', formData.idFile);
             }
 
@@ -173,10 +237,8 @@ const SellerVerification = () => {
                         Thank you for applying to become a seller. We are reviewing your documents and store information. You will be notified once your store is approved.
                     </p>
                     <div className="pt-4">
-                        <Link to="/seller/dashboard">
-                            <Button className="w-full rounded-xl font-sans font-bold text-sm py-6">
-                                Go to Dashboard
-                            </Button>
+                        <Link to="/seller/dashboard" className="block w-full text-center py-3 text-xs font-sans font-bold uppercase tracking-widest bg-primary hover:bg-primary-dark text-white rounded-xl transition-all duration-200">
+                            Go to Dashboard
                         </Link>
                     </div>
                 </div>
@@ -187,80 +249,49 @@ const SellerVerification = () => {
     return (
         <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-background/50 animate-in fade-in duration-700 relative overflow-hidden flex items-center justify-center">
 
-            {/* Decorative background elements */}
+            
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl -z-10" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl -z-10" />
 
             <div className="max-w-xl w-full z-10">
                 <div className="bg-card p-8 md:p-10 rounded-3xl border border-border/60 shadow-soft-lg">
 
-                    <div className="flex justify-center mb-6">
-                        <div className="flex items-center gap-2">
-                            <div className={`h-1.5 rounded-full transition-all duration-300 ${step >= 1 ? 'w-8 bg-primary/80' : 'w-4 bg-muted'}`} />
-                            <div className={`h-1.5 rounded-full transition-all duration-300 ${step >= 2 ? 'w-8 bg-primary/80' : 'w-4 bg-muted'}`} />
-                            <div className={`h-1.5 rounded-full transition-all duration-300 ${step >= 3 ? 'w-8 bg-primary/80' : 'w-4 bg-muted'}`} />
-                            <div className={`h-1.5 rounded-full transition-all duration-300 ${step >= 4 ? 'w-8 bg-primary/80' : 'w-4 bg-muted'}`} />
-                        </div>
-                    </div>
+                    <Steps currentStep={step} />
 
                     <div className="text-center mb-8">
                         <h1 className="text-2xl md:text-3xl font-headline font-bold text-foreground tracking-tight">
-                            {step === 1 && "Seller Identity"}
-                            {step === 2 && "Store Basics"}
-                            {step === 3 && "Store Location"}
-                            {step === 4 && "Verification Documents"}
+                            {step === 1 && "Store Basics"}
+                            {step === 2 && "Store Location"}
+                            {step === 3 && "Verification Documents"}
                         </h1>
                         <p className="mt-2 text-xs font-sans text-muted-foreground max-w-sm mx-auto">
-                            {step === 1 && "Please provide your authentic legal identification details."}
-                            {step === 2 && "Tell us about the craft you sell."}
-                            {step === 3 && "Where can buyers find your physical store or workshop?"}
-                            {step === 4 && "Upload necessary IDs and permits to verify your identity."}
+                            {step === 1 && "Tell us about the craft you sell and how buyers can reach you."}
+                            {step === 2 && "Where can buyers find your physical store or workshop?"}
+                            {step === 3 && "Upload necessary IDs and permits to verify your identity."}
                         </p>
                     </div>
 
                     <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
 
-                        {/* Step 1: Personal Identity */}
+                        
                         {step === 1 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="firstName" className="text-xs font-semibold text-foreground uppercase tracking-wide">First Name</Label>
-                                        <Input
-                                            id="firstName"
-                                            name="firstName"
-                                            required
-                                            value={formData.firstName}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. John"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="middleName" className="text-xs font-semibold text-foreground uppercase tracking-wide">Middle Name</Label>
-                                        <Input
-                                            id="middleName"
-                                            name="middleName"
-                                            value={formData.middleName}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. Robert"
-                                        />
-                                    </div>
-                                    <div className="space-y-2 md:col-span-2">
-                                        <Label htmlFor="lastName" className="text-xs font-semibold text-foreground uppercase tracking-wide">Last Name</Label>
-                                        <Input
-                                            id="lastName"
-                                            name="lastName"
-                                            required
-                                            value={formData.lastName}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. Doe"
-                                        />
-                                    </div>
+                                <div>
+                                    <label htmlFor="storeName" className={fieldLabel}>Store Name</label>
+                                    <input
+                                        id="storeName"
+                                        name="storeName"
+                                        required
+                                        value={formData.storeName}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. The Rustic Artisan"
+                                        className={fieldInput}
+                                    />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-xs font-semibold text-foreground uppercase tracking-wide">Phone Number</Label>
-                                    <Input
+                                <div>
+                                    <label htmlFor="phone" className={fieldLabel}>Phone Number</label>
+                                    <input
                                         id="phone"
                                         name="phone"
                                         type="tel"
@@ -268,109 +299,95 @@ const SellerVerification = () => {
                                         value={formData.phone}
                                         onChange={handleInputChange}
                                         placeholder="e.g. +63 9XX XXX XXXX"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Step 2: Store Basics */}
-                        {step === 2 && (
-                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-2">
-                                    <Label htmlFor="storeName" className="text-xs font-semibold text-foreground uppercase tracking-wide">Store Name</Label>
-                                    <Input
-                                        id="storeName"
-                                        name="storeName"
-                                        required
-                                        value={formData.storeName}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. The Rustic Artisan"
+                                        className={fieldInput}
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="category" className="text-xs font-semibold text-foreground uppercase tracking-wide">Category</Label>
-                                    <Input
-                                        id="category"
-                                        name="category"
-                                        required
-                                        value={formData.category}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. Pottery, Woodwork, Textiles"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="description" className="text-xs font-semibold text-foreground uppercase tracking-wide">Store Description</Label>
-                                    <Textarea
+                                <div>
+                                    <label htmlFor="description" className={fieldLabel}>Business Description</label>
+                                    <textarea
                                         id="description"
                                         name="description"
                                         required
                                         rows={4}
                                         value={formData.description}
                                         onChange={handleInputChange}
-                                        className="resize-none"
-                                        placeholder="Tell buyers about your craft..."
+                                        className={`${fieldInput} resize-none`}
+                                        placeholder="Tell buyers about your business..."
                                     />
                                 </div>
                             </div>
                         )}
 
-                        {/* Step 3: Location */}
-                        {step === 3 && (
+                        
+                        {step === 2 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="street" className="text-xs font-semibold text-foreground uppercase tracking-wide">Street Address</Label>
-                                        <Input
+                                    <div>
+                                        <label htmlFor="street" className={fieldLabel}>Street Address</label>
+                                        <input
                                             id="street"
                                             name="street"
                                             required
                                             value={formData.address.street}
                                             onChange={handleAddressChange}
                                             placeholder="Unit, Building, Street name"
+                                            className={fieldInput}
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="city" className="text-xs font-semibold text-foreground uppercase tracking-wide">City</Label>
-                                            <Input
-                                                id="city"
-                                                name="city"
-                                                required
-                                                value={formData.address.city}
-                                                onChange={handleAddressChange}
-                                                placeholder="City"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="state" className="text-xs font-semibold text-foreground uppercase tracking-wide">State / Province</Label>
-                                            <Input
+                                        <div>
+                                            <label htmlFor="state" className={fieldLabel}>State / Province</label>
+                                            <select
                                                 id="state"
                                                 name="state"
                                                 required
                                                 value={formData.address.state}
                                                 onChange={handleAddressChange}
-                                                placeholder="State/Province"
-                                            />
+                                                className={fieldInput}
+                                                disabled={loadingProvinces}
+                                            >
+                                                <option value="" disabled>Select Province</option>
+                                                {provinces.map(prov => (
+                                                    <option key={prov.code} value={prov.name}>{prov.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label htmlFor="city" className={fieldLabel}>City</label>
+                                            <select
+                                                id="city"
+                                                name="city"
+                                                required
+                                                value={formData.address.city}
+                                                onChange={handleAddressChange}
+                                                className={fieldInput}
+                                                disabled={!formData.address.state || loadingCities}
+                                            >
+                                                <option value="" disabled>{loadingCities ? 'Loading...' : 'Select City'}</option>
+                                                {cities.map(city => (
+                                                    <option key={city.code} value={city.name}>{city.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="zipCode" className="text-xs font-semibold text-foreground uppercase tracking-wide">ZIP / Postal Code</Label>
-                                        <Input
+                                    <div>
+                                        <label htmlFor="zipCode" className={fieldLabel}>ZIP / Postal Code</label>
+                                        <input
                                             id="zipCode"
                                             name="zipCode"
                                             required
                                             value={formData.address.zipCode}
                                             onChange={handleAddressChange}
                                             placeholder="ZIP Code"
+                                            className={fieldInput}
                                         />
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div>
                                     <div className="flex items-center justify-between pb-1">
-                                        <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Pin Location</Label>
+                                        <label className={fieldLabel}>Pin Location</label>
                                         <span className="text-[10px] text-muted-foreground font-sans">Drag pin to adjust</span>
                                     </div>
                                     <div className="h-[250px] w-full rounded-xl overflow-hidden border border-border/60 relative">
@@ -398,11 +415,11 @@ const SellerVerification = () => {
                             </div>
                         )}
 
-                        {/* Step 4: Documents */}
-                        {step === 4 && (
+                        {/* Step 3: Documents */}
+                        {step === 3 && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Business Permit</Label>
+                                <div>
+                                    <label className={fieldLabel}>Business Permit</label>
                                     <div className="mt-1 flex justify-center rounded-xl border border-dashed border-border/80 px-6 py-8 hover:bg-neutral-light/50 transition-colors bg-background/50 relative cursor-pointer group">
                                         <div className="text-center">
                                             <Upload className="mx-auto h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -423,8 +440,8 @@ const SellerVerification = () => {
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Valid Government ID</Label>
+                                <div>
+                                    <label className={fieldLabel}>Valid Government ID</label>
                                     <div className="mt-1 flex justify-center rounded-xl border border-dashed border-border/80 px-6 py-8 hover:bg-neutral-light/50 transition-colors bg-background/50 relative cursor-pointer group">
                                         <div className="text-center">
                                             <Upload className="mx-auto h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -455,31 +472,31 @@ const SellerVerification = () => {
 
                         <div className="flex gap-4 pt-4 border-t border-border/50">
                             {step > 1 && (
-                                <Button type="button" onClick={prevStep} variant="outline" className="w-1/3 rounded-xl font-sans font-bold text-xs uppercase tracking-widest border-border/60 hover:bg-neutral-light" disabled={isSubmitting}>
-                                    <ArrowLeft className="w-4 h-4 mr-2" />
+                                <button type="button" onClick={prevStep} className="w-1/3 py-3 text-xs font-sans font-bold uppercase tracking-widest border border-border/60 hover:bg-neutral-light text-muted-foreground hover:text-foreground rounded-xl transition-all cursor-pointer disabled:opacity-50" disabled={isSubmitting}>
+                                    <ArrowLeft className="w-4 h-4 mr-2 inline-block align-middle" />
                                     Back
-                                </Button>
+                                </button>
                             )}
 
-                            {step < 4 ? (
-                                <Button type="button" onClick={nextStep} className="flex-1 rounded-xl font-sans font-bold text-xs uppercase tracking-widest group">
+                            {step < 3 ? (
+                                <button type="button" onClick={nextStep} className="flex-1 py-3 text-xs font-sans font-bold uppercase tracking-widest bg-primary hover:bg-primary-dark text-white rounded-xl transition-all duration-200 cursor-pointer">
                                     Next Step
-                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform inline-block align-middle" />
+                                </button>
                             ) : (
-                                <Button type="button" onClick={handleSubmit} className="flex-1 rounded-xl font-sans font-bold text-xs uppercase tracking-widest group bg-secondary hover:bg-secondary-dark text-white" disabled={isSubmitting}>
+                                <button type="button" onClick={handleSubmit} className="flex-1 py-3 text-xs font-sans font-bold uppercase tracking-widest bg-secondary hover:bg-secondary-dark text-white rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50" disabled={isSubmitting}>
                                     {isSubmitting ? (
                                         <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin inline-block align-middle" />
                                             Submitting...
                                         </>
                                     ) : (
                                         <>
                                             Submit Application
-                                            <CheckCircle className="w-4 h-4 ml-2" />
+                                            <CheckCircle className="w-4 h-4 ml-2 inline-block align-middle" />
                                         </>
                                     )}
-                                </Button>
+                                </button>
                             )}
                         </div>
 
