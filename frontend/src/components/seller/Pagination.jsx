@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const Pagination = () => {
   return (
     <div className="flex items-center justify-center gap-2 mt-12 mb-8">
-      {/* Previous Button */}
+      
       <button className="w-8 h-8 flex items-center justify-center rounded-md border border-neutral-dark/15 text-neutral-dark/60 hover:bg-neutral-dark/5 transition-colors disabled:opacity-50" aria-label="Previous page">
         <ChevronLeft className="w-4 h-4" />
       </button>

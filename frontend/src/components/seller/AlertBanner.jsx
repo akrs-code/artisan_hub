@@ -2,13 +2,13 @@ import React from 'react';
 import { TriangleAlert } from 'lucide-react';
 
 const AlertBanner = ({ title, message, buttonText, onClick, variant = 'danger', icon: Icon = TriangleAlert }) => {
-  // Danger variant (Red/Pink)
+  
   let containerClass = "bg-[#FCF1F0] border border-[#EAC2BE]";
   let iconContainerClass = "bg-[#F8E2DF]";
   let iconColor = "text-destructive";
   let buttonClass = "bg-[#C85746] hover:bg-destructive text-white";
 
-  // Warning variant (Beige/Brown)
+  
   if (variant === 'warning') {
     containerClass = "bg-[#F3EBE3] border border-[#E3D4C4]";
     iconContainerClass = "bg-[#EBDDD0]";

@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 
-const SalesPerformance = () => {
+const SalesPerformance = ({ data = [] }) => {
   const [period, setPeriod] = useState('Monthly');
 
-  // Dummy data for the bars (height percentages)
-  const barData = [30, 45, 25, 55, 40, 65, 50, 75];
-  const xLabels = ['Sep 20', 'Sep 27', 'Oct 04', 'Oct 11', 'Oct 18'];
+  
+  const maxVal = Math.max(1, ...data.map(d => d.value));
+  const barData = data.map(d => (d.value / maxVal) * 100);
+  const xLabels = data.map(d => d.label);
 
   return (
     <div className="card-custom !p-8 flex flex-col h-full group hover:card-custom-hover">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h2 className="text-lg font-headline font-bold text-neutral-dark">Sales Performance</h2>
-          <p className="text-xs font-sans text-neutral-dark/60 mt-1">Revenue growth over the last 30 days</p>
+          <h2 className="text-lg font-headline font-bold text-foreground">Sales Performance</h2>
+          <p className="text-xs font-sans text-muted-foreground mt-1">Revenue growth over the last 30 days</p>
         </div>
         
         {/* Toggle Pill */}
@@ -24,7 +25,7 @@ const SalesPerformance = () => {
             Weekly
           </button>
           <button 
-            className={`nav-pill-item text-xs w-auto px-4 h-8 ${period === 'Monthly' ? 'active !bg-[#7E4C33] font-semibold' : ''}`}
+            className={`nav-pill-item text-xs w-auto px-4 h-8 ${period === 'Monthly' ? 'active !bg-primary font-semibold' : ''}`}
             onClick={() => setPeriod('Monthly')}
           >
             Monthly
@@ -38,14 +39,14 @@ const SalesPerformance = () => {
           {barData.map((height, i) => (
             <div 
               key={i} 
-              className="w-full bg-[#EBE5D9] hover:bg-[#DED7C9] transition-colors duration-300 rounded-t-sm"
+              className="w-full bg-primary/20 hover:bg-primary/40 transition-colors duration-300 rounded-t-sm"
               style={{ height: `${height}%` }}
             />
           ))}
         </div>
         
         {/* X-Axis Labels */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 text-[11px] font-sans font-medium text-neutral-dark/60">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 text-[11px] font-sans font-medium text-muted-foreground">
           {xLabels.map((label, i) => (
             <span key={i}>{label}</span>
           ))}

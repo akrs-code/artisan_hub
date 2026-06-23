@@ -26,7 +26,7 @@ const getColorHex = (colorName) => {
 const ProductCard = ({ product, onEdit, onDelete }) => {
   const { name, category, price, stockQuantity, inStock, imageUrl, colors = [], sizes = [], rating = 0 } = product;
 
-  // Determine status badge
+  
   let statusBadge = { label: 'Active', classes: 'bg-[#8C5233] text-white' };
   if (!inStock || stockQuantity === 0) {
     statusBadge = { label: 'Out of Stock', classes: 'bg-destructive text-white' };
@@ -35,7 +35,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
   return (
     <div className="bg-card border border-border/80 rounded-xl overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-(--shadow-soft-lg) hover:border-primary/30 group relative">
       
-      {/* IMAGE */}
+      
       <div className="relative h-40 bg-muted overflow-hidden block shrink-0">
         <img
           src={imageUrl || 'https://placehold.co/400x300/F5F0E8/8C5233?text=Product+Image'}
@@ -43,23 +43,23 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
 
-        {/* Status Badge */}
+        
         <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[8px] font-sans font-bold uppercase tracking-widest ${statusBadge.classes}`}>
           {statusBadge.label}
         </div>
       </div>
 
-      {/* BODY */}
+      
       <div className="flex flex-col flex-1 p-3.5">
         
-        {/* Category */}
+        
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest">
             {category || 'Uncategorized'}
           </span>
         </div>
 
-        {/* Name */}
+        
         <h3 className="font-headline font-bold text-sm text-foreground hover:text-primary transition-colors leading-snug line-clamp-1 mb-1">
           {name}
         </h3>

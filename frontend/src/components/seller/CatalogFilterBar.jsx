@@ -11,7 +11,7 @@ const CatalogFilterBar = ({
 }) => {
   return (
     <div className="card-custom !p-6 flex flex-col md:flex-row gap-6 mb-8 mt-6">
-      {/* Search By Name */}
+      
       <div className="flex-1">
         <label className="block text-[11px] font-sans font-bold tracking-widest text-neutral-dark/60 uppercase mb-2">
           Search by Name

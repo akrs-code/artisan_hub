@@ -1,7 +1,7 @@
 import React from 'react';
 
 const RestockForecast = ({ data }) => {
-  // data is expected to be an array of objects: { label: 'MON', value: 40 }
+  
   const maxVal = Math.max(...data.map(d => d.value), 1);
 
   return (

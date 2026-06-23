@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { X, Info } from 'lucide-react';
 
 const ActionModal = ({ isOpen, onClose, title, message }) => {
-  // Prevent scrolling when modal is open
+  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -18,7 +18,7 @@ const ActionModal = ({ isOpen, onClose, title, message }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop */}
+      
       <div 
         className="absolute inset-0 bg-neutral-dark/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}

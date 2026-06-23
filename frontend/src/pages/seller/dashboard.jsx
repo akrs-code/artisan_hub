@@ -1,105 +1,133 @@
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Loader2, Banknote, ShoppingCart, TrendingUp, Package } from 'lucide-react';
 import StatCard from '../../components/seller/StatCard';
 import SalesPerformance from '../../components/seller/SalesPerformance';
 import TopProducts from '../../components/seller/TopProducts';
 import RecentOrders from '../../components/seller/RecentOrders';
-import DashboardFAB from '../../components/seller/DashboardFAB';
-import ActionModal from '../../components/seller/ActionModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { shopsAPI, ordersAPI } from '../../services/api';
 
 const Dashboard = () => {
-  const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+  const [orders, setOrders] = useState([]);
+  const [shop, setShop] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const openModal = (title, message) => {
-    setModalState({ isOpen: true, title, message });
-  };
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const shopRes = await shopsAPI.getOwned();
+        if (shopRes && shopRes.data) {
+          setShop(shopRes.data);
+          const [ordersRes, statsRes] = await Promise.all([
+            ordersAPI.getShopOrders(shopRes.data._id),
+            shopsAPI.getShopStats(shopRes.data._id)
+          ]);
+          if (ordersRes && ordersRes.data) {
+            setOrders(ordersRes.data);
+          }
+          if (statsRes && statsRes.data) {
+            setStats(statsRes.data);
+          }
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to fetch dashboard analytical data.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const closeModal = () => {
-    setModalState(prev => ({ ...prev, isOpen: false }));
-  };
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm font-sans text-muted-foreground">Loading dashboard analytics...</p>
+      </div>
+    );
+  }
+
+  
+  const totalSalesCentavos = orders
+    .filter((o) => o.status === 'delivered')
+    .reduce((sum, o) => sum + o.total, 0);
+  const totalSalesPHP = (totalSalesCentavos / 100).toLocaleString('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+  });
+
+  const ordersCount = orders.length;
+
+  const avgOrderValueCentavos = ordersCount > 0 ? Math.round(totalSalesCentavos / ordersCount) : 0;
+  const avgOrderValuePHP = (avgOrderValueCentavos / 100).toLocaleString('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+  });
 
   return (
     <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
 
-      {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
-            Welcome back, Habib!
-          </h1>
-          <p className="text-muted-foreground font-sans text-xs">
-            Your workshop performance is looking strong this week.
-          </p>
-        </div>
-
-        {/* Date Picker Button */}
-        <button 
-          onClick={() => openModal('Date Filtering', 'The date filtering feature is currently under development. Check back soon!')}
-          className="flex items-center gap-3 bg-neutral px-4 py-2.5 rounded-lg border border-neutral-dark/15 shadow-sm text-[13px] font-sans font-bold text-neutral-dark/80 hover:bg-neutral-light transition-colors"
-        >
-          <Calendar className="w-4 h-4 text-primary" />
-          Oct 12 - Oct 19, 2023
-          <ChevronDown className="w-4 h-4 text-neutral-dark/50 ml-2" />
-        </button>
+      
+      <div className="mb-8">
+        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
+          Welcome back, {shop?.name || 'Artisan Seller'}!
+        </h1>
+        <p className="text-muted-foreground font-sans text-xs">
+          Your workshop performance is looking strong this week.
+        </p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-sm font-sans text-destructive">
+          {error}
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <StatCard
-          title="TOTAL SALES"
-          value="P8,432.00"
-          percentage={12.5}
-          isPositive={true}
-          trendData={[10, 20, 15, 30, 25, 40, 35, 50, 45, 60]}
+          title="Total Sales"
+          value={totalSalesPHP}
+          subtext="Completed orders"
+          icon={Banknote}
         />
         <StatCard
-          title="ORDERS"
-          value="142"
-          percentage={4.2}
-          isPositive={true}
-          trendData={[20, 18, 25, 22, 30, 28, 35, 32, 40, 38]}
+          title="Total Orders"
+          value={ordersCount.toString()}
+          subtext="All time"
+          icon={ShoppingCart}
         />
         <StatCard
-          title="AVG. ORDER VALUE"
-          value="$59.38"
-          percentage={8.1}
-          isPositive={true}
-          trendData={[5, 10, 8, 15, 12, 20, 18, 25, 22, 30]}
+          title="Avg. Order Value"
+          value={avgOrderValuePHP}
+          subtext="Per order"
+          icon={TrendingUp}
         />
         <StatCard
-          title="STORE VISITS"
-          value="1,204"
-          percentage={-2.4}
-          isPositive={false}
-          trendData={[40, 38, 35, 30, 32, 25, 28, 20, 22, 15]}
+          title="Total Products"
+          value={stats?.totalProducts?.toString() || "0"}
+          subtext="Live inventory"
+          icon={Package}
         />
       </div>
 
       {/* Middle Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
-          <SalesPerformance />
+          <SalesPerformance data={stats?.dailySales || []} />
         </div>
         <div className="lg:col-span-1">
-          <TopProducts />
+          <TopProducts products={stats?.topProducts || []} />
         </div>
       </div>
 
       {/* Bottom Section */}
       <div className="w-full">
-        <RecentOrders />
+        <RecentOrders orders={orders} />
       </div>
-
-      {/* Floating Action Button */}
-      <DashboardFAB onClick={() => openModal('Quick Actions', 'Quick action shortcuts will be available in a future update.')} />
-
-      {/* Action Modal */}
-      <ActionModal 
-        isOpen={modalState.isOpen}
-        onClose={closeModal}
-        title={modalState.title}
-        message={modalState.message}
-      />
     </div>
   );
 };

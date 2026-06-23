@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { usePHLocations } from '../../hooks/usePHLocations';
 
 const Catalog = () => {
   const [shop, setShop] = useState(null);
@@ -16,22 +17,37 @@ const Catalog = () => {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Shop Creation Form State (if seller doesn't have a shop yet)
+  
   const [shopName, setShopName] = useState('');
   const [shopDescription, setShopDescription] = useState('');
   const [shopCategory, setShopCategory] = useState('Ceramics');
-  const [shopAddress, setShopAddress] = useState('');
+  const [shopProvince, setShopProvince] = useState('');
+  const [shopCity, setShopCity] = useState('');
 
-  // Modals state
+  const { provinces, cities, getCities, loadingProvinces, loadingCities } = usePHLocations();
+
+  const handleProvinceChange = (e) => {
+    const val = e.target.value;
+    setShopProvince(val);
+    setShopCity('');
+    const prov = provinces.find(p => p.name === val);
+    if (prov) {
+      getCities(prov.code);
+    } else {
+      getCities(null);
+    }
+  };
+
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Filter states
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
-  // Load shop on mount
+  
   useEffect(() => {
     fetchOwnedShop();
   }, []);
@@ -47,7 +63,7 @@ const Catalog = () => {
       }
     } catch (err) {
       if (err.status === 404) {
-        // Seller doesn't have a shop yet, keep shop state null
+        
         setShop(null);
       } else {
         setError(err.message || 'Failed to fetch shop details.');
@@ -68,25 +84,25 @@ const Catalog = () => {
     }
   };
 
-  // Initialize shop handler
+  
   const handleCreateShop = async (e) => {
     e.preventDefault();
     setIsActionLoading(true);
     setError('');
 
     try {
-      if (!shopName || !shopAddress) {
-        throw new Error('Shop Name and Address are required.');
+      if (!shopName || !shopCity || !shopProvince) {
+        throw new Error('Shop Name, City, and Province are required.');
       }
 
-      // Create FormData to support image uploads in shop creation (if we add them, but here we pass raw text fields)
-      // Since createShop takes lat/lng/address, we'll pass default Manila coords if they don't specify
+      
+      
       const formData = new FormData();
       formData.append('name', shopName);
       formData.append('description', shopDescription);
       formData.append('category', shopCategory);
-      formData.append('address', shopAddress);
-      formData.append('lat', '14.5995'); // Manila default
+      formData.append('address', `${shopCity}, ${shopProvince}`);
+      formData.append('lat', '14.5995'); 
       formData.append('lng', '121.0215');
 
       const response = await shopsAPI.createShop(formData);
@@ -101,12 +117,12 @@ const Catalog = () => {
     }
   };
 
-  // Add or Edit product submit handler
+  
   const handleSaveProduct = async (formData, productId) => {
     setIsActionLoading(true);
     try {
       if (productId) {
-        // Edit product
+        
         const response = await productsAPI.updateProduct(productId, formData);
         if (response && response.data) {
           setProducts((prev) =>
@@ -114,7 +130,7 @@ const Catalog = () => {
           );
         }
       } else {
-        // Add new product
+        
         const response = await productsAPI.createProduct(shop._id, formData);
         if (response && response.data) {
           setProducts((prev) => [response.data, ...prev]);
@@ -129,7 +145,7 @@ const Catalog = () => {
     }
   };
 
-  // Delete product handler
+  
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
       return;
@@ -143,13 +159,13 @@ const Catalog = () => {
     }
   };
 
-  // Open modal for editing
+  
   const handleOpenEditModal = (product) => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
 
-  // Filter products client-side
+  
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const nameMatch = product.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -177,11 +193,11 @@ const Catalog = () => {
     );
   }
 
-  // State: No Shop Found - Setup Required
+  
   if (!shop) {
     return (
       <div className="px-6 lg:px-10 py-10 max-w-2xl mx-auto w-full animate-in fade-in duration-500">
-        <div className="card-custom text-center p-8 space-y-6">
+        <div className="bg-card border border-border rounded-2xl text-center p-8 space-y-6">
           <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center text-primary">
             <Store className="w-8 h-8" />
           </div>
@@ -232,16 +248,40 @@ const Catalog = () => {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="shopAddress" className="text-xs font-semibold text-foreground uppercase tracking-wide">Location/Address</Label>
-              <Input
-                id="shopAddress"
-                value={shopAddress}
-                onChange={(e) => setShopAddress(e.target.value)}
-                placeholder="e.g. Quezon City, Metro Manila"
-                required
-                disabled={isActionLoading}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="shopProvince" className="text-xs font-semibold text-foreground uppercase tracking-wide">Province</Label>
+                <select
+                  id="shopProvince"
+                  value={shopProvince}
+                  onChange={handleProvinceChange}
+                  disabled={isActionLoading || loadingProvinces}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                >
+                  <option value="" disabled>Select Province</option>
+                  {provinces.map(prov => (
+                    <option key={prov.code} value={prov.name}>{prov.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="shopCity" className="text-xs font-semibold text-foreground uppercase tracking-wide">City / Municipality</Label>
+                <select
+                  id="shopCity"
+                  value={shopCity}
+                  onChange={(e) => setShopCity(e.target.value)}
+                  disabled={!shopProvince || isActionLoading || loadingCities}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
+                >
+                  <option value="" disabled>{loadingCities ? 'Loading...' : 'Select City'}</option>
+                  {cities.map(city => (
+                    <option key={city.code} value={city.name}>{city.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -282,6 +322,21 @@ const Catalog = () => {
   return (
     <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
       
+      {/* Verification Notice Banner */}
+      {!shop.isVerified && (
+        <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-sans font-bold text-amber-800 uppercase tracking-wide">Shop Verification Pending</h4>
+            <p className="text-xs font-sans text-amber-700 leading-relaxed">
+              Your shop verification documents are currently being reviewed by our administrators. You will be able to add or edit products once your shop has been verified and activated.
+            </p>
+          </div>
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold tracking-widest bg-amber-100 text-amber-800 uppercase">
+            Pending
+          </span>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
@@ -300,10 +355,19 @@ const Catalog = () => {
         {/* Add Product Button */}
         <button 
           onClick={() => {
+            if (!shop.isVerified) {
+              alert('Your shop is pending verification. You cannot add products yet.');
+              return;
+            }
             setEditingProduct(null);
             setIsModalOpen(true);
           }}
-          className="flex items-center justify-center gap-2 btn-primary px-6 py-3 rounded-lg bg-[#8C5233] hover:bg-[#7E4A2E] text-xs font-sans font-bold uppercase tracking-wider shadow-sm transition-colors cursor-pointer"
+          disabled={!shop.isVerified}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-xs font-sans font-bold uppercase tracking-wider shadow-sm transition-all ${
+            !shop.isVerified 
+              ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+              : 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
+          }`}
         >
           <Plus className="w-4 h-4" />
           Add New Product
@@ -333,7 +397,7 @@ const Catalog = () => {
           ))}
         </div>
       ) : (
-        <div className="card-custom flex flex-col items-center justify-center text-center p-12 border-dashed border-border/80">
+        <div className="bg-card rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-center p-12">
           <p className="font-headline font-bold text-lg text-foreground mb-1">No products found</p>
           <p className="text-xs text-muted-foreground font-sans max-w-sm mb-4">
             {products.length === 0 
@@ -343,10 +407,19 @@ const Catalog = () => {
           {products.length === 0 && (
             <button 
               onClick={() => {
+                if (!shop.isVerified) {
+                  alert('Your shop is pending verification. You cannot add products yet.');
+                  return;
+                }
                 setEditingProduct(null);
                 setIsModalOpen(true);
               }}
-              className="flex items-center justify-center gap-2 btn-primary px-5 py-2.5 rounded-lg bg-[#8C5233] hover:bg-[#7E4A2E] text-xs font-sans font-bold uppercase tracking-wider cursor-pointer"
+              disabled={!shop.isVerified}
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-sans font-bold uppercase tracking-wider transition-all ${
+                !shop.isVerified 
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+                  : 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
+              }`}
             >
               <Plus className="w-4 h-4" />
               Add Your First Product

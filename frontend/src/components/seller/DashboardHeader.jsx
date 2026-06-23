@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, MessageSquare, Settings } from 'lucide-react';
+import { Search, Bell, Settings } from 'lucide-react';
 
 const DashboardHeader = ({
   user = {
@@ -12,7 +12,7 @@ const DashboardHeader = ({
 }) => {
   return (
     <header className="flex items-center justify-between py-6">
-      {/* Search Bar */}
+      
       <div className="relative w-full max-w-md">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-neutral-dark/50" />
@@ -32,10 +32,6 @@ const DashboardHeader = ({
         {showSettings ? (
           <button className="text-neutral-dark/70 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
             <Settings className="w-5 h-5" />
-          </button>
-        ) : (
-          <button className="text-neutral-dark/70 hover:text-neutral-dark transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
-            <MessageSquare className="w-5 h-5" />
           </button>
         )}
 

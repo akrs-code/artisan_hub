@@ -1,9 +1,9 @@
 import React from 'react';
 
 const RevenueTrendChart = ({ data }) => {
-  // data expected to be an array of objects representing weeks:
-  // { label: 'W1', bars: [40, 60, 50] } // values 0-100 representing height %
-  // One bar can have isHighlighted: true: { value: 90, isHighlighted: true }
+  
+  
+  
 
   return (
     <div className="card-custom !p-8 flex flex-col h-full group hover:card-custom-hover min-h-[320px]">

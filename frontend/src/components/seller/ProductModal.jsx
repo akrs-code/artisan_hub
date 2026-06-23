@@ -21,7 +21,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Sync with product when editing
+  
   useEffect(() => {
     if (product) {
       setFormData({
@@ -51,7 +51,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
     setError('');
   }, [product, isOpen]);
 
-  // Clean up URL object on unmount / change
+  
   useEffect(() => {
     return () => {
       if (imagePreview && imagePreview.startsWith('blob:')) {
@@ -80,7 +80,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
     setIsLoading(true);
 
     try {
-      // Basic validation
+      
       if (!formData.name || !formData.price || !formData.stockQuantity) {
         throw new Error('Name, price, and stock quantity are required.');
       }
@@ -95,7 +95,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
         throw new Error('Please enter a valid stock quantity.');
       }
 
-      // Convert colors/sizes from comma separated to array
+      
       const colorsArray = formData.colors
         ? formData.colors.split(',').map((c) => c.trim()).filter(Boolean)
         : [];
@@ -103,7 +103,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
         ? formData.sizes.split(',').map((s) => s.trim()).filter(Boolean)
         : [];
 
-      // Create FormData object
+      
       const data = new FormData();
       data.append('name', formData.name);
       data.append('category', formData.category);
@@ -111,7 +111,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
       data.append('stockQuantity', parsedStock.toString());
       data.append('description', formData.description);
       
-      // Append arrays individually (multer/express handles array parsing)
+      
       colorsArray.forEach((color) => data.append('colors[]', color));
       sizesArray.forEach((size) => data.append('sizes[]', size));
 
@@ -130,7 +130,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
+      
       <div 
         className="fixed inset-0 bg-neutral-dark/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
@@ -183,9 +183,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
               </label>
             </div>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-xs font-semibold text-foreground uppercase tracking-wide">Product Name</Label>
               <Input
@@ -255,7 +254,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
             </div>
           </div>
 
-          {/* Description */}
+          
           <div className="space-y-2">
             <Label htmlFor="description" className="text-xs font-semibold text-foreground uppercase tracking-wide">Description</Label>
             <Textarea
@@ -284,7 +283,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
               <p className="text-[9px] text-muted-foreground mt-1">Separate with commas</p>
             </div>
 
-            {/* Sizes */}
+            
             <div className="space-y-2">
               <Label htmlFor="sizes" className="text-xs font-semibold text-foreground uppercase tracking-wide">Sizes</Label>
               <Input

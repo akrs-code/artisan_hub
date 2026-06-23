@@ -1,7 +1,7 @@
 import React from 'react';
 
 const DailyShipmentsChart = ({ data }) => {
-  // data is expected to be an array of objects: { label: 'MON', value: 40, isHighlighted: false }
+  
   const maxVal = Math.max(...data.map(d => d.value), 1);
 
   return (
@@ -30,7 +30,7 @@ const DailyShipmentsChart = ({ data }) => {
           })}
         </div>
         
-        {/* X-Axis Labels */}
+        
         <div className="absolute bottom-0 left-0 right-0 flex justify-between px-3 text-[8px] font-sans font-bold tracking-widest text-neutral-dark/40 uppercase">
           {data.map((item, i) => (
             <span key={i} className="w-full text-center">{item.label}</span>
