@@ -10,7 +10,7 @@ import WorkspaceView from './components/WorkspaceView';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { GuestRoute, ProtectedRoute, SellerRoute } from './components/RouteGuards';
-
+import { Toaster } from 'react-hot-toast';
 
 import Login from './pages/shared/Login';
 import Signup from './pages/shared/Signup';
@@ -47,6 +47,18 @@ import Withdrawals from './pages/admin/withdrawals';
 const App = () => (
   <AuthProvider>
     <CartProvider>
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          className: 'font-sans text-sm font-semibold',
+          duration: 4000,
+          style: {
+            background: 'var(--color-neutral-dark)',
+            color: '#fff',
+            borderRadius: '12px',
+          }
+        }} 
+      />
       <BrowserRouter>
         <Routes>
           
