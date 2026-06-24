@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Truck, ChevronDown, Star, Send, X } from 'lucide-react';
+import { Package, Truck, ChevronDown, Star, Send } from 'lucide-react';
 import { ordersAPI, shopsAPI, productsAPI } from '../../../services/api';
 import { StatusBadge } from './StatusBadge';
+import { StarRating } from '@/components/ui/star-rating';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 const formatPrice = (c) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(c / 100);
@@ -10,46 +12,28 @@ const formatPrice = (c) =>
 const formatDate = (d) =>
   new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(d));
 
-// ── Reusable Star Rating ──────────────────────────────────────────────────────
-const StarRating = ({ value, onChange }) => (
-  <div className="flex gap-1">
-    {[1, 2, 3, 4, 5].map((star) => (
-      <button
-        key={star}
-        type="button"
-        onClick={() => onChange(star)}
-        className="p-0.5 hover:scale-110 transition-transform cursor-pointer"
-      >
-        <Star className={`w-6 h-6 ${star <= value ? 'fill-primary text-primary' : 'text-border'}`} />
-      </button>
-    ))}
-  </div>
-);
-
 // ── Review Modal ──────────────────────────────────────────────────────────────
 const ReviewModal = ({ title, subtitle, rating, onRatingChange, comment, onCommentChange, onClose, onSubmit, submitDisabled }) => (
-  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-    <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200">
+  <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+    <DialogContent className="max-w-md">
+      <DialogClose onClick={onClose} />
+      
       {/* Header */}
-      <div className="flex items-start justify-between px-6 py-5 border-b border-border">
-        <div>
-          <p className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest mb-1">{subtitle}</p>
-          <h3 className="font-headline font-bold text-foreground text-base leading-tight">{title}</h3>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      <DialogHeader>
+        <DialogDescription className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest mb-1">
+          {subtitle}
+        </DialogDescription>
+        <DialogTitle className="font-headline font-bold text-foreground text-base leading-tight">
+          {title}
+        </DialogTitle>
+      </DialogHeader>
 
       {/* Body */}
       <div className="px-6 py-5 space-y-4">
         {/* Star rating */}
         <div className="flex items-center justify-between py-3 border-y border-border/60">
           <span className="field-label !mb-0">Your Rating</span>
-          <StarRating value={rating} onChange={onRatingChange} />
+          <StarRating rating={rating} onRatingChange={onRatingChange} interactive size="xl" />
         </div>
 
         {/* Comment */}
@@ -66,7 +50,7 @@ const ReviewModal = ({ title, subtitle, rating, onRatingChange, comment, onComme
       </div>
 
       {/* Footer */}
-      <div className="flex gap-3 px-6 pb-5">
+      <DialogFooter className="flex gap-3 px-6 pb-5 pt-0 border-t-0 bg-transparent mt-0">
         <button
           type="button"
           onClick={onClose}
@@ -83,10 +67,11 @@ const ReviewModal = ({ title, subtitle, rating, onRatingChange, comment, onComme
           <Send className="w-3.5 h-3.5" />
           Submit
         </button>
-      </div>
-    </div>
-  </div>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 );
+
 
 // ── Detail Row ────────────────────────────────────────────────────────────────
 const DetailRow = ({ label, value, bold }) => (
@@ -157,6 +142,17 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
     } catch (err) {
       console.error(err);
       alert('Failed to mark order as received');
+    }
+  };
+
+  const handleCompleteOrder = async () => {
+    if (!window.confirm('Mark this order as completed? This will finalize the transaction.')) return;
+    try {
+      await ordersAPI.completeOrder(order._id);
+      if (onOrderUpdate) onOrderUpdate();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to complete order');
     }
   };
 
@@ -305,6 +301,14 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
                   className="btn-sm btn-solid"
                 >
                   Order Received
+                </button>
+              )}
+              {order.status === 'delivered' && (
+                <button
+                  onClick={handleCompleteOrder}
+                  className="btn-sm btn-solid bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700"
+                >
+                  Complete Order
                 </button>
               )}
               {/* Expand toggle */}

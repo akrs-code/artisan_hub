@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const PaymentSuccess = () => {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-6 animate-in fade-in duration-500">
+    <div className="min-h-[80vh] flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-card border border-border/80 rounded-2xl p-8 text-center shadow-lg transform scale-in duration-300">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600 mb-6 shadow-inner">
           <CheckCircle className="w-10 h-10 stroke-[2.5]" />

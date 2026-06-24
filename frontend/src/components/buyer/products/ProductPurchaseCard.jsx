@@ -1,4 +1,6 @@
-import { ShoppingCart, Minus, Plus, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ShoppingCart, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { QuantityStepper } from '../../ui/quantity-stepper';
+import { Button } from '@/components/ui/button';
 
 const formatPrice = (centavos) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(centavos / 100);
@@ -16,50 +18,34 @@ export const ProductPurchaseCard = ({
     {/* Qty + Add */}
     <div className="flex flex-col sm:flex-row gap-3">
       {/* Quantity control */}
-      <div className="inline-flex items-center border border-border rounded-xl overflow-hidden bg-card shadow-sm shrink-0 h-11">
-        <button
-          onClick={onDecrement}
-          className="w-11 h-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          aria-label="Decrease quantity"
-        >
-          <Minus className="w-3.5 h-3.5" />
-        </button>
-        <span className="w-11 text-center text-sm font-semibold font-sans text-foreground select-none border-x border-border">
-          {quantity}
-        </span>
-        <button
-          onClick={onIncrement}
-          disabled={product.stockQuantity != null && quantity >= product.stockQuantity}
-          className="w-11 h-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Increase quantity"
-        >
-          <Plus className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      <QuantityStepper
+        quantity={quantity}
+        onDecrement={onDecrement}
+        onIncrement={onIncrement}
+        max={product.stockQuantity}
+        size="md"
+      />
 
       {/* Add to Cart */}
-      <button
+      <Button
         onClick={onAddToCart}
         disabled={!product.inStock}
-        className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-sans font-semibold transition-all cursor-pointer ${
-          addedFeedback
-            ? 'bg-green-600 text-white'
-            : 'bg-primary hover:bg-primary/90 text-white shadow-sm'
-        } disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`flex-1 ${addedFeedback ? 'bg-green-600 hover:bg-green-600 text-white' : ''}`}
       >
-        <ShoppingCart className="w-4 h-4" />
+        <ShoppingCart className="w-4 h-4 mr-2" />
         {addedFeedback ? 'Added to Cart!' : 'Add to Cart'}
-      </button>
+      </Button>
     </div>
 
     {/* Buy Now */}
-    <button
+    <Button
+      variant="outline"
       onClick={onBuyNow}
       disabled={!product.inStock}
-      className="w-full h-11 rounded-xl border border-primary text-primary hover:bg-primary/5 text-sm font-sans font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+      className="w-full border-primary text-primary hover:bg-primary/5"
     >
       Buy Now
-    </button>
+    </Button>
 
     {/* Stock warning */}
     {product.inStock && product.stockQuantity != null && product.stockQuantity <= 5 && (

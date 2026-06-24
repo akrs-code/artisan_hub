@@ -170,7 +170,7 @@ const MapDiscovery = () => {
                   <div className="size-5 cursor-pointer rounded-full border-2 border-white bg-primary shadow-lg transition-transform hover:scale-110" />
                   <MarkerLabel position="bottom">{artisan.category}</MarkerLabel>
                 </MarkerContent>
-                <MarkerPopup className="w-72 p-0 overflow-hidden rounded-[1.25rem] bg-card border border-border shadow-(--shadow-soft-lg)">
+                <MarkerPopup className="w-72 p-0 overflow-hidden rounded-[8px] glass-card">
                   <ShopPopupContent
                     artisan={artisan}
                     savedShopIds={savedShopIds}

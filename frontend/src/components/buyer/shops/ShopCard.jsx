@@ -42,7 +42,7 @@ export const ShopCard = ({ shop }) => {
       <div className={`flex flex-col flex-1 p-3.5 ${shop.logoUrl ? 'pt-2' : ''}`}>
         {/* Category badge */}
         <div className="flex items-center justify-between mb-1.5">
-          <span className="inline-flex text-[9px] font-sans font-bold text-primary uppercase tracking-widest bg-primary/8 border border-primary/15 px-2 py-0.5 rounded-full">
+          <span className="badge-custom bg-primary/8 border border-primary/15 text-primary">
             {shop.category}
           </span>
           {shop.isVerified && (

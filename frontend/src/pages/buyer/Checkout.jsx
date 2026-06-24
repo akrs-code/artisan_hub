@@ -5,6 +5,8 @@ import { useCart } from '../../context/CartContext';
 import { ordersAPI, usersAPI } from '../../services/api';
 import { usePHLocations } from '../../hooks/usePHLocations';
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 
 const formatPrice = (c) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(c / 100);
@@ -70,6 +72,7 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card'); 
   const [errorMsg, setErrorMsg] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
 
@@ -190,20 +193,20 @@ const Checkout = () => {
                 province: province || prev.province,
                 zipCode: zip || prev.zipCode
               }));
-              alert("Location access granted! Address populated successfully.");
+              toast.success("Location access granted! Address populated successfully.");
             }
           } catch (err) {
             console.error("Reverse geocoding failed:", err);
-            alert(`Location coordinates detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}.`);
+            toast.success(`Location coordinates detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}.`);
           }
         },
         (error) => {
           console.error("Geolocation error:", error);
-          alert("Could not access your location. Please check browser permissions.");
+          toast.error("Could not access your location. Please check browser permissions.");
         }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      toast.error("Geolocation is not supported by your browser.");
     }
   };
 
@@ -262,6 +265,12 @@ const Checkout = () => {
       }
 
       
+      if (paymentMethod === 'cod') {
+        clearCart();
+        setShowSuccessModal(true);
+        return;
+      }
+
       const payRes = await fetch('http://localhost:5000/api/payments/create-link', {
         method: 'POST',
         headers: {
@@ -281,6 +290,7 @@ const Checkout = () => {
       }
     } catch (err) {
       setErrorMsg(err.message || 'Failed to place order. Please try again.');
+      setShowErrorModal(true);
     } finally {
       setIsProcessing(false);
     }
@@ -298,7 +308,7 @@ const Checkout = () => {
   const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
 
   return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full">
       
       
       <Link
@@ -329,7 +339,7 @@ const Checkout = () => {
         <div className="lg:col-span-2">
           
           {step === 'delivery' && (
-            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+            <form onSubmit={handleNextStep} className="glass-card p-6 space-y-6">
               <div className="flex items-center justify-between border-b border-border/40 pb-3 flex-wrap gap-2">
                 <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                   <MapPin className="w-4 h-4 text-primary" />
@@ -511,17 +521,14 @@ const Checkout = () => {
                 </label>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 text-xs font-sans font-bold uppercase tracking-widest bg-primary hover:bg-primary-dark text-white rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1"
-              >
-                Continue to Payment <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              <Button type="submit" className="w-full">
+                Continue to Payment <ChevronRight className="w-4 h-4 ml-1.5" />
+              </Button>
             </form>
           )}
 
           {step === 'payment' && (
-            <form onSubmit={handleNextStep} className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+            <form onSubmit={handleNextStep} className="glass-card p-6 space-y-6">
               <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                 <CreditCard className="w-4 h-4 text-primary" />
                 Payment Method
@@ -574,7 +581,7 @@ const Checkout = () => {
 
               {/* Progressive Disclosures */}
               {paymentMethod === 'card' && (
-                <div className="mt-4 p-5 border border-border/60 bg-muted/20 rounded-xl space-y-4 animate-in fade-in duration-200">
+                <div className="mt-4 p-5 border border-border/60 bg-muted/20 rounded-xl space-y-4">
                   <h3 className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Card Details</h3>
                   <div className="space-y-3">
                     <div>
@@ -634,37 +641,30 @@ const Checkout = () => {
               )}
 
               {paymentMethod === 'gcash' && (
-                <div className="p-4 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl font-sans mt-3 animate-in fade-in duration-200">
+                <div className="p-4 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl font-sans mt-3">
                   You will be redirected to GCash secure checkout portal to confirm details.
                 </div>
               )}
 
               {paymentMethod === 'cod' && (
-                <div className="p-4 bg-amber-50 border border-amber-100 text-amber-800 text-xs rounded-xl font-sans mt-3 animate-in fade-in duration-200">
+                <div className="p-4 bg-amber-50 border border-amber-100 text-amber-800 text-xs rounded-xl font-sans mt-3">
                   Prepare exact amount upon delivery. COD orders are subject to handling fees.
                 </div>
               )}
 
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handlePrevStep}
-                  className="px-5 py-3 text-xs font-sans font-bold uppercase tracking-widest border border-border text-muted-foreground hover:text-foreground rounded-xl transition-all cursor-pointer"
-                >
+                <Button type="button" variant="outline" onClick={handlePrevStep}>
                   Back
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 text-xs font-sans font-bold uppercase tracking-widest bg-primary hover:bg-primary-dark text-white rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1"
-                >
-                  Review Order <ChevronRight className="w-3.5 h-3.5" />
-                </button>
+                </Button>
+                <Button type="submit" className="flex-1">
+                  Review Order <ChevronRight className="w-4 h-4 ml-1.5" />
+                </Button>
               </div>
             </form>
           )}
 
           {step === 'review' && (
-            <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="glass-card p-6 space-y-6">
               <h2 className="text-base font-headline font-bold text-foreground flex items-center gap-2.5">
                 <CheckCircle className="w-4 h-4 text-secondary-dark" />
                 Review Your Order
@@ -696,24 +696,20 @@ const Checkout = () => {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handlePrevStep}
-                  className="px-5 py-3 text-xs font-sans font-bold uppercase tracking-widest border border-border text-muted-foreground hover:text-foreground rounded-xl transition-all cursor-pointer"
-                >
+                <Button type="button" variant="outline" onClick={handlePrevStep}>
                   Back
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSubmit}
                   disabled={isProcessing}
-                  className="flex-1 py-3 text-xs font-sans font-bold uppercase tracking-widest bg-primary hover:bg-primary-dark text-white rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1"
                 >
                   {isProcessing ? (
-                    <><div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Placing Order...</>
+                    <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2" /> Placing Order...</>
                   ) : (
-                    <><Truck className="w-3.5 h-3.5" /> Place Order</>
+                    <><Truck className="w-4 h-4 mr-2" /> Place Order</>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -722,7 +718,7 @@ const Checkout = () => {
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-card border border-border/80 rounded-2xl p-5 sticky top-8 shadow-sm">
+          <div className="glass-card p-5 sticky top-8">
             <h2 className="text-base font-headline font-bold text-foreground mb-4">Order Summary</h2>
 
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
@@ -758,7 +754,7 @@ const Checkout = () => {
                 <span className="font-semibold text-foreground">{formatPrice(SHIPPING_FEE)}</span>
               </div>
               {paymentMethod === 'cod' && (
-                <div className="flex justify-between animate-in fade-in duration-200">
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">COD Handling Fee</span>
                   <span className="font-semibold text-foreground">{formatPrice(3000)}</span>
                 </div>
@@ -790,7 +786,7 @@ const Checkout = () => {
 
       {/* Successful Payment Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
           
           <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 border border-border/80 text-center space-y-6 transform scale-in duration-300">
@@ -830,6 +826,31 @@ const Checkout = () => {
             >
               <ShoppingBag className="w-4 h-4" />
               Track My Order
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Failed Payment Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          
+          <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 border border-destructive/30 text-center space-y-6 transform scale-in duration-300">
+            <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto text-destructive shadow-inner">
+              <AlertCircle className="w-8 h-8 stroke-[2.5]" />
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-headline font-bold text-foreground">Payment Failed</h2>
+              <p className="text-muted-foreground text-xs font-sans mt-2">{errorMsg}</p>
+            </div>
+
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full btn-base bg-destructive hover:bg-destructive-hover text-white py-3 rounded-xl text-xs font-sans font-bold uppercase tracking-widest flex items-center justify-center shadow-md transition-colors cursor-pointer"
+            >
+              Try Again
             </button>
           </div>
         </div>

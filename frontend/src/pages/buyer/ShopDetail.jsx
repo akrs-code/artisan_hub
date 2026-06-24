@@ -6,6 +6,8 @@ import { shopsAPI, productsAPI } from '../../services/api';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 const ShopDetail = () => {
   const { id } = useParams();
@@ -87,9 +89,9 @@ const ShopDetail = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-10">
         <p className="text-muted-foreground mb-4">Artisan shop not found.</p>
-        <button onClick={() => navigate('/discover')} className="btn-base btn-primary text-xs rounded-xl font-sans font-bold">
+        <Button onClick={() => navigate('/discover')}>
           Go back to marketplace
-        </button>
+        </Button>
       </div>
     );
   }
@@ -108,7 +110,7 @@ const ShopDetail = () => {
   });
 
   return (
-    <div className="w-full pb-24 animate-in fade-in duration-500 bg-background min-h-full">
+    <div className="w-full pb-24 bg-background min-h-full">
       <div className="relative h-[55vh] w-full overflow-hidden">
         <img
           src={shop.coverUrl || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1920&q=80'}
@@ -134,17 +136,14 @@ const ShopDetail = () => {
               ))}
               <span className="text-xs font-sans font-bold ml-1">{(shop.rating || 0).toFixed(1)}</span>
             </div>
-            <button
+            <Button
               onClick={() => toggleSaveShop(shop._id)}
-              className={`btn-base gap-2 text-sm rounded-xl cursor-pointer ${
-                isSaved
-                  ? 'btn-primary'
-                  : 'bg-white/15 backdrop-blur-md text-white border border-white/30 hover:bg-white/25'
-              }`}
+              variant={isSaved ? "default" : "outline"}
+              className={`gap-2 ${isSaved ? '' : 'bg-white/15 backdrop-blur-md text-white border-white/30 hover:bg-white/25 hover:text-white'}`}
             >
-              <Heart className={`w-4 h-4 ${isSaved ? 'fill-white' : ''}`} />
+              <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
               {isSaved ? 'Saved' : 'Save Shop'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -185,15 +184,14 @@ const ShopDetail = () => {
               {availableCategories.length > 1 && (
                 <div className="flex flex-wrap gap-2">
                   {availableCategories.map((cat) => (
-                    <button
+                    <Button
                       key={cat}
+                      variant={activeCategory === cat ? "default" : "outline"}
                       onClick={() => setActiveCategory(cat)}
-                      className={`chip-pill text-xs rounded-xl cursor-pointer ${
-                        activeCategory === cat ? 'chip-pill-primary' : 'bg-card border border-border text-foreground hover:border-primary/50'
-                      }`}
+                      className="rounded-full h-8 px-4 text-xs"
                     >
                       {cat}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -203,12 +201,13 @@ const ShopDetail = () => {
               <div className="card-custom text-center py-20">
                 <Package className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                 <h3 className="font-headline font-bold text-xl text-foreground mb-2">No items in this category</h3>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setActiveCategory('All')}
-                  className="btn-base btn-outlined text-sm mt-4 rounded-xl"
+                  className="mt-4"
                 >
                   View All
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -289,12 +288,11 @@ const ShopDetail = () => {
 
                       {/* Comment Box */}
                       <div className="space-y-1">
-                        <textarea
+                        <Textarea
                           placeholder="What did you think of their products, customization, or service?"
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
                           rows={3}
-                          className="w-full text-xs font-sans p-3 border border-neutral-dark/10 rounded-xl bg-background text-neutral-dark focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                         />
                       </div>
 
@@ -303,14 +301,13 @@ const ShopDetail = () => {
                       )}
 
                       <div className="flex justify-end">
-                        <button
+                        <Button
                           type="submit"
                           disabled={isSubmittingReview}
-                          className="btn-base btn-primary text-xs font-bold font-sans rounded-xl uppercase tracking-wider flex items-center gap-1.5 disabled:opacity-50"
                         >
-                          <Send className="w-3.5 h-3.5" />
+                          <Send className="w-4 h-4 mr-2" />
                           Submit Review
-                        </button>
+                        </Button>
                       </div>
                     </form>
                   </CardContent>

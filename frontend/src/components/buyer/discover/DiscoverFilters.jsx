@@ -22,6 +22,12 @@ export const DiscoverFilters = ({
   categories,
   selectedCategory,
   onCategoryChange,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
+  minRating,
+  setMinRating,
   hasActiveFilters,
   onClearFilters,
   resultCount,
@@ -75,13 +81,15 @@ export const DiscoverFilters = ({
 
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="w-4 h-4 text-muted-foreground" />
+          </div>
           <input
             type="text"
             placeholder={`Search ${activeTab}…`}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="field-input pl-9 pr-9 py-2.5 text-sm"
+            className="input-search rounded-full"
           />
           {searchQuery && (
             <button
@@ -153,7 +161,7 @@ export const DiscoverFilters = ({
           {hasActiveFilters && (
             <button
               onClick={onClearFilters}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold border border-destructive/25 bg-destructive/8 text-destructive hover:bg-destructive/15 transition-all cursor-pointer"
+              className="btn-danger inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold transition-all cursor-pointer"
             >
               <X className="w-3 h-3" />
               Clear filters
@@ -161,6 +169,50 @@ export const DiscoverFilters = ({
           )}
         </div>
       )}
+
+      {/* ── Advanced Filters: Price & Rating ───────────────────────────── */}
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start sm:items-center py-2">
+        
+        {/* Price Range (Only for Products) */}
+        {activeTab === 'products' && (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Price Range</span>
+            <input 
+              type="number" 
+              placeholder="Min ₱" 
+              value={minPrice} 
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-20 px-2.5 py-1.5 text-xs rounded-lg border border-border/80 bg-card focus:outline-none focus:border-primary/50 transition-colors"
+            />
+            <span className="text-muted-foreground/50">-</span>
+            <input 
+              type="number" 
+              placeholder="Max ₱" 
+              value={maxPrice} 
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-20 px-2.5 py-1.5 text-xs rounded-lg border border-border/80 bg-card focus:outline-none focus:border-primary/50 transition-colors"
+            />
+          </div>
+        )}
+
+        {/* Rating Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mr-1">Min Rating</span>
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setMinRating(minRating === star ? 0 : star)}
+                className={`p-1 rounded-full transition-colors cursor-pointer ${
+                  minRating >= star ? 'text-yellow-400 hover:text-yellow-500' : 'text-muted-foreground/20 hover:text-muted-foreground/40'
+                }`}
+              >
+                <Star className={`w-4 h-4 ${minRating >= star ? 'fill-current' : ''}`} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* ── Result count ─────────────────────────────────────────────── */}
       <p className="text-xs text-muted-foreground font-sans">

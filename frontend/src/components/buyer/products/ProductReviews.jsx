@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { StarRating } from '@/components/ui/star-rating';
 
 
 const getMockReviews = (productId) => [
@@ -49,14 +49,7 @@ export const ProductReviews = ({ product }) => {
             </div>
 
             {/* Stars */}
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-primary text-primary' : 'text-muted/30'}`}
-                />
-              ))}
-            </div>
+            <StarRating rating={review.rating} size="md" />
 
             {/* Text */}
             <p className="text-xs font-body text-muted-foreground leading-relaxed">{review.text}</p>
@@ -66,3 +59,4 @@ export const ProductReviews = ({ product }) => {
     </div>
   );
 };
+

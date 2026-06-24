@@ -3,6 +3,9 @@ import { useLocation, Link } from 'react-router-dom';
 import { Package, PartyPopper, Search, Filter, Loader2 } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
 import { OrderCard } from '@/components/buyer/orders/OrderCard';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 
 const STATUS_OPTIONS = ['All', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
@@ -56,7 +59,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500 bg-background min-h-full">
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full bg-background min-h-full">
 
       
       <div className="mb-8">
@@ -81,43 +84,45 @@ const Orders = () => {
 
       {/* Empty State (no orders at all) */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-card rounded-2xl border border-border/80 flex flex-col items-center">
+        <div className="text-center py-20 glass-card flex flex-col items-center">
           <Package className="w-10 h-10 text-muted-foreground/20 mb-4" />
           <h3 className="text-lg font-headline font-bold text-foreground mb-2">No Orders Yet</h3>
           <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
             You haven't placed any orders yet. Start exploring artisan shops to find unique items.
           </p>
-          <Link to="/discover" className="btn-base btn-primary px-6 py-2 rounded-xl font-sans font-bold text-xs uppercase tracking-widest">
-            Start Shopping
-          </Link>
+          <Button asChild>
+            <Link to="/discover">
+              Start Shopping
+            </Link>
+          </Button>
         </div>
       ) : (
         <>
           {/* Search + Filter row */}
           <div className="flex flex-col sm:flex-row gap-2.5 mb-7">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-              <input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground z-10 pointer-events-none" />
+              <Input
                 type="text"
                 placeholder="Search by shop, item, or order ID…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                className="pl-9 pr-4 py-2 text-xs"
               />
             </div>
             <div className="relative min-w-[160px]">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-              <select
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground z-10 pointer-events-none" />
+              <Select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm cursor-pointer capitalize"
+                className="pl-9 pr-8 py-2 text-xs capitalize"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s} className="capitalize">
                     {s === 'All' ? 'All Statuses' : s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -130,15 +135,17 @@ const Orders = () => {
 
           {/* Order Grid or no-results state */}
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-12 bg-card border border-border/80 rounded-2xl flex flex-col items-center gap-3">
+            <div className="text-center py-12 glass-card flex flex-col items-center gap-3">
               <Package className="w-8 h-8 text-muted-foreground/20" />
               <p className="text-sm font-headline font-bold text-foreground">No orders match your search</p>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setSearchQuery(''); setSelectedStatus('All'); }}
-                className="text-[10px] font-sans font-bold text-primary hover:underline uppercase tracking-widest"
+                className="text-primary hover:text-primary/80 uppercase tracking-widest"
               >
                 Clear filters
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
