@@ -199,6 +199,11 @@ export const ordersAPI = {
       method: 'PUT',
     }),
 
+  completeOrder: (orderId) =>
+    request(`/orders/${orderId}/complete`, {
+      method: 'PUT',
+    }),
+
   cancelOrder: (orderId) =>
     request(`/orders/${orderId}/cancel`, {
       method: 'PUT',
