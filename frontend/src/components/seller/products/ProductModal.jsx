@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Loader2 } from 'lucide-react';
-
+import { Upload, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 
 const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   const [formData, setFormData] = useState({
@@ -13,8 +13,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
     sizes: '',
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,8 +30,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
         colors: product.colors ? product.colors.join(', ') : '',
         sizes: product.sizes ? product.sizes.join(', ') : '',
       });
-      setImagePreview(product.imageUrl || '');
-      setImageFile(null);
+      setImagePreviews(product.imageUrls?.length > 0 ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []));
+      setImageFiles([]);
     } else {
       setFormData({
         name: '',
@@ -42,8 +42,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
         colors: '',
         sizes: '',
       });
-      setImagePreview('');
-      setImageFile(null);
+      setImagePreviews([]);
+      setImageFiles([]);
     }
     setError('');
   }, [product, isOpen]);
@@ -51,24 +51,39 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   
   useEffect(() => {
     return () => {
-      if (imagePreview && imagePreview.startsWith('blob:')) {
-        URL.revokeObjectURL(imagePreview);
-      }
+      imagePreviews.forEach((preview) => {
+        if (preview && preview.startsWith('blob:')) {
+          URL.revokeObjectURL(preview);
+        }
+      });
     };
-  }, [imagePreview]);
-
-  if (!isOpen) return null;
+  }, [imagePreviews]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      setImageFiles((prev) => [...prev, ...files].slice(0, 5));
+      
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setImagePreviews((prev) => [...prev, ...newPreviews].slice(0, 5));
     }
+  };
+
+  const removeImage = (indexToRemove) => {
+    setImageFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    setImagePreviews((prev) => {
+      const newPreviews = [...prev];
+      const removed = newPreviews.splice(indexToRemove, 1)[0];
+      if (removed && removed.startsWith('blob:')) {
+        URL.revokeObjectURL(removed);
+      }
+      return newPreviews;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -112,8 +127,10 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
       colorsArray.forEach((color) => data.append('colors[]', color));
       sizesArray.forEach((size) => data.append('sizes[]', size));
 
-      if (imageFile) {
-        data.append('image', imageFile);
+      if (imageFiles.length > 0) {
+        imageFiles.forEach((file) => {
+          data.append('images', file);
+        });
       }
 
       await onSave(data, product?._id);
@@ -126,64 +143,72 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      
-      <div 
-        className="fixed inset-0 bg-neutral-dark/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-      
-      {/* Modal Dialog */}
-      <div className="relative bg-card rounded-2xl border border-border shadow-soft-xl w-full max-w-lg overflow-hidden transform transition-all my-8 max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/80 shrink-0">
-          <h3 className="text-lg font-headline font-bold text-foreground">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogClose onClick={onClose} />
+        
+        <DialogHeader>
+          <DialogTitle>
             {product ? 'Edit Product' : 'Add New Product'}
-          </h3>
-          <button 
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground hover:bg-neutral-dark/5 rounded-full p-2 transition-colors focus:outline-none"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Content - Scrollable Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
           {error && (
-            <div className="p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl text-xs font-sans text-destructive font-medium">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-[10px] font-sans text-destructive font-medium">
               {error}
             </div>
           )}
 
           {/* Image Upload Area */}
           <div className="space-y-2">
-            <label className="field-label">Product Image</label>
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-40 border border-dashed border-border/80 rounded-xl cursor-pointer hover:border-primary/50 bg-neutral-light/30 transition-colors overflow-hidden group">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors mb-2" />
-                    <p className="text-xs font-sans font-bold text-foreground">Click to upload product photo</p>
-                    <p className="text-[10px] font-sans text-muted-foreground mt-1">PNG, JPG, or WEBP</p>
+            <label className="field-label flex justify-between">
+              <span>Product Images</span>
+              <span className="text-[10px] text-muted-foreground font-normal">{imagePreviews.length} / 5</span>
+            </label>
+            <div className="flex flex-col gap-3">
+              {/* Image Previews Grid */}
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-5 gap-2">
+                  {imagePreviews.map((preview, idx) => (
+                    <div key={idx} className="relative w-full aspect-square rounded-lg border border-border/80 overflow-hidden group">
+                      <img src={preview} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80"
+                      >
+                        <Upload className="w-3 h-3 rotate-45" /> {/* Close button replacement */}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {imagePreviews.length < 5 && (
+                <label className="flex flex-col items-center justify-center w-full h-20 border border-dashed border-border/80 rounded-xl cursor-pointer hover:border-primary/50 bg-neutral-light/30 transition-colors overflow-hidden group">
+                  <div className="flex flex-col items-center justify-center pt-3 pb-4">
+                    <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors mb-1" />
+                    <p className="text-[10px] font-sans font-bold text-foreground">Click to upload photos</p>
+                    <p className="text-[9px] font-sans text-muted-foreground mt-0.5">PNG, JPG, or WEBP (Max 5)</p>
                   </div>
-                )}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  onChange={handleImageChange} 
-                  disabled={isLoading}
-                />
-              </label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    multiple
+                    className="hidden" 
+                    onChange={handleImageChange} 
+                    disabled={isLoading}
+                  />
+                </label>
+              )}
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="name" className="field-label">Product Name</label>
+              <label htmlFor="name" className="field-label !mb-1 !text-[10px]">Product Name</label>
               <input
                 id="name"
                 name="name"
@@ -192,20 +217,20 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="e.g. Speckled Mug"
-                className="field-input"
+                className="field-input !py-1.5 !text-xs"
               />
             </div>
 
             {/* Category */}
             <div className="space-y-2">
-              <label htmlFor="category" className="field-label">Category</label>
+              <label htmlFor="category" className="field-label !mb-1 !text-[10px]">Category</label>
               <select
                 id="category"
                 name="category"
                 disabled={isLoading}
                 value={formData.category}
                 onChange={handleChange}
-                className="field-select"
+                className="field-select !py-1.5 !text-xs"
               >
                 <option value="Ceramics">Ceramics</option>
                 <option value="Textiles">Textiles</option>
@@ -220,7 +245,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Price */}
             <div className="space-y-2">
-              <label htmlFor="price" className="field-label">Price (PHP)</label>
+              <label htmlFor="price" className="field-label !mb-1 !text-[10px]">Price (PHP)</label>
               <input
                 id="price"
                 name="price"
@@ -232,13 +257,13 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 value={formData.price}
                 onChange={handleChange}
                 placeholder="0.00"
-                className="field-input"
+                className="field-input !py-1.5 !text-xs"
               />
             </div>
 
             {/* Stock Quantity */}
             <div className="space-y-2">
-              <label htmlFor="stockQuantity" className="field-label">Stock Quantity</label>
+              <label htmlFor="stockQuantity" className="field-label !mb-1 !text-[10px]">Stock Quantity</label>
               <input
                 id="stockQuantity"
                 name="stockQuantity"
@@ -249,14 +274,14 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 value={formData.stockQuantity}
                 onChange={handleChange}
                 placeholder="10"
-                className="field-input"
+                className="field-input !py-1.5 !text-xs"
               />
             </div>
           </div>
 
           
           <div className="space-y-2">
-            <label htmlFor="description" className="field-label">Description</label>
+            <label htmlFor="description" className="field-label !mb-1 !text-[10px]">Description</label>
             <textarea
               id="description"
               name="description"
@@ -264,14 +289,14 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
               value={formData.description}
               onChange={handleChange}
               placeholder="Tell customers about the craftsmanship, materials, and creation of this item..."
-              className="field-textarea h-20"
+              className="field-textarea h-16 !py-1.5 !text-xs"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Colors */}
             <div className="space-y-2">
-              <label htmlFor="colors" className="field-label">Colors</label>
+              <label htmlFor="colors" className="field-label !mb-1 !text-[10px]">Colors</label>
               <input
                 id="colors"
                 name="colors"
@@ -279,14 +304,14 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 value={formData.colors}
                 onChange={handleChange}
                 placeholder="e.g. Sand, Terracotta, White"
-                className="field-input"
+                className="field-input !py-1.5 !text-xs"
               />
-              <p className="text-[9px] text-muted-foreground mt-1">Separate with commas</p>
+              <p className="text-[8px] text-muted-foreground mt-0.5">Separate with commas</p>
             </div>
 
             
             <div className="space-y-2">
-              <label htmlFor="sizes" className="field-label">Sizes</label>
+              <label htmlFor="sizes" className="field-label !mb-1 !text-[10px]">Sizes</label>
               <input
                 id="sizes"
                 name="sizes"
@@ -294,30 +319,30 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 value={formData.sizes}
                 onChange={handleChange}
                 placeholder="e.g. Small, Medium, Large"
-                className="field-input"
+                className="field-input !py-1.5 !text-xs"
               />
-              <p className="text-[9px] text-muted-foreground mt-1">Separate with commas</p>
+              <p className="text-[8px] text-muted-foreground mt-0.5">Separate with commas</p>
             </div>
           </div>
 
           {/* Footer inside Form */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-border/80">
+          <div className="flex justify-end gap-2 pt-4 border-t border-border/80">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="btn-md btn-outline"
+              className="btn-sm btn-outline px-4"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-md btn-solid"
+              className="btn-sm btn-solid px-4"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                   Saving...
                 </>
               ) : (
@@ -326,8 +351,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -119,7 +119,7 @@ const CatalogFilterBar = ({
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold border border-destructive/25 bg-destructive/8 text-destructive hover:bg-destructive/15 transition-all cursor-pointer"
+            className="btn-danger inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold transition-all cursor-pointer"
           >
             <X className="w-3 h-3" />
             Clear filters

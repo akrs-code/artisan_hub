@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPrice } from '../../../utils/formatters';
 
 const TopProducts = ({ products = [] }) => {
   return (
@@ -11,8 +12,12 @@ const TopProducts = ({ products = [] }) => {
         ) : (
           products.map((product) => (
             <div key={product._id} className="flex items-center gap-4 group/item cursor-pointer">
-              <div className="w-12 h-12 rounded-lg overflow-hidden border border-border shadow-sm transition-transform group-hover/item:scale-105 bg-muted flex items-center justify-center">
-                <span className="text-[10px] text-muted-foreground">Image</span>
+              <div className="w-12 h-12 rounded-lg overflow-hidden border border-border shadow-sm transition-transform group-hover/item:scale-105 bg-muted flex items-center justify-center shrink-0">
+                <img
+                  src={product.imageUrl || 'https://placehold.co/100x100?text=Product'}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <div className="flex-1">
@@ -25,14 +30,12 @@ const TopProducts = ({ products = [] }) => {
               </div>
 
               <div className="text-[14px] font-bold text-primary">
-                {(product.revenue / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+                {formatPrice(product.revenue)}
               </div>
             </div>
           ))
         )}
       </div>
-
-
     </div>
   );
 };

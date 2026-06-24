@@ -196,7 +196,7 @@ const Catalog = () => {
   
   if (!shop) {
     return (
-      <div className="px-6 lg:px-10 py-10 max-w-2xl mx-auto w-full animate-in fade-in duration-500">
+      <div className="px-6 lg:px-10 py-10 max-w-2xl mx-auto w-full">
         <div className="bg-card border border-border rounded-2xl text-center p-8 space-y-6">
           <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center text-primary">
             <Store className="w-8 h-8" />
@@ -320,7 +320,7 @@ const Catalog = () => {
   }
 
   return (
-    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
       
       {/* Verification Notice Banner */}
       {!shop.isVerified && (
@@ -353,7 +353,7 @@ const Catalog = () => {
         </div>
 
         {/* Add Product Button */}
-        <button 
+        <Button 
           onClick={() => {
             if (!shop.isVerified) {
               alert('Your shop is pending verification. You cannot add products yet.');
@@ -363,15 +363,10 @@ const Catalog = () => {
             setIsModalOpen(true);
           }}
           disabled={!shop.isVerified}
-          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-xs font-sans font-bold uppercase tracking-wider shadow-sm transition-all ${
-            !shop.isVerified 
-              ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-              : 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
-          }`}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 mr-2" />
           Add New Product
-        </button>
+        </Button>
       </div>
 
       {/* Interactive Filters */}
@@ -405,7 +400,7 @@ const Catalog = () => {
               : "No products match your search/filter parameters."}
           </p>
           {products.length === 0 && (
-            <button 
+            <Button 
               onClick={() => {
                 if (!shop.isVerified) {
                   alert('Your shop is pending verification. You cannot add products yet.');
@@ -415,15 +410,10 @@ const Catalog = () => {
                 setIsModalOpen(true);
               }}
               disabled={!shop.isVerified}
-              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-sans font-bold uppercase tracking-wider transition-all ${
-                !shop.isVerified 
-                  ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                  : 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
-              }`}
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 mr-2" />
               Add Your First Product
-            </button>
+            </Button>
           )}
         </div>
       )}

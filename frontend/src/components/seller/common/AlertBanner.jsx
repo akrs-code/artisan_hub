@@ -1,44 +1,38 @@
 import React from 'react';
 import { TriangleAlert } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const AlertBanner = ({ title, message, buttonText, onClick, variant = 'danger', icon: Icon = TriangleAlert }) => {
+  const alertVariant = variant === 'danger' ? 'destructive' : 'warning';
   
-  let containerClass = "bg-[#FCF1F0] border border-[#EAC2BE]";
-  let iconContainerClass = "bg-[#F8E2DF]";
-  let iconColor = "text-destructive";
-  let buttonClass = "bg-[#C85746] hover:bg-destructive text-white";
-
-  
-  if (variant === 'warning') {
-    containerClass = "bg-[#F3EBE3] border border-[#E3D4C4]";
-    iconContainerClass = "bg-[#EBDDD0]";
-    iconColor = "text-primary";
-    buttonClass = "btn-md btn-solid";
-  }
+  const buttonClass = alertVariant === 'destructive' 
+    ? "bg-[#C85746] hover:bg-destructive text-white" 
+    : "btn-md btn-solid";
 
   return (
-    <div className={`${containerClass} rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full`}>
+    <Alert variant={alertVariant} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full p-5 [&>svg]:relative [&>svg]:left-0 [&>svg]:top-0 [&>svg~div]:pl-0">
       <div className="flex items-start gap-4">
-        <div className={`${iconContainerClass} p-2 rounded-md shrink-0 mt-0.5`}>
-          <Icon className={`w-5 h-5 ${iconColor}`} />
-        </div>
+        <Icon className="w-5 h-5 shrink-0" />
         <div>
-          <h4 className="text-[13px] font-sans font-bold text-neutral-dark mb-1">
+          <AlertTitle className="text-[13px] font-sans font-bold text-neutral-dark mb-1">
             {title}
-          </h4>
-          <p className="text-[13px] font-sans text-neutral-dark/70">
+          </AlertTitle>
+          <AlertDescription className="text-[13px] font-sans text-neutral-dark/70">
             {message}
-          </p>
+          </AlertDescription>
         </div>
       </div>
-      <button 
-        onClick={onClick}
-        className={`shrink-0 px-5 py-2.5 rounded-md text-[11px] font-bold tracking-widest uppercase transition-colors ${buttonClass}`}
-      >
-        {buttonText}
-      </button>
-    </div>
+      {buttonText && onClick && (
+        <button 
+          onClick={onClick}
+          className={`shrink-0 px-5 py-2.5 rounded-md text-[11px] font-bold tracking-widest uppercase transition-colors ${buttonClass}`}
+        >
+          {buttonText}
+        </button>
+      )}
+    </Alert>
   );
 };
 
 export default AlertBanner;
+

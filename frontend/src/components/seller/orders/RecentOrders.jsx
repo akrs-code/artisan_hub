@@ -4,13 +4,13 @@ import DataTable from '../../../components/ui/DataTable';
 const StatusBadge = ({ status }) => {
   if (status === 'shipped') {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest border border-border text-muted-foreground uppercase">
+      <span className="badge-custom border border-border text-muted-foreground">
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest bg-primary/10 text-primary uppercase">
+    <span className="badge-custom bg-primary/10 text-primary">
       {status}
     </span>
   );

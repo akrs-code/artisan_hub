@@ -2,21 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 import Pagination from '../common/Pagination'; 
 import DataTable from '../../../components/ui/DataTable';
-
-const StatusBadge = ({ status }) => {
-  let badgeStyle = "bg-muted text-muted-foreground"; 
-  if (status === 'LOW STOCK') {
-    badgeStyle = "bg-destructive/10 text-destructive";
-  } else if (status === 'OUT OF STOCK') {
-    badgeStyle = "bg-destructive/10 text-destructive";
-  }
-
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase text-center leading-tight whitespace-pre-wrap min-w-[70px] justify-center ${badgeStyle}`}>
-      {status.replace(' ', '\n')}
-    </span>
-  );
-};
+import StatusBadge from '../../../components/ui/StatusBadge';
 
 const InventoryTable = ({ items, totalItems, currentlyShowing, onUpdateStock }) => {
   const [editingSku, setEditingSku] = useState(null);
@@ -40,19 +26,23 @@ const InventoryTable = ({ items, totalItems, currentlyShowing, onUpdateStock }) 
 
   const columns = useMemo(() => [
     {
-      header: 'Item Details',
+      header: 'Product Name',
       accessorKey: 'name',
-      meta: { headerClassName: 'w-[35%]' },
+      meta: { headerClassName: 'w-[20%]' },
       cell: ({ row }) => (
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-md overflow-hidden shrink-0 border border-border">
-            <img src={row.original.image || 'https://placehold.co/100x100?text=Product'} alt={row.original.name} className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h4 className="text-[12px] font-sans font-bold text-foreground group-hover/row:text-primary transition-colors leading-tight mb-0.5">{row.original.name}</h4>
-            <p className="text-[9px] font-sans text-muted-foreground leading-snug truncate max-w-[200px]">{row.original.description}</p>
-          </div>
-        </div>
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {row.original.name}
+        </span>
+      )
+    },
+    {
+      header: 'Description',
+      accessorKey: 'description',
+      meta: { headerClassName: 'w-[25%]' },
+      cell: ({ row }) => (
+        <span className="text-[11px] font-sans text-muted-foreground truncate max-w-[200px] block">
+          {row.original.description || '-'}
+        </span>
       )
     },
     {

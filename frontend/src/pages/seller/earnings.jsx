@@ -4,6 +4,7 @@ import TransactionsTable from '../../components/seller/finance/TransactionsTable
 import WithdrawModal from '../../components/seller/finance/WithdrawModal';
 import { useState, useEffect } from 'react';
 import { shopsAPI, ordersAPI, walletAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
 
 const Earnings = () => {
     const [orders, setOrders] = useState([]);
@@ -58,9 +59,9 @@ const Earnings = () => {
     const availableCentavos = walletStats?.availableBalance || 0;
     const pendingClearanceCentavos = pendingOrders.reduce((sum, o) => sum + o.total, 0);
 
-    const revenueStr = (totalRevenueCentavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
-    const availableStr = (availableCentavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
-    const pendingStr = (pendingClearanceCentavos / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+    const revenueStr = formatPrice(totalRevenueCentavos);
+    const availableStr = formatPrice(availableCentavos);
+    const pendingStr = formatPrice(pendingClearanceCentavos);
 
     
     const orderTxns = orders.map(order => ({
@@ -69,7 +70,7 @@ const Earnings = () => {
         type: 'Sale',
         orderId: `#${order._id.substring(0, 8).toUpperCase()}`,
         status: order.status,
-        amount: `+${(order.total / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}`,
+        amount: `+${formatPrice(order.total)}`,
         timestamp: new Date(order.createdAt).getTime()
     }));
 
@@ -79,14 +80,14 @@ const Earnings = () => {
         type: 'Payout',
         orderId: w.method.toUpperCase(),
         status: w.status,
-        amount: `-${(w.amount / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}`,
+        amount: `-${formatPrice(w.amount)}`,
         timestamp: new Date(w.createdAt).getTime()
     }));
 
     const transactions = [...orderTxns, ...withdrawalTxns].sort((a, b) => b.timestamp - a.timestamp);
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">

@@ -1,4 +1,10 @@
-import { Box, TrendingDown, AlertCircle, MapPin, Loader2 } from 'lucide-react';
+import {
+    Box,
+    TrendingDown,
+    AlertCircle,
+    MapPin,
+    Loader2
+} from 'lucide-react';
 import InventoryStatCard from '../../components/seller/inventory/InventoryStatCard';
 import InventoryTable from '../../components/seller/inventory/InventoryTable';
 import { useState, useEffect } from 'react';
@@ -17,7 +23,9 @@ const Inventory = () => {
             if (shopRes?.data) {
                 setShop(shopRes.data);
                 const productsRes = await productsAPI.getShopProducts(shopRes.data._id);
-                if (productsRes?.data) setProducts(productsRes.data);
+                if (productsRes?.data) {
+                    setProducts(productsRes.data);
+                }
             }
         } catch (err) {
             setError(err.message || 'Failed to load inventory.');
@@ -26,7 +34,9 @@ const Inventory = () => {
         }
     };
 
-    useEffect(() => { fetchInventory(); }, []);
+    useEffect(() => {
+        fetchInventory();
+    }, []);
 
     const handleUpdateStock = async (productId, newStock) => {
         try {
@@ -63,16 +73,10 @@ const Inventory = () => {
     }));
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
-
-            
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
             <div className="mb-8">
-                <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
-                    Inventory Management
-                </h1>
-                <p className="text-muted-foreground font-sans text-xs">
-                    Monitor, restock, and manage your artisan craft supplies.
-                </p>
+                <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Inventory Management</h1>
+                <p className="text-muted-foreground font-sans text-xs">Monitor, restock, and manage your artisan craft supplies.</p>
             </div>
 
             {error && (
@@ -83,9 +87,24 @@ const Inventory = () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <InventoryStatCard title="Total Products" value={products.length.toString()} subtext="Live products" icon={Box} />
-                <InventoryStatCard title="Low Stock" value={lowStockCount.toString()} subtext="Below reorder point" icon={TrendingDown} />
-                <InventoryStatCard title="Out of Stock" value={outOfStockCount.toString()} subtext="Needs restocking" icon={AlertCircle} />
+                <InventoryStatCard
+                    title="Total Products"
+                    value={products.length.toString()}
+                    subtext="Live products"
+                    icon={Box}
+                />
+                <InventoryStatCard
+                    title="Low Stock"
+                    value={lowStockCount.toString()}
+                    subtext="Below reorder point"
+                    icon={TrendingDown}
+                />
+                <InventoryStatCard
+                    title="Out of Stock"
+                    value={outOfStockCount.toString()}
+                    subtext="Needs restocking"
+                    icon={AlertCircle}
+                />
                 <InventoryStatCard
                     title="Store Location"
                     value={shop ? '01' : '00'}

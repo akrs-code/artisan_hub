@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Landmark, AlertCircle } from 'lucide-react';
+import { Landmark, AlertCircle } from 'lucide-react';
 import { walletAPI } from '../../../services/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 
 const WithdrawModal = ({ isOpen, onClose, shopId, onSuccess }) => {
   const [amount, setAmount] = useState('');
@@ -12,22 +13,13 @@ const WithdrawModal = ({ isOpen, onClose, shopId, onSuccess }) => {
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      
       setAmount('');
       setMethod('bank');
       setAccountName('');
       setAccountNumber('');
       setError('');
-    } else {
-      document.body.style.overflow = 'unset';
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,25 +45,16 @@ const WithdrawModal = ({ isOpen, onClose, shopId, onSuccess }) => {
   const fieldLabel = "field-label";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <div 
-        className="absolute inset-0 bg-neutral-dark/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-      
-      <div className="relative bg-background rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95">
-        <div className="flex items-center justify-between p-6 border-b border-border/40">
-          <h3 className="text-lg font-headline font-bold text-foreground flex items-center gap-2">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogClose onClick={onClose} />
+        
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
             <Landmark className="w-5 h-5 text-primary" />
             Request Payout
-          </h3>
-          <button 
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
@@ -140,9 +123,10 @@ const WithdrawModal = ({ isOpen, onClose, shopId, onSuccess }) => {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 export default WithdrawModal;
+

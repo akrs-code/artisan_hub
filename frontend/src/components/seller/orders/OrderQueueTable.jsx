@@ -1,25 +1,7 @@
 import React, { useMemo } from 'react';
 import Pagination from '../common/Pagination';
 import DataTable from '../../../components/ui/DataTable';
-
-const StatusBadge = ({ status }) => {
-  let badgeStyle = "bg-primary/10 text-primary";
-  if (status === 'confirmed') {
-    badgeStyle = "bg-blue-100 text-blue-800";
-  } else if (status === 'shipped') {
-    badgeStyle = "bg-primary/20 text-primary";
-  } else if (status === 'delivered') {
-    badgeStyle = "bg-green-100 text-green-800";
-  } else if (status === 'cancelled') {
-    badgeStyle = "bg-destructive/10 text-destructive";
-  }
-
-  return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase text-center ${badgeStyle}`}>
-      {status}
-    </span>
-  );
-};
+import StatusBadge from '../../../components/ui/StatusBadge';
 
 const OrderQueueTable = ({ orders, totalOrders, currentlyShowing, onSelectOrder }) => {
   const columns = useMemo(() => [

@@ -1,10 +1,16 @@
-import { Loader2, Banknote, ShoppingCart, TrendingUp, Package } from 'lucide-react';
+import { Loader2, Banknote, ShoppingCart, TrendingUp, Package, Settings, Clock, ShieldAlert, FileText, Upload, Calendar, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import StatCard from '../../components/seller/dashboard/StatCard';
 import SalesPerformance from '../../components/seller/analytics/SalesPerformance';
 import TopProducts from '../../components/seller/products/TopProducts';
 import RecentOrders from '../../components/seller/orders/RecentOrders';
+import CustomerInsights from '../../components/seller/analytics/CustomerInsights';
 import { useState, useEffect } from 'react';
 import { shopsAPI, ordersAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
+import { Button } from '@/components/ui/button';
+
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 const Dashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -13,33 +19,96 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const shopRes = await shopsAPI.getOwned();
-        if (shopRes && shopRes.data) {
-          setShop(shopRes.data);
-          const [ordersRes, statsRes] = await Promise.all([
-            ordersAPI.getShopOrders(shopRes.data._id),
-            shopsAPI.getShopStats(shopRes.data._id)
-          ]);
-          if (ordersRes && ordersRes.data) {
-            setOrders(ordersRes.data);
-          }
-          if (statsRes && statsRes.data) {
-            setStats(statsRes.data);
-          }
-        }
-      } catch (err) {
-        setError(err.message || 'Failed to fetch dashboard analytical data.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Settings Modal States
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('hours'); // 'hours' or 'verification'
+  const [storeHours, setStoreHours] = useState({
+    monday:    { open: '09:00', close: '18:00', closed: false },
+    tuesday:   { open: '09:00', close: '18:00', closed: false },
+    wednesday: { open: '09:00', close: '18:00', closed: false },
+    thursday:  { open: '09:00', close: '18:00', closed: false },
+    friday:    { open: '09:00', close: '18:00', closed: false },
+    saturday:  { open: '09:00', close: '18:00', closed: true },
+    sunday:    { open: '09:00', close: '18:00', closed: true }
+  });
+  const [permitFile, setPermitFile] = useState(null);
+  const [idFile, setIdFile] = useState(null);
+  const [savingSettings, setSavingSettings] = useState(false);
 
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const shopRes = await shopsAPI.getOwned();
+      if (shopRes && shopRes.data) {
+        setShop(shopRes.data);
+        if (shopRes.data.storeHours) {
+          setStoreHours(shopRes.data.storeHours);
+        }
+        const [ordersRes, statsRes] = await Promise.all([
+          ordersAPI.getShopOrders(shopRes.data._id),
+          shopsAPI.getShopStats(shopRes.data._id)
+        ]);
+        if (ordersRes && ordersRes.data) {
+          setOrders(ordersRes.data);
+        }
+        if (statsRes && statsRes.data) {
+          setStats(statsRes.data);
+        }
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch dashboard analytical data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const handleHourToggle = (day) => {
+    setStoreHours(prev => ({
+      ...prev,
+      [day]: { ...prev[day], closed: !prev[day].closed }
+    }));
+  };
+
+  const handleHourChange = (day, field, value) => {
+    setStoreHours(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [field]: value }
+    }));
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    try {
+      setSavingSettings(true);
+      const data = new FormData();
+      data.append('storeHours', JSON.stringify(storeHours));
+      
+      if (permitFile) {
+        data.append('businessPermit', permitFile);
+      }
+      if (idFile) {
+        data.append('governmentId', idFile);
+      }
+
+      const res = await shopsAPI.updateShop(shop._id, data);
+      toast.success('Shop settings updated successfully.');
+      setShop(res.data);
+      if (res.data.storeHours) {
+        setStoreHours(res.data.storeHours);
+      }
+      setPermitFile(null);
+      setIdFile(null);
+      setIsSettingsOpen(false);
+    } catch (err) {
+      toast.error(err.message || 'Failed to update shop settings.');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -50,34 +119,65 @@ const Dashboard = () => {
     );
   }
 
-  
-  const totalSalesCentavos = orders
-    .filter((o) => o.status === 'delivered')
-    .reduce((sum, o) => sum + o.total, 0);
-  const totalSalesPHP = (totalSalesCentavos / 100).toLocaleString('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-  });
+  const completedOrders = orders.filter((o) => ['delivered', 'completed'].includes(o.status));
+  const totalSalesCentavos = completedOrders.reduce((sum, o) => sum + o.total, 0);
+  const totalSalesPHP = formatPrice(totalSalesCentavos);
 
   const ordersCount = orders.length;
 
-  const avgOrderValueCentavos = ordersCount > 0 ? Math.round(totalSalesCentavos / ordersCount) : 0;
-  const avgOrderValuePHP = (avgOrderValueCentavos / 100).toLocaleString('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-  });
+  const completedOrdersCount = completedOrders.length;
+  const avgOrderValueCentavos = completedOrdersCount > 0 ? Math.round(totalSalesCentavos / completedOrdersCount) : 0;
+  const avgOrderValuePHP = formatPrice(avgOrderValueCentavos);
 
   return (
-    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
-
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
       
-      <div className="mb-8">
-        <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
-          Welcome back, {shop?.name || 'Artisan Seller'}!
-        </h1>
-        <p className="text-muted-foreground font-sans text-xs">
-          Your workshop performance is looking strong this week.
-        </p>
+      {/* Document Revision Alert Banner */}
+      {shop?.verificationStatus === 'needs_documents' && (
+        <div className="mb-6 p-5 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-bold font-sans">Document Revision Requested</h4>
+              <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                The administrator has requested updates to your verification documents. 
+                <span className="block font-semibold mt-1">Reason: "{shop.verificationFeedback || 'No reason provided'}"</span>
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={() => {
+              setSettingsTab('verification');
+              setIsSettingsOpen(true);
+            }}
+            className="bg-amber-600 hover:bg-amber-700 text-white shrink-0 self-start md:self-auto"
+          >
+            Update Documents
+          </Button>
+        </div>
+      )}
+
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
+            Welcome back, {shop?.name || 'Artisan Seller'}!
+          </h1>
+          <p className="text-muted-foreground font-sans text-xs">
+            Your workshop performance is looking strong this week.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSettingsTab('hours');
+            setIsSettingsOpen(true);
+          }}
+          className="flex items-center gap-2 self-start sm:self-auto"
+        >
+          <Settings className="w-4 h-4" />
+          <span>Shop Settings</span>
+        </Button>
       </div>
 
       {error && (
@@ -117,17 +217,258 @@ const Dashboard = () => {
       {/* Middle Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
-          <SalesPerformance data={stats?.dailySales || []} />
+          <SalesPerformance
+            dailySales={stats?.dailySales || []}
+            monthlySales={stats?.monthlySales || []}
+          />
         </div>
         <div className="lg:col-span-1">
           <TopProducts products={stats?.topProducts || []} />
         </div>
       </div>
 
+      {/* Customer Insights Grid */}
+      <CustomerInsights 
+        insights={stats?.customerInsights} 
+        demographics={stats?.demographics} 
+      />
+
       {/* Bottom Section */}
       <div className="w-full">
         <RecentOrders orders={orders} />
       </div>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsSettingsOpen(false)}
+          />
+          <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-xl overflow-hidden transform transition-all">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div>
+                <h3 className="text-lg font-headline font-bold text-foreground">
+                  Shop Settings
+                </h3>
+                <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                  Configure scheduling and verify security records
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsSettingsOpen(false)}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-1.5 transition-colors focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Tab navigation */}
+            <div className="flex border-b border-border px-6">
+              <button
+                type="button"
+                onClick={() => setSettingsTab('hours')}
+                className={`py-3 px-4 font-sans text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
+                  settingsTab === 'hours' 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                Store Hours
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettingsTab('verification')}
+                className={`py-3 px-4 font-sans text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
+                  settingsTab === 'verification' 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <ShieldAlert className="w-4 h-4" />
+                Verification Status
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveSettings}>
+              <div className="p-6 max-h-[50vh] overflow-y-auto custom-scrollbar space-y-4">
+                
+                {/* Store Hours Tab Content */}
+                {settingsTab === 'hours' && (
+                  <div className="space-y-4 font-sans">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Set operating schedules for your physical storefront or workshop. Closed days will be highlighted to buyers.
+                    </p>
+                    
+                    <div className="space-y-3">
+                      {DAYS.map((day) => {
+                        const dayData = storeHours[day] || { open: '09:00', close: '18:00', closed: false };
+                        return (
+                          <div key={day} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-border/60 bg-muted/10 rounded-xl gap-3">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id={`closed-${day}`}
+                                checked={dayData.closed}
+                                onChange={() => handleHourToggle(day)}
+                                className="w-4 h-4 rounded text-primary focus:ring-primary border-border"
+                              />
+                              <label htmlFor={`closed-${day}`} className="text-xs font-bold text-foreground capitalize select-none w-20">
+                                {day}
+                              </label>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 self-end sm:self-auto">
+                              <span className="text-[10px] text-muted-foreground font-semibold">Open:</span>
+                              <input
+                                type="time"
+                                disabled={dayData.closed}
+                                value={dayData.open}
+                                onChange={(e) => handleHourChange(day, 'open', e.target.value)}
+                                className="px-2 py-1.5 text-xs bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary disabled:opacity-40"
+                              />
+                              <span className="text-[10px] text-muted-foreground font-semibold ml-2">Close:</span>
+                              <input
+                                type="time"
+                                disabled={dayData.closed}
+                                value={dayData.close}
+                                onChange={(e) => handleHourChange(day, 'close', e.target.value)}
+                                className="px-2 py-1.5 text-xs bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-primary disabled:opacity-40"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification Tab Content */}
+                {settingsTab === 'verification' && (
+                  <div className="space-y-4 font-sans">
+                    {/* Status Alert Banner */}
+                    <div className="p-4 bg-muted/20 border border-border rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-muted-foreground uppercase">Verification Status:</span>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase ${
+                          shop?.verificationStatus === 'verified'
+                            ? 'bg-green-100 text-green-800'
+                            : shop?.verificationStatus === 'needs_documents'
+                            ? 'bg-amber-100 text-amber-800 animate-pulse'
+                            : 'bg-indigo-100 text-indigo-800'
+                        }`}>
+                          {shop?.verificationStatus || 'pending'}
+                        </span>
+                      </div>
+                      
+                      {shop?.verificationStatus === 'needs_documents' && (
+                        <p className="text-xs text-amber-700 font-medium mt-3 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                          <strong>Admin Feedback:</strong> "{shop.verificationFeedback}"
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="field-label flex items-center gap-1">
+                          <FileText className="w-3.5 h-3.5" />
+                          Business Permit (Re-upload)
+                        </label>
+                        <div className="mt-1 flex items-center gap-3">
+                          <input
+                            type="file"
+                            id="permit-upload"
+                            accept="image/*,.pdf"
+                            onChange={(e) => setPermitFile(e.target.files?.[0])}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <label 
+                              htmlFor="permit-upload"
+                              className="flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              Select File
+                            </label>
+                          </Button>
+                          <span className="text-xs text-muted-foreground truncate max-w-xs">
+                            {permitFile ? permitFile.name : 'No file chosen'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="field-label flex items-center gap-1">
+                          <FileText className="w-3.5 h-3.5" />
+                          Government ID (Re-upload)
+                        </label>
+                        <div className="mt-1 flex items-center gap-3">
+                          <input
+                            type="file"
+                            id="id-upload"
+                            accept="image/*,.pdf"
+                            onChange={(e) => setIdFile(e.target.files?.[0])}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <label 
+                              htmlFor="id-upload"
+                              className="flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              Select File
+                            </label>
+                          </Button>
+                          <span className="text-xs text-muted-foreground truncate max-w-xs">
+                            {idFile ? idFile.name : 'No file chosen'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Footer */}
+              <div className="bg-muted/30 p-5 border-t border-border flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsSettingsOpen(false)}
+                  disabled={savingSettings}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={savingSettings}
+                >
+                  {savingSettings ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Settings'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
