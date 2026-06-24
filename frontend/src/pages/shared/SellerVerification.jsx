@@ -223,7 +223,7 @@ const SellerVerification = () => {
 
     if (isSubmitted) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background/50 animate-in fade-in duration-700">
+            <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background/50">
                 <div className="max-w-md w-full bg-card p-10 rounded-2xl border border-border/60 shadow-soft-lg text-center space-y-6">
                     <div className="flex justify-center">
                         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
@@ -245,7 +245,7 @@ const SellerVerification = () => {
     }
 
     return (
-        <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-background/50 animate-in fade-in duration-700 relative overflow-hidden flex items-center justify-center">
+        <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-background/50 relative overflow-hidden flex items-center justify-center">
 
 
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl -z-10" />
@@ -273,7 +273,7 @@ const SellerVerification = () => {
 
 
                         {step === 1 && (
-                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div className="space-y-5">
                                 <div>
                                     <label htmlFor="storeName" className={fieldLabel}>Store Name</label>
                                     <input
@@ -319,7 +319,7 @@ const SellerVerification = () => {
 
 
                         {step === 2 && (
-                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div className="space-y-5">
                                 <div className="space-y-4">
                                     <div>
                                         <label htmlFor="street" className={fieldLabel}>Street Address</label>
@@ -415,7 +415,7 @@ const SellerVerification = () => {
 
                         {/* Step 3: Documents */}
                         {step === 3 && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div className="space-y-6">
                                 <div>
                                     <label className={fieldLabel}>Business Permit</label>
                                     <div className="mt-1 flex justify-center rounded-xl border border-dashed border-border/80 px-6 py-8 hover:bg-neutral-light/50 transition-colors bg-background/50 relative cursor-pointer group">

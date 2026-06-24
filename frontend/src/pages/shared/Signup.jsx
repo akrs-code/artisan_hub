@@ -4,6 +4,7 @@ import { Mail, Lock, User, Store, ShoppingBag, ArrowRight, Loader2, AlertCircle,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
@@ -67,7 +68,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-background/50 relative overflow-hidden">
 
       
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
@@ -90,7 +91,7 @@ const Signup = () => {
 
           
           {error && (
-            <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
               <p className="text-xs font-sans text-destructive font-medium">{error}</p>
             </div>
@@ -99,36 +100,28 @@ const Signup = () => {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
 
             
-            <div className="flex p-1.5 bg-neutral-light/80 rounded-xl border border-border/50 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setRole('buyer')}
-                disabled={isLoading}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${role === 'buyer'
-                  ? 'bg-white shadow-sm text-foreground border border-border/50'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-                  }`}
-              >
-                <ShoppingBag className="w-4 h-4" />
-                Buyer
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('seller')}
-                disabled={isLoading}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold font-sans rounded-lg transition-all duration-300 ${role === 'seller'
-                  ? 'bg-white shadow-sm text-foreground border border-border/50'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/50'
-                  }`}
-              >
-                <Store className="w-4 h-4" />
-                Seller
-              </button>
-            </div>
+            <Tabs>
+              <TabsList className="w-full flex">
+                {[
+                  { key: 'buyer', icon: ShoppingBag, label: 'Buyer' },
+                  { key: 'seller', icon: Store, label: 'Seller' },
+                ].map(({ key, icon: Icon, label }) => (
+                  <TabsTrigger
+                    key={key}
+                    active={role === key}
+                    onClick={() => setRole(key)}
+                    className="flex-1 justify-center py-2.5 text-xs"
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
             <div className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 space-y-2">
                   <Label htmlFor="firstName" className="text-xs font-semibold text-foreground tracking-wide uppercase">First Name</Label>
                   <div className="relative group">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
@@ -146,7 +139,7 @@ const Signup = () => {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="flex-1 space-y-2">
                   <Label htmlFor="lastName" className="text-xs font-semibold text-foreground tracking-wide uppercase">Last Name</Label>
                   <div className="relative group">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />

@@ -36,22 +36,20 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
         aria-label="ArtisanHub Navigation"
         className={`
           fixed top-0 left-0 h-full z-40
-          w-[272px] bg-neutral border-r border-neutral-dark/10
-          flex flex-col shadow-lg select-none overflow-hidden
+          w-[272px] bg-background border-r border-border
+          flex flex-col shadow-glass select-none overflow-hidden
           transition-transform duration-300 ease-in-out
 
-          
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
 
-          
           md:static md:translate-x-0 md:flex md:shrink-0 md:shadow-none
         `}
       >
         {/* Branding (visible on all sizes — on mobile it's below the Header, on desktop it IS the top bar) */}
-        <div className="shrink-0 border-b border-neutral-dark/10 px-5 py-4 flex items-center justify-between">
+        <div className="shrink-0 border-b border-border px-5 py-4 flex items-center justify-between">
           <Link
             to="/"
-            className="outline-none focus-visible:ring-2 focus-visible:ring-primary rounded w-fit"
+            className="outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[8px] w-fit"
             aria-label="Artisan Hub Home"
           >
             <span className="font-headline text-lg font-bold text-primary tracking-tight">
@@ -64,7 +62,7 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
             {/* Close button — mobile only */}
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-1.5 text-neutral-dark/60 hover:text-neutral-dark hover:bg-neutral-dark/5 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="md:hidden p-1.5 text-foreground hover:bg-muted rounded-[8px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label="Close menu"
             >
               <X className="w-4 h-4" />
@@ -78,11 +76,11 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
         </nav>
 
         {/* Profile footer */}
-        <div className="shrink-0 border-t border-neutral-dark/10 p-4 space-y-2">
+        <div className="shrink-0 border-t border-border p-4 space-y-2">
           {isAuthenticated && user ? (
             <>
-              <div className="flex items-center gap-3 px-3 py-2.5 bg-neutral-dark/5 border border-neutral-dark/10 rounded-xl shadow-sm">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold font-headline shrink-0">
+              <div className="flex items-center gap-3 px-3 py-2.5 bg-muted border border-border rounded-[8px] shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold font-headline shrink-0">
                     {getInitial()}
                   </div>
                 <div className="min-w-0">
@@ -93,7 +91,7 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
               
               <button
                 onClick={handleSignOut}
-                className="flex items-center justify-center w-full px-3 py-2.5 text-red-600 bg-red-50 border border-red-100 rounded-md hover:bg-red-100 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-red-400 font-sans font-bold text-[10px] uppercase tracking-widest cursor-pointer"
+                className="flex items-center justify-center w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-[8px] hover:bg-primary/90 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans font-bold text-[10px] uppercase tracking-widest cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5 mr-2" />
                 Sign Out
@@ -102,7 +100,7 @@ export const SharedSidebar = ({ sidebarContent, isSidebarOpen, setIsSidebarOpen 
           ) : (
             <Link
               to="/login"
-              className="flex items-center justify-center w-full px-3 py-2.5 text-white bg-primary hover:bg-primary-dark rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans font-bold text-[10px] uppercase tracking-widest"
+              className="flex items-center justify-center w-full px-4 py-2.5 text-primary-foreground bg-primary hover:bg-primary/90 rounded-[8px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary font-sans font-bold text-[10px] uppercase tracking-widest"
             >
               <LogIn className="w-3.5 h-3.5 mr-2" />
               Sign In
