@@ -87,7 +87,7 @@ const UsersPage = () => {
   }
 
   return (
-    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
       
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">

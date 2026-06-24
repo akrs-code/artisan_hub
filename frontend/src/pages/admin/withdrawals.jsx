@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { StatusBadge } from '../../components/admin/common/StatusBadge';
+import DataTable from '../../components/ui/DataTable';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const Withdrawals = () => {
     const [withdrawals, setWithdrawals] = useState([]);
@@ -44,6 +47,96 @@ const Withdrawals = () => {
         return map[s] || s.toUpperCase();
     };
 
+    const columns = useMemo(() => [
+        {
+            header: 'Requested On',
+            accessorKey: 'createdAt',
+            cell: ({ row }) => (
+                <span className="text-xs font-sans text-muted-foreground whitespace-nowrap">
+                    {new Date(row.original.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+            )
+        },
+        {
+            header: 'Shop',
+            accessorKey: 'shop',
+            cell: ({ row }) => (
+                <p className="text-sm font-headline font-semibold text-foreground">{row.original.shop?.name || 'Unknown Shop'}</p>
+            )
+        },
+        {
+            header: 'Account Info',
+            accessorKey: 'accountName',
+            cell: ({ row }) => (
+                <div>
+                    <p className="text-xs font-sans text-foreground font-semibold uppercase">{row.original.method}</p>
+                    <p className="text-[10px] font-sans text-muted-foreground">{row.original.accountName}</p>
+                    <p className="text-[10px] font-sans text-muted-foreground">{row.original.accountNumber}</p>
+                </div>
+            )
+        },
+        {
+            header: 'Amount',
+            accessorKey: 'amount',
+            cell: ({ row }) => (
+                <p className="text-sm font-headline font-bold text-primary">
+                    {(row.original.amount / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+                </p>
+            )
+        },
+        {
+            header: 'Status',
+            accessorKey: 'status',
+            cell: ({ row }) => (
+                <StatusBadge status={normalizeStatus(row.original.status)} />
+            )
+        },
+        {
+            header: 'Actions',
+            id: 'actions',
+            meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
+            cell: ({ row }) => {
+                const w = row.original;
+                return (
+                    <div className="flex justify-end gap-2">
+                        {w.status === 'pending' && (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleUpdateStatus(w._id, 'approved')}
+                                    className="text-primary hover:text-primary"
+                                    title="Approve"
+                                >
+                                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                                    Approve
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleUpdateStatus(w._id, 'rejected')}
+                                    title="Reject"
+                                >
+                                    <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                                    Reject
+                                </Button>
+                            </>
+                        )}
+                        {w.status === 'approved' && (
+                            <Button
+                                size="sm"
+                                onClick={() => handleUpdateStatus(w._id, 'completed')}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                                Mark Paid
+                            </Button>
+                        )}
+                    </div>
+                );
+            }
+        }
+    ], [handleUpdateStatus]);
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
@@ -54,7 +147,7 @@ const Withdrawals = () => {
     }
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
@@ -66,114 +159,38 @@ const Withdrawals = () => {
                         Review, approve, and process seller withdrawal requests.
                     </p>
                 </div>
-
-                <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Search by shop or name..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-xs font-sans placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 w-full md:w-64 transition-all"
-                    />
-                </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-                <div className="p-5 border-b border-border flex items-center justify-between">
-                    <div>
-                        <h2 className="text-base font-headline font-bold text-foreground">All Requests</h2>
-                        <p className="text-xs font-sans text-muted-foreground mt-0.5">
-                            {filteredWithdrawals.length} of {withdrawals.length} requests
-                        </p>
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-muted/40 border-b border-border">
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">Requested On</th>
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Shop</th>
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Account Info</th>
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Amount</th>
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="px-5 py-3 text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/40">
-                            {filteredWithdrawals.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6" className="px-6 py-16 text-center text-muted-foreground text-sm font-sans">
-                                        No withdrawal requests found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredWithdrawals.map(w => (
-                                    <tr key={w._id} className="hover:bg-muted/10 transition-colors">
-                                        <td className="px-5 py-4 text-xs font-sans text-muted-foreground whitespace-nowrap">
-                                            {new Date(w.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <p className="text-sm font-headline font-semibold text-foreground">{w.shop?.name || 'Unknown Shop'}</p>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <p className="text-xs font-sans text-foreground font-semibold uppercase">{w.method}</p>
-                                            <p className="text-[10px] font-sans text-muted-foreground">{w.accountName}</p>
-                                            <p className="text-[10px] font-sans text-muted-foreground">{w.accountNumber}</p>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <p className="text-sm font-headline font-bold text-primary">
-                                                {(w.amount / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
-                                            </p>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <StatusBadge status={normalizeStatus(w.status)} />
-                                        </td>
-                                        <td className="px-5 py-4 text-right">
-                                            {w.status === 'pending' && (
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(w._id, 'approved')}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-sans font-semibold border border-primary/20 transition-colors"
-                                                        title="Approve"
-                                                    >
-                                                        <CheckCircle className="w-3.5 h-3.5" />
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(w._id, 'rejected')}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive text-xs font-sans font-semibold border border-destructive/20 transition-colors"
-                                                        title="Reject"
-                                                    >
-                                                        <XCircle className="w-3.5 h-3.5" />
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                            )}
-                                            {w.status === 'approved' && (
-                                                <button
-                                                    onClick={() => handleUpdateStatus(w._id, 'completed')}
-                                                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-sans font-semibold rounded-lg transition-colors shadow-sm"
-                                                >
-                                                    Mark Paid
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {filteredWithdrawals.length > 0 && (
-                    <div className="p-4 border-t border-border bg-muted/20 text-xs font-sans text-muted-foreground">
-                        Showing <span className="font-semibold text-foreground">{filteredWithdrawals.length}</span> of{' '}
-                        <span className="font-semibold text-foreground">{withdrawals.length}</span> requests
-                    </div>
-                )}
+            <div className="w-full">
+                <DataTable
+                    title="All Requests"
+                    subtitle={`${filteredWithdrawals.length} of ${withdrawals.length} requests`}
+                    columns={columns}
+                    data={filteredWithdrawals}
+                    emptyStateMessage="No withdrawal requests found."
+                    headerActions={
+                        <div className="relative w-full md:w-64">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                            <Input
+                                type="text"
+                                placeholder="Search by shop or name..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 rounded-full"
+                            />
+                        </div>
+                    }
+                    footer={
+                        filteredWithdrawals.length > 0 && (
+                            <div className="text-xs font-sans text-muted-foreground w-full">
+                                Showing <span className="font-semibold text-foreground">{filteredWithdrawals.length}</span> of{' '}
+                                <span className="font-semibold text-foreground">{withdrawals.length}</span> requests
+                            </div>
+                        )
+                    }
+                />
             </div>
         </div>
     );

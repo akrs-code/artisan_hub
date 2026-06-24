@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { StatusBadge } from '../common/StatusBadge';
+import StatusBadge from '../../../components/ui/StatusBadge';
 import DataTable from '../../../components/ui/DataTable';
 
 const ApplicationsTable = ({ data, onRowClick }) => {

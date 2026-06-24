@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../../ui/button';
 
 const PlatformGrowthChart = ({ data }) => {
   const maxVal = Math.max(...data.map(d => d.value), 1);
@@ -15,15 +16,15 @@ const PlatformGrowthChart = ({ data }) => {
           </p>
         </div>
         <div className="flex bg-muted rounded-lg p-1">
-          <button className="px-3 py-1 rounded-md text-[10px] font-sans font-bold text-muted-foreground hover:text-foreground transition-colors">
+          <Button variant="ghost" className="h-7 px-3 text-[10px] font-sans font-bold text-muted-foreground hover:text-foreground">
             7D
-          </button>
-          <button className="px-3 py-1 rounded-md bg-background text-foreground shadow-sm text-[10px] font-sans font-bold transition-colors">
+          </Button>
+          <Button variant="outline" className="h-7 px-3 bg-background text-foreground shadow-sm text-[10px] font-sans font-bold">
             30D
-          </button>
-          <button className="px-3 py-1 rounded-md text-[10px] font-sans font-bold text-muted-foreground hover:text-foreground transition-colors">
+          </Button>
+          <Button variant="ghost" className="h-7 px-3 text-[10px] font-sans font-bold text-muted-foreground hover:text-foreground">
             90D
-          </button>
+          </Button>
         </div>
       </div>
 

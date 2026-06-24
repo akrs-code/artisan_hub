@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Hourglass, Flag, CheckCircle, Eye, EyeOff, X, Loader2, ExternalLink } from 'lucide-react';
 import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import { adminAPI } from '../../services/api';
+import DataTable from '../../components/ui/DataTable';
+import { Button } from '@/components/ui/button';
 
 
 const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
@@ -56,26 +58,24 @@ const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
 
                 {/* Actions */}
                 <div className="px-6 py-4 border-t border-border flex gap-3">
-                    <button
+                    <Button
+                        variant="secondary"
                         onClick={onClose}
-                        className="flex-1 py-2.5 bg-muted text-muted-foreground hover:bg-muted/80 rounded-xl text-xs font-sans font-bold uppercase tracking-widest transition-all"
+                        className="flex-1 uppercase tracking-widest"
                     >
                         Close
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant={product.status === 'ACTIVE' ? 'destructive' : 'default'}
                         onClick={() => onToggleVisibility(product)}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all flex items-center justify-center gap-2 ${
-                            product.status === 'ACTIVE'
-                                ? 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20'
-                                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                        }`}
+                        className="flex-1"
                     >
                         {product.status === 'ACTIVE' ? (
-                            <><EyeOff className="w-3.5 h-3.5" /> Hide Listing</>
+                            <><EyeOff className="w-3.5 h-3.5 mr-2" /> Hide Listing</>
                         ) : (
-                            <><Eye className="w-3.5 h-3.5" /> Restore Listing</>
+                            <><Eye className="w-3.5 h-3.5 mr-2" /> Restore Listing</>
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -129,6 +129,62 @@ const Moderate = () => {
         status: p.isActive ? 'ACTIVE' : 'HIDDEN',
     }));
 
+    const columns = useMemo(() => [
+        {
+            header: 'Product',
+            accessorKey: 'product',
+            cell: ({ row }) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
+                        <img src={row.original.image} alt={row.original.productName} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <div className="text-[13px] font-sans font-bold text-foreground">{row.original.productName}</div>
+                        <div className="text-[9px] font-sans text-muted-foreground uppercase tracking-wider">#{row.original.id}</div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            header: 'Shop',
+            accessorKey: 'shopName',
+            cell: ({ row }) => <span className="text-[13px] font-sans text-foreground font-medium">{row.original.shopName}</span>
+        },
+        {
+            header: 'Listed On',
+            accessorKey: 'flaggedDate',
+            cell: ({ row }) => <span className="text-[13px] font-sans text-muted-foreground">{row.original.flaggedDate}</span>
+        },
+        {
+            header: 'Status',
+            accessorKey: 'status',
+            cell: ({ row }) => (
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase ${
+                    row.original.status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-destructive/10 text-destructive'
+                }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${row.original.status === 'ACTIVE' ? 'bg-green-600' : 'bg-destructive'}`} />
+                    {row.original.status}
+                </span>
+            )
+        },
+        {
+            header: 'Actions',
+            id: 'actions',
+            meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
+            cell: ({ row }) => (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedProduct(row.original)}
+                >
+                    <ExternalLink className="w-3 h-3 mr-1.5" /> Review
+                </Button>
+            )
+        }
+    ], []);
+
     if (loading) {
         return (
             <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
@@ -139,7 +195,7 @@ const Moderate = () => {
     }
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             {/* Header */}
             <div className="mb-8">
@@ -164,71 +220,20 @@ const Moderate = () => {
             </div>
 
             {/* Products Table */}
-            <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                <div className="p-5 border-b border-border">
-                    <h2 className="text-base font-headline font-bold text-foreground">All Listings</h2>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr className="bg-muted/40 border-b border-border">
-                                <th className="py-3 px-5 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Product</th>
-                                <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Shop</th>
-                                <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Listed On</th>
-                                <th className="py-3 px-4 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase">Status</th>
-                                <th className="py-3 px-5 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {formattedProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="py-16 text-center text-sm font-sans text-muted-foreground">
-                                        No products found.
-                                    </td>
-                                </tr>
-                            ) : formattedProducts.map((row, i) => (
-                                <tr key={row.rawId} className={`border-b border-border/50 hover:bg-muted/20 transition-colors ${i === formattedProducts.length - 1 ? 'border-b-0' : ''}`}>
-                                    <td className="py-4 px-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
-                                                <img src={row.image} alt={row.productName} className="w-full h-full object-cover" />
-                                            </div>
-                                            <div>
-                                                <div className="text-[13px] font-sans font-bold text-foreground">{row.productName}</div>
-                                                <div className="text-[9px] font-sans text-muted-foreground uppercase tracking-wider">#{row.id}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-4 px-4 text-[13px] font-sans text-foreground font-medium">{row.shopName}</td>
-                                    <td className="py-4 px-4 text-[13px] font-sans text-muted-foreground">{row.flaggedDate}</td>
-                                    <td className="py-4 px-4">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase ${
-                                            row.status === 'ACTIVE'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-destructive/10 text-destructive'
-                                        }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${row.status === 'ACTIVE' ? 'bg-green-600' : 'bg-destructive'}`} />
-                                            {row.status}
-                                        </span>
-                                    </td>
-                                    <td className="py-4 px-5 text-right">
-                                        <button
-                                            onClick={() => setSelectedProduct(row)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-sans font-bold text-foreground hover:bg-muted transition-colors"
-                                        >
-                                            <ExternalLink className="w-3 h-3" /> Review
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                {formattedProducts.length > 0 && (
-                    <div className="p-4 border-t border-border bg-muted/20 text-[11px] font-sans text-muted-foreground">
-                        Showing <span className="font-bold text-foreground">{formattedProducts.length}</span> products
-                    </div>
-                )}
+            <div className="w-full">
+                <DataTable
+                    title="All Listings"
+                    columns={columns}
+                    data={formattedProducts}
+                    emptyStateMessage="No products found."
+                    footer={
+                        formattedProducts.length > 0 && (
+                            <div className="text-[11px] font-sans text-muted-foreground w-full">
+                                Showing <span className="font-bold text-foreground">{formattedProducts.length}</span> products
+                            </div>
+                        )
+                    }
+                />
             </div>
 
             {/* Product Detail Modal */}

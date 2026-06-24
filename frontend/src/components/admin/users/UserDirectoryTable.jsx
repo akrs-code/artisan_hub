@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Store, Ban, CheckCircle, RefreshCw, Eye, X, Trash2 } from 'lucide-react';
-import { StatusBadge } from '../common/StatusBadge';
+import { Store, Ban, CheckCircle, RefreshCw, Eye, X, Trash2, Search } from 'lucide-react';
+import StatusBadge from '../../../components/ui/StatusBadge';
 import DataTable from '../../../components/ui/DataTable';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/Tabs';
 
 // ── Role Badge ────────────────────────────────────────────────────────────────
 const RoleBadge = ({ role }) => (
-  <span className="inline-flex px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-bold tracking-widest uppercase">
+  <span className="badge-custom bg-primary/10 text-primary">
     {role}
   </span>
 );
@@ -91,11 +92,13 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = data.filter(row => {
     const roleMatch = roleFilter === 'All' || row.role === roleFilter;
     const statusMatch = statusFilter === 'All' || row.status === statusFilter;
-    return roleMatch && statusMatch;
+    const searchMatch = !searchQuery || row.name.toLowerCase().includes(searchQuery.toLowerCase()) || (row.subtext && row.subtext.toLowerCase().includes(searchQuery.toLowerCase()));
+    return roleMatch && statusMatch && searchMatch;
   });
 
   const userShop = selectedUser
@@ -184,42 +187,60 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
   ], [onActionClick, onDeleteClick]);
 
   return (
-    <>
-      <DataTable
-        title="User Directory"
-        subtitle={`${filtered.length} of ${data.length} users`}
-        columns={columns}
-        data={filtered}
-        emptyStateMessage="No users found."
-        headerActions={
-          <>
-            <select
-              value={roleFilter}
-              onChange={e => setRoleFilter(e.target.value)}
-              className="text-xs font-sans font-semibold px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+    <div className="w-full">
+      <Tabs>
+        <TabsList>
+          {['All', 'BUYER', 'SELLER', 'ADMIN'].map(role => (
+            <TabsTrigger 
+              key={role} 
+              active={roleFilter === role} 
+              onClick={() => setRoleFilter(role)}
             >
-              {['All', 'BUYER', 'SELLER', 'ADMIN'].map(r => (
-                <option key={r} value={r}>{r === 'All' ? 'All Roles' : r}</option>
-              ))}
-            </select>
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              className="text-xs font-sans font-semibold px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
-            >
-              {['All', 'VERIFIED', 'SUSPENDED'].map(s => (
-                <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>
-              ))}
-            </select>
-          </>
-        }
-        footer={
-          <div className="text-xs font-sans text-muted-foreground w-full">
-            Showing <span className="font-semibold text-foreground">{filtered.length}</span> of{' '}
-            <span className="font-semibold text-foreground">{data.length}</span> users
-          </div>
-        }
-      />
+              {role === 'All' ? 'All Users' : role} ({data.filter(r => role === 'All' || r.role === role).length})
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent active={true}>
+          <DataTable
+            title="User Directory"
+            subtitle={`${filtered.length} of ${data.length} users`}
+            columns={columns}
+            data={filtered}
+            emptyStateMessage="No users found."
+            headerActions={
+              <div className="flex items-center gap-2">
+                <div className="relative w-full md:w-64">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="input-search rounded-full"
+                  />
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="text-xs font-sans font-semibold px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
+                >
+                  {['All', 'VERIFIED', 'SUSPENDED'].map(s => (
+                    <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>
+                  ))}
+                </select>
+              </div>
+            }
+            footer={
+              <div className="text-xs font-sans text-muted-foreground w-full">
+                Showing <span className="font-semibold text-foreground">{filtered.length}</span> of{' '}
+                <span className="font-semibold text-foreground">{data.length}</span> users
+              </div>
+            }
+          />
+        </TabsContent>
+      </Tabs>
 
       {selectedUser && (
         <UserDetailModal
@@ -228,7 +249,7 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
           onClose={() => setSelectedUser(null)}
         />
       )}
-    </>
+    </div>
   );
 };
 

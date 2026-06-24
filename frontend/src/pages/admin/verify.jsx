@@ -16,6 +16,7 @@ import {
 import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import ApplicationsTable from '../../components/admin/shops/ApplicationsTable';
 import { adminAPI } from '../../services/api';
+import { Button } from '@/components/ui/button';
 
 const Verify = () => {
     const [shops, setShops] = useState([]);
@@ -102,7 +103,7 @@ const Verify = () => {
     }
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
@@ -293,31 +294,30 @@ const Verify = () => {
 
                         {/* Footer Controls */}
                         <div className="sticky bottom-0 bg-muted/30 p-5 border-t border-border flex justify-between items-center gap-3">
-                            <button
+                            <Button
+                                variant="outline"
                                 onClick={() => setSelectedShop(null)}
-                                className="px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground font-sans text-xs font-semibold transition-all cursor-pointer"
                             >
                                 Back to Queue
-                            </button>
+                            </Button>
                             
                             {selectedShop.verificationStatus === 'pending' && (
                                 <div className="flex items-center gap-3">
-                                    <button
+                                    <Button
+                                        variant="destructive"
                                         onClick={() => handleVerifyAction(selectedShop._id, 'rejected')}
                                         disabled={isActioning}
-                                        className="px-4 py-2.5 rounded-xl bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 font-sans text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
                                     >
-                                        <XIcon className="w-4 h-4" />
+                                        <XIcon className="w-4 h-4 mr-1.5" />
                                         Reject
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={() => handleVerifyAction(selectedShop._id, 'verified')}
                                         disabled={isActioning}
-                                        className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
                                     >
-                                        <Check className="w-4 h-4" />
+                                        <Check className="w-4 h-4 mr-1.5" />
                                         Approve
-                                    </button>
+                                    </Button>
                                 </div>
                             )}
                         </div>

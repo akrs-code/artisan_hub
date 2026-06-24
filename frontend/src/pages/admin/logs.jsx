@@ -3,6 +3,8 @@ import { Banknote, CheckCircle, Hourglass, TrendingUp, Loader2 } from 'lucide-re
 import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import TransactionLogsTable from '../../components/admin/finance/TransactionLogsTable';
 import { adminAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
+
 
 const LogsPage = () => {
     const [orders, setOrders] = useState([]);
@@ -34,7 +36,7 @@ const LogsPage = () => {
         id: o._id ? o._id.substring(o._id.length - 8).toUpperCase() : 'UNKNOWN',
         shopName: o.shop?.name || 'Unknown Shop',
         type: 'SALE',
-        amount: ((o.total || 0) / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }),
+        amount: formatPrice(o.total || 0),
         status: o.status ? o.status.toUpperCase() : 'UNKNOWN'
     }));
 
@@ -48,7 +50,7 @@ const LogsPage = () => {
     }
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             
             <div className="mb-8">
@@ -64,7 +66,7 @@ const LogsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <AdminStatCard
                     title="Total Revenue"
-                    value={(totalRevenue / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+                    value={formatPrice(totalRevenue)}
                     subtext={
                         <span className="flex items-center gap-1 text-muted-foreground text-xs">
                             From delivered orders

@@ -5,6 +5,7 @@ import PlatformGrowthChart from '../../components/admin/analytics/PlatformGrowth
 import SystemAlerts from '../../components/admin/dashboard/SystemAlerts';
 import CategoryPerformanceTable from '../../components/admin/analytics/CategoryPerformanceTable';
 import { adminAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
 
 const Overview = () => {
     const [stats, setStats] = useState({
@@ -77,7 +78,7 @@ const Overview = () => {
     }
 
     return (
-        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
             
             <div className="mb-8">
@@ -105,7 +106,7 @@ const Overview = () => {
                 />
                 <AdminStatCard
                     title="Total Revenue"
-                    value={(stats.revenue / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+                    value={formatPrice(stats.revenue)}
                     subtext="From delivered orders"
                     icon={Banknote}
                 />
