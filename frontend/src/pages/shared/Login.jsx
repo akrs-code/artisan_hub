@@ -1,24 +1,72 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, Shield, Store, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleQuickLogin = async (quickEmail) => {
+    setError('');
+    setIsLoading(true);
+    setEmail(quickEmail);
+    setPassword('password123');
+
+    try {
+      const data = await login({ email: quickEmail, password: 'password123' });
+
+      const role = data.user?.role;
+      if (role === 'admin') {
+        navigate('/admin/overview');
+      } else if (role === 'seller') {
+        navigate('/seller/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Quick login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt', { email, password });
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const data = await login({ email, password });
+
+
+      const role = data.user?.role;
+      if (role === 'admin') {
+        navigate('/admin/overview');
+      } else if (role === 'seller') {
+        navigate('/seller/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 animate-in fade-in duration-700 bg-background/50 relative overflow-hidden">
-      
-      {/* Decorative background elements */}
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-background/50 relative overflow-hidden">
+
+
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl" />
 
@@ -27,7 +75,7 @@ const Login = () => {
           <div className="flex justify-center mb-6">
             <div className="w-12 h-1.5 rounded-full bg-primary/80" />
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-3xl font-headline font-bold text-foreground tracking-tight">
               Welcome Back
@@ -36,7 +84,15 @@ const Login = () => {
               Sign in to continue your journey.
             </p>
           </div>
-          
+
+
+          {error && (
+            <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              <p className="text-xs font-sans text-destructive font-medium">{error}</p>
+            </div>
+          )}
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               <div className="space-y-2">
@@ -49,6 +105,7 @@ const Login = () => {
                     type="email"
                     autoComplete="email"
                     required
+                    disabled={isLoading}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -56,13 +113,10 @@ const Login = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-xs font-semibold text-foreground tracking-wide uppercase">Password</Label>
-                  <Link to="/forgot-password" className="text-xs font-sans font-medium text-primary hover:text-primary-dark transition-colors">
-                    Forgot password?
-                  </Link>
                 </div>
                 <div className="relative group">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
@@ -72,6 +126,7 @@ const Login = () => {
                     type="password"
                     autoComplete="current-password"
                     required
+                    disabled={isLoading}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -81,12 +136,60 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group">
-              Sign In
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-4 group"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </Button>
 
-            <div className="text-center mt-8 pt-6 border-t border-border/50">
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <p className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                Quick Login for Testing
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('superadmin@artisanhub.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <Shield className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('abdulkhaliqsolaiman@gmail.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <Store className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Seller</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('khaliq.business16@gmail.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <User className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Buyer</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="text-center mt-6">
               <p className="text-sm font-sans text-muted-foreground">
                 Don't have an account?{' '}
                 <Link to="/register" className="font-semibold text-primary hover:text-primary-dark transition-colors">

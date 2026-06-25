@@ -1,6 +1,6 @@
-import { Star } from 'lucide-react';
+import { StarRating } from '@/components/ui/star-rating';
 
-// Static mock reviews — swap for real API data when ready
+
 const getMockReviews = (productId) => [
   {
     id: `${productId}_r1`,
@@ -33,21 +33,15 @@ export const ProductReviews = ({ product }) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-headline font-bold text-foreground mb-4">Customer Reviews</h2>
+      <h2 className="page-title mb-4">Customer Reviews</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {reviews.map((review) => (
           <div
             key={review.id}
-            className="bg-card border border-border/70 rounded-xl p-5 shadow-sm flex flex-col gap-3"
+            className="ec-card p-5 flex flex-col gap-3"
           >
             {/* Reviewer info */}
             <div className="flex items-center gap-3">
-              <img
-                src={review.avatar}
-                alt={review.name}
-                className="w-9 h-9 rounded-full object-cover border border-border/50 shrink-0"
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
               <div>
                 <p className="text-xs font-sans font-bold text-foreground leading-tight">{review.name}</p>
                 <p className="text-[10px] text-muted-foreground font-sans">{review.date}</p>
@@ -55,14 +49,7 @@ export const ProductReviews = ({ product }) => {
             </div>
 
             {/* Stars */}
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-primary text-primary' : 'text-muted/30'}`}
-                />
-              ))}
-            </div>
+            <StarRating rating={review.rating} size="md" />
 
             {/* Text */}
             <p className="text-xs font-body text-muted-foreground leading-relaxed">{review.text}</p>
@@ -72,3 +59,4 @@ export const ProductReviews = ({ product }) => {
     </div>
   );
 };
+

@@ -1,57 +1,88 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Store, Package } from 'lucide-react';
-import { mockShops, mockProducts } from '../../lib/mockData';
+import { Search, Filter, Store, Package, Loader2 } from 'lucide-react';
+import { shopsAPI, productsAPI } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import { ShopCard } from '@/components/buyer/shops/ShopCard';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 
 const SavedShops = () => {
   const { savedShopIds, toggleSaveShop, savedProductIds, addToCart } = useCart();
-  const [activeTab, setActiveTab] = useState('shops');
+  const [activeTab, setActiveTab] = useState('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [allShops, setAllShops] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const baseShops = mockShops.filter((shop) => savedShopIds.includes(shop._id));
-  const baseProducts = mockProducts.filter((prod) => savedProductIds?.includes(prod._id));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [shopsRes, productsRes] = await Promise.all([
+          shopsAPI.getShops(),
+          productsAPI.getProducts(),
+        ]);
+        setAllShops(shopsRes?.data || []);
+        setAllProducts(productsRes?.data || []);
+      } catch (err) {
+        console.error('Failed to load saved items:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const baseShops = allShops.filter((shop) => savedShopIds.includes(shop._id));
+  const baseProducts = allProducts.filter((prod) => savedProductIds?.includes(prod._id));
 
   const categories = ['All', ...new Set(
-    activeTab === 'shops' ? baseShops.map(s => s.category) : baseProducts.map(p => p.category)
+    activeTab === 'shops' ? baseShops.map(s => s.category).filter(Boolean) : baseProducts.map(p => p.category).filter(Boolean)
   )];
 
   const handleTabChange = (tab) => { setActiveTab(tab); setSelectedCategory('All'); setSearchQuery(''); };
 
   const filteredShops = baseShops.filter(shop => {
     const q = searchQuery.toLowerCase();
-    return (shop.name.toLowerCase().includes(q) || shop.description.toLowerCase().includes(q))
+    return (shop.name?.toLowerCase().includes(q) || shop.description?.toLowerCase().includes(q))
       && (selectedCategory === 'All' || shop.category === selectedCategory);
   });
 
   const filteredProducts = baseProducts.filter(prod => {
     const q = searchQuery.toLowerCase();
-    return (prod.name.toLowerCase().includes(q) || prod.description.toLowerCase().includes(q))
+    return (prod.name?.toLowerCase().includes(q) || prod.description?.toLowerCase().includes(q))
       && (selectedCategory === 'All' || prod.category === selectedCategory);
   });
 
-  return (
-    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm font-sans text-muted-foreground">Loading your saved items...</p>
+      </div>
+    );
+  }
 
-      {/* Page Header */}
+  return (
+    <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
+
+      
       <div className="mb-8">
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Saved Items</h1>
         <p className="text-muted-foreground font-sans text-xs">Your curated collection of favourite artisans and products.</p>
-
       </div>
 
       {/* TABS */}
       <Tabs>
         <TabsList>
           {[
-            { key: 'shops', icon: Store, label: 'Shops', count: baseShops.length },
             { key: 'products', icon: Package, label: 'Products', count: baseProducts.length },
+            { key: 'shops', icon: Store, label: 'Shops', count: baseShops.length },
           ].map(({ key, icon: Icon, label, count }) => (
             <TabsTrigger
               key={key}
@@ -60,7 +91,14 @@ const SavedShops = () => {
               className="mr-4"
             >
               <Icon className="w-3.5 h-3.5" />
-              {label} ({count})
+              {label}
+              <span
+                className={`ml-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                  activeTab === key ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {count}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -94,22 +132,23 @@ const SavedShops = () => {
         </div>
       )}
 
-
       {/* CONTENT */}
       {activeTab === 'shops' ? (
         baseShops.length === 0 ? (
-          <div className="text-center py-20 bg-card rounded-xl border border-border/80 flex flex-col items-center">
+          <div className="text-center py-20 glass-card flex flex-col items-center">
             <Store className="w-10 h-10 text-muted-foreground/20 mb-4" />
             <h3 className="text-lg font-headline font-bold text-foreground mb-2">Your Shop Collection is Empty</h3>
             <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
               You haven't saved any artisan shops yet. Explore our discover catalog to find unique craftsmen and local products.
             </p>
-            <Link to="/discover" className="btn-base btn-primary px-6 py-2 rounded-xl font-sans font-bold text-xs uppercase tracking-widest">
-              Explore Shops
-            </Link>
+            <Button asChild>
+              <Link to="/discover">
+                Explore Shops
+              </Link>
+            </Button>
           </div>
         ) : filteredShops.length === 0 ? (
-          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-xl">
+          <div className="text-center py-12 text-xs text-muted-foreground font-sans glass-card">
             No saved shops match your search.
           </div>
         ) : (
@@ -121,18 +160,20 @@ const SavedShops = () => {
         )
       ) : (
         baseProducts.length === 0 ? (
-          <div className="text-center py-20 bg-card rounded-xl border border-border/80 flex flex-col items-center">
+          <div className="text-center py-20 glass-card flex flex-col items-center">
             <Package className="w-10 h-10 text-muted-foreground/20 mb-4" />
             <h3 className="text-lg font-headline font-bold text-foreground mb-2">Your Product Collection is Empty</h3>
             <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
               You haven't saved any products yet. Explore our artisan catalog to discover unique, handcrafted pieces.
             </p>
-            <Link to="/" className="btn-base btn-primary px-6 py-2 rounded-xl font-sans font-bold text-xs uppercase tracking-widest">
-              Explore Catalog
-            </Link>
+            <Button asChild>
+              <Link to="/">
+                Explore Catalog
+              </Link>
+            </Button>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12 text-xs text-muted-foreground font-sans bg-card border border-border/80 rounded-xl">
+          <div className="text-center py-12 text-xs text-muted-foreground font-sans glass-card">
             No saved products match your search.
           </div>
         ) : (

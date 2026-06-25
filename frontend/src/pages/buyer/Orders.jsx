@@ -1,96 +1,134 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Package, PartyPopper, Search, Filter } from 'lucide-react';
-import { mockOrders, mockShops } from '../../lib/mockData';
+import { Package, PartyPopper, Search, Filter, Loader2, Eye } from 'lucide-react';
+import { ordersAPI } from '../../services/api';
 import { OrderCard } from '@/components/buyer/orders/OrderCard';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import DataTable from '@/components/ui/DataTable';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-const STATUS_OPTIONS = ['All', 'pending', 'shipped', 'delivered'];
+const STATUS_OPTIONS = ['All', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
 const Orders = () => {
   const location = useLocation();
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('artisan_hub_orders');
-    return saved ? JSON.parse(saved) : mockOrders;
-  });
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showBanner, setShowBanner] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const columns = useMemo(() => [
+    {
+      header: 'Order ID',
+      accessorKey: '_id',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-primary leading-tight block uppercase tracking-widest font-mono">
+          #{row.original._id.substring(0, 8)}
+        </span>
+      ),
+    },
+    {
+      header: 'Date',
+      accessorKey: 'createdAt',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans text-muted-foreground leading-tight block">
+          {new Date(row.original.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
+      )
+    },
+    {
+      header: 'Shop',
+      accessorKey: 'shop',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {row.original.shop?.name || 'Artisan Shop'}
+        </span>
+      )
+    },
+    {
+      header: 'Total',
+      accessorKey: 'total',
+      meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {(row.original.total / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+        </span>
+      )
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      meta: { headerClassName: 'text-center', cellClassName: 'text-center' },
+      cell: ({ row }) => <StatusBadge status={row.original.status} />
+    },
+    {
+      header: 'Actions',
+      id: 'actions',
+      meta: { headerClassName: 'text-center', cellClassName: 'text-center' },
+      cell: ({ row }) => (
+        <button 
+          onClick={() => setSelectedOrder(row.original)}
+          className="text-muted-foreground hover:text-primary transition-colors p-1" 
+          title="View Details"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+      )
+    }
+  ], []);
+
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const res = await ordersAPI.getMyOrders();
+      setOrders(res?.data || []);
+    } catch (err) {
+      console.error("Failed to load orders:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
+    fetchOrders();
     if (location.state?.orderPlaced) {
       setShowBanner(true);
-      const details = location.state.orderDetails;
-      if (details) {
-        const newOrder = {
-          _id: `order_${Math.random().toString(36).substring(2, 11)}`,
-          buyer: 'user_buyer_1',
-          shop: details.shop || 'shop_1',
-          items: details.items,
-          total: details.total,
-          deliveryAddress: details.deliveryAddress,
-          paymentMethod: details.paymentMethod,
-          status: 'pending',
-          courier: details.paymentMethod === 'cod' ? 'LBC' : 'J&T',
-          trackingNumber: details.paymentMethod === 'cod' ? 'LBC55443322' : 'JNT123456789',
-          createdAt: new Date().toISOString(),
-        };
-
-        setOrders((prev) => {
-          const exists = prev.some(
-            (o) =>
-              o.items[0]?.name === newOrder.items[0]?.name &&
-              Math.abs(new Date(o.createdAt).getTime() - new Date(newOrder.createdAt).getTime()) < 5000
-          );
-          if (exists) return prev;
-          const updated = [newOrder, ...prev];
-          localStorage.setItem('artisan_hub_orders', JSON.stringify(updated));
-          return updated;
-        });
-      } else {
-        const newOrder = {
-          _id: `order_${Math.random().toString(36).substring(2, 11)}`,
-          buyer: 'user_buyer_1',
-          shop: 'shop_1',
-          items: [{ product: 'prod_1', name: 'Just Ordered Item', price: 50000, quantity: 1 }],
-          total: 65000,
-          deliveryAddress: '123 Mango Avenue, Cebu City, Cebu 6000',
-          paymentMethod: 'cod',
-          status: 'pending',
-          createdAt: new Date().toISOString(),
-        };
-
-        setOrders((prev) => {
-          const exists = prev.some((o) => o._id === newOrder._id);
-          if (exists) return prev;
-          const updated = [newOrder, ...prev];
-          localStorage.setItem('artisan_hub_orders', JSON.stringify(updated));
-          return updated;
-        });
-      }
       window.history.replaceState({}, document.title);
     }
   }, [location]);
 
   const filteredOrders = orders.filter((order) => {
-    const shop = mockShops.find((s) => s._id === order.shop);
+    const shopName = order.shop?.name || 'Artisan Shop';
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       !q ||
       order._id.toLowerCase().includes(q) ||
-      (shop?.name?.toLowerCase().includes(q)) ||
+      shopName.toLowerCase().includes(q) ||
       order.items.some((i) => i.name.toLowerCase().includes(q));
     const matchesStatus = selectedStatus === 'All' || order.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
-  return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full animate-in fade-in duration-500">
+  if (isLoading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <p className="text-sm font-sans text-muted-foreground">Loading your orders...</p>
+      </div>
+    );
+  }
 
-      {/* Page Header */}
+  return (
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full bg-background min-h-full">
+
+      
       <div className="mb-8">
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
         <p className="text-muted-foreground font-sans text-xs">Track and manage your artisan purchases.</p>
-        
       </div>
 
       {/* Success Banner */}
@@ -110,43 +148,45 @@ const Orders = () => {
 
       {/* Empty State (no orders at all) */}
       {orders.length === 0 ? (
-        <div className="text-center py-20 bg-card rounded-2xl border border-border/80 flex flex-col items-center">
+        <div className="text-center py-20 glass-card flex flex-col items-center">
           <Package className="w-10 h-10 text-muted-foreground/20 mb-4" />
           <h3 className="text-lg font-headline font-bold text-foreground mb-2">No Orders Yet</h3>
           <p className="text-muted-foreground font-sans text-xs max-w-md mb-6 leading-relaxed">
             You haven't placed any orders yet. Start exploring artisan shops to find unique items.
           </p>
-          <Link to="/" className="btn-base btn-primary px-6 py-2 rounded-xl font-sans font-bold text-xs uppercase tracking-widest">
-            Start Shopping
-          </Link>
+          <Button asChild>
+            <Link to="/discover">
+              Start Shopping
+            </Link>
+          </Button>
         </div>
       ) : (
         <>
-          {/* Search + Filter row — same pattern as SavedShops */}
+          {/* Search + Filter row */}
           <div className="flex flex-col sm:flex-row gap-2.5 mb-7">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-              <input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground z-10 pointer-events-none" />
+              <Input
                 type="text"
                 placeholder="Search by shop, item, or order ID…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                className="pl-9 pr-4 py-2 text-xs"
               />
             </div>
             <div className="relative min-w-[160px]">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-              <select
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground z-10 pointer-events-none" />
+              <Select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-card border border-border/70 rounded-xl text-xs font-sans appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm cursor-pointer capitalize"
+                className="pl-9 pr-8 py-2 text-xs capitalize"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s} className="capitalize">
-                    {s === 'All' ? 'All Statuses' : s.charAt(0).toUpperCase() + s.slice(1)}
+                    {s === 'All' ? 'All Statuses' : s}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -159,25 +199,47 @@ const Orders = () => {
 
           {/* Order Grid or no-results state */}
           {filteredOrders.length === 0 ? (
-            <div className="text-center py-12 bg-card border border-border/80 rounded-2xl flex flex-col items-center gap-3">
+            <div className="text-center py-12 glass-card flex flex-col items-center gap-3">
               <Package className="w-8 h-8 text-muted-foreground/20" />
               <p className="text-sm font-headline font-bold text-foreground">No orders match your search</p>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setSearchQuery(''); setSelectedStatus('All'); }}
-                className="text-[10px] font-sans font-bold text-primary hover:underline uppercase tracking-widest"
+                className="text-primary hover:text-primary/80 uppercase tracking-widest"
               >
                 Clear filters
-              </button>
+              </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredOrders.map((order) => (
-                <OrderCard key={order._id} order={order} />
-              ))}
+            <div className="mt-4">
+              <DataTable
+                columns={columns}
+                data={filteredOrders}
+                emptyStateMessage="No orders found."
+              />
             </div>
           )}
         </>
       )}
+
+      {/* Order Details Modal */}
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent className="max-w-xl p-0 overflow-hidden gap-0 border-border shadow-xl bg-card">
+          <DialogHeader className="px-6 py-4 border-b border-border bg-muted/20">
+            <DialogTitle className="text-lg font-headline font-bold text-foreground flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
+              Order Details
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6 max-h-[70vh] overflow-y-auto">
+             {selectedOrder && <OrderCard order={selectedOrder} onOrderUpdate={fetchOrders} />}
+          </div>
+          <div className="px-6 py-4 border-t border-border bg-muted/20">
+             <Button className="w-full" variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

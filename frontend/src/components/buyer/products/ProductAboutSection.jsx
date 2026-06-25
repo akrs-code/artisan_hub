@@ -1,7 +1,7 @@
-import { Card, CardTitle } from '@/components/ui/card';
+
 
 export const ProductAboutSection = ({ product }) => {
-  // Build a details table from available product fields
+  
   const details = [
     product.material && { label: 'Material', value: product.material },
     product.dimensions && { label: 'Dimensions', value: product.dimensions },
@@ -13,17 +13,17 @@ export const ProductAboutSection = ({ product }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-      {/* About this piece */}
-      <Card className="border-border/70">
-        <CardTitle className="text-lg mb-3">About this piece</CardTitle>
+      
+      <div className="ec-card p-5">
+        <h3 className="card-title mb-3">About this piece</h3>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">
           {product.description}
         </p>
-      </Card>
+      </div>
 
       {/* Product Details table */}
-      <Card className="border-border/70">
-        <CardTitle className="text-lg mb-3">Product Details</CardTitle>
+      <div className="ec-card p-5">
+        <h3 className="card-title mb-3">Product Details</h3>
         {details.length > 0 ? (
           <dl className="space-y-3">
             {details.map(({ label, value }) => (
@@ -60,7 +60,7 @@ export const ProductAboutSection = ({ product }) => {
             )}
           </dl>
         )}
-      </Card>
+      </div>
     </div>
   );
 };

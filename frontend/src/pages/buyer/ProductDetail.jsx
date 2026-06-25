@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { mockProducts, mockShops } from '../../lib/mockData';
 import { ChevronLeft, Star } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { productsAPI } from '../../services/api';
 
+import { Button } from '@/components/ui/button';
 import { ProductImagePanel }   from '@/components/buyer/products/ProductImagePanel';
 import { ProductDetailTabs }   from '@/components/buyer/products/ProductDetailTabs';
 import { ProductVariants }     from '@/components/buyer/products/ProductVariants';
 import { ProductPurchaseCard } from '@/components/buyer/products/ProductPurchaseCard';
+import { ProductRecommendations } from '@/components/buyer/products/ProductRecommendations';
 
 const formatPrice = (centavos) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(centavos / 100);
@@ -25,15 +27,31 @@ const ProductDetail = () => {
   const [isZoomed, setIsZoomed]         = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
   const [activeTab, setActiveTab]       = useState('product');
+  const [reviews, setReviews]           = useState([]);
 
   useEffect(() => {
-    const found = mockProducts.find((p) => p._id === id);
-    if (found) {
-      setProduct(found);
-      setShop(mockShops.find((s) => s._id === found.shop));
-      setSelectedSize(found.sizes?.[0] || '');
-      setSelectedColor(found.colors?.[0] || '');
-    }
+    const loadProduct = async () => {
+      try {
+        const res = await productsAPI.getProductBySlug(id);
+        const prod = res?.data;
+        if (prod) {
+          setProduct(prod);
+          setShop(prod.shop);
+          setSelectedSize(prod.sizes?.[0] || '');
+          setSelectedColor(prod.colors?.[0] || '');
+
+          try {
+            const revRes = await productsAPI.getProductReviews(prod._id);
+            if (revRes?.data) setReviews(revRes.data);
+          } catch (e) {
+            console.error('Failed to load reviews', e);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load product detail:", err);
+      }
+    };
+    loadProduct();
   }, [id]);
 
   if (!product || !shop) {
@@ -50,23 +68,43 @@ const ProductDetail = () => {
     setTimeout(() => setAddedFeedback(false), 2000);
   };
 
+  const handleBuyNow = () => {
+    addToCart(product, quantity);
+    navigate('/cart');
+  };
+
+  const handleReviewSubmit = async (rating, comment) => {
+    try {
+      await productsAPI.addProductReview(product._id, rating, comment);
+      const revRes = await productsAPI.getProductReviews(product._id);
+      if (revRes?.data) setReviews(revRes.data);
+      alert('Review submitted successfully!');
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Failed to submit review. You may have already reviewed this product.');
+      return false;
+    }
+  };
+
   const decrement = () => setQuantity((q) => Math.max(1, q - 1));
   const increment = () => setQuantity((q) =>
     product.stockQuantity ? Math.min(product.stockQuantity, q + 1) : q + 1
   );
 
   return (
-    <div className="w-full pb-24 animate-in fade-in duration-500 bg-background min-h-full">
+    <div className="w-full pb-24 bg-background min-h-full">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full">
 
         {/* Back button */}
-        <button
+        <Button
+          variant="ghost"
           onClick={() => window.history.length > 2 ? navigate(-1) : navigate(`/shop/${shop._id}`)}
-          className="inline-flex items-center gap-2 mb-8 px-3.5 py-1.5 rounded-full hover:bg-card border border-transparent hover:border-border/50 text-xs font-sans font-bold text-muted-foreground hover:text-foreground transition-all duration-200 uppercase tracking-widest cursor-pointer"
+          className="mb-8 rounded-full"
         >
-          <ChevronLeft className="w-4 h-4 text-primary" />
+          <ChevronLeft className="w-4 h-4 mr-2" />
           Back
-        </button>
+        </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
 
@@ -122,6 +160,8 @@ const ProductDetail = () => {
               shop={shop}
               activeTab={activeTab}
               onTabChange={setActiveTab}
+              reviews={reviews}
+              onReviewSubmit={handleReviewSubmit}
             />
 
             {/* Variants */}
@@ -141,10 +181,17 @@ const ProductDetail = () => {
               onDecrement={decrement}
               onIncrement={increment}
               onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
               addedFeedback={addedFeedback}
             />
           </div>
         </div>
+
+        {/* ── Product Recommendations ─────────────────────────────── */}
+        <div className="mt-20 border-t border-border/50 pt-16">
+          <ProductRecommendations product={product} />
+        </div>
+
       </div>
     </div>
   );

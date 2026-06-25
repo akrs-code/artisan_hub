@@ -4,7 +4,7 @@ import { SharedSidebar } from './SharedSidebar';
 import Header from '../components/Header';
 
 const RootLayout = ({ sidebarContent }) => {
-  // Default open on desktop (≥768px), closed on mobile
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 768 : false
   );
@@ -26,7 +26,7 @@ const RootLayout = ({ sidebarContent }) => {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
 
-      {/* Sidebar — hidden off-screen on mobile, always visible on md+ */}
+      
       <SharedSidebar
         sidebarContent={sidebarContent}
         isSidebarOpen={isSidebarOpen}
@@ -39,9 +39,9 @@ const RootLayout = ({ sidebarContent }) => {
         {/* Mobile-only top header bar */}
         <Header toggleSidebar={toggleSidebar} />
 
-        {/* Page content */}
+        
         <main className="flex-1 overflow-y-auto relative bg-background">
-          {/* Top padding only on mobile to clear the fixed header */}
+          
           <div className="pt-[57px] md:pt-0 h-full">
             <Outlet context={{ toggleSidebar }} />
           </div>

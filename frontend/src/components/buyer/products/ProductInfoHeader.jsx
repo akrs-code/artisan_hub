@@ -6,7 +6,7 @@ const formatPrice = (centavos) =>
 
 export const ProductInfoHeader = ({ product, shop }) => (
   <div className="mb-5">
-    {/* Shop link row */}
+    
     <Link
       to={`/shop/${shop._id}`}
       className="inline-flex items-center gap-2 mb-3 group"
@@ -27,7 +27,7 @@ export const ProductInfoHeader = ({ product, shop }) => (
       {product.name}
     </h1>
 
-    {/* Rating + sold + location */}
+    
     <div className="flex flex-wrap items-center gap-3 mb-4 text-sm font-sans">
       <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => (

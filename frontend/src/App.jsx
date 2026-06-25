@@ -7,15 +7,17 @@ import {
 } from './components/RoleBasedSidebar';
 import WorkspaceView from './components/WorkspaceView';
 
-
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { GuestRoute, ProtectedRoute, SellerRoute } from './components/RouteGuards';
+import { Toaster } from 'react-hot-toast';
 
-// Auth Pages
 import Login from './pages/shared/Login';
 import Signup from './pages/shared/Signup';
 import SellerVerification from './pages/shared/SellerVerification';
 
-// Buyer Pages
+
+
 import MapDiscovery from './pages/buyer/MapDiscovery';
 import Discover from './pages/buyer/Discover';
 import SavedShops from './pages/buyer/SavedShops';
@@ -25,105 +27,107 @@ import Cart from './pages/buyer/Cart';
 import Checkout from './pages/buyer/Checkout';
 import Orders from './pages/buyer/Orders';
 import BuyerProfile from './pages/buyer/BuyerProfile';
+import PaymentSuccess from './pages/buyer/PaymentSuccess';
 
-// Seller Pages
+
 import Dashboard from './pages/seller/dashboard';
 import Catalog from './pages/seller/catalog';
 import Inventory from './pages/seller/inventory';
 import SellerOrders from './pages/seller/orders';
 import Earnings from './pages/seller/earnings';
 
-// Admin Pages
-import Overview from './pages/admin/overview';
-import Verify from './pages/admin/verify';
-import Moderate from './pages/admin/moderate';
-import Users from './pages/admin/users';
-import Logs from './pages/admin/logs';
-import Disputes from './pages/admin/disputes';
 
-// Admin Pages
 import Overview from './pages/admin/overview';
 import Verify from './pages/admin/verify';
 import Moderate from './pages/admin/moderate';
 import Users from './pages/admin/users';
 import Logs from './pages/admin/logs';
-import Disputes from './pages/admin/disputes';
+import Withdrawals from './pages/admin/withdrawals';
 
 const App = () => (
-  <BrowserRouter>
-    <Routes>
-      <Route path="/admin/*" element={<RootLayout sidebarContent={<AdminSidebar />} />} >
-        <Route path="" element={<Overview />} />
-        <Route path="verify" element={<Verify />} />
-        <Route path="moderate" element={<Moderate />} />
-        <Route path="users" element={<Users />} />
-        <Route path="logs" element={<Logs />} />
-        <Route path="disputes" element={<Disputes />} />
-        <Route path="*" element={<WorkspaceView />} />
-      </Route>
+  <AuthProvider>
+    <CartProvider>
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          className: 'font-sans text-sm font-semibold',
+          duration: 4000,
+          style: {
+            background: 'var(--color-neutral-dark)',
+            color: '#fff',
+            borderRadius: '12px',
+          }
+        }} 
+      />
+      <BrowserRouter>
+        <Routes>
+          
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Signup />} />
+          </Route>
+          
+          <Route path="/verify-seller" element={<SellerVerification />} />
 
-      <Route path="/seller/*" element={<RootLayout sidebarContent={<SellerSidebar />} />}>
-        <Route path="*" element={<WorkspaceView />} />
-      </Route>
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route
+              path="/admin/*"
+              element={<RootLayout sidebarContent={<AdminSidebar />} />}
+            >
+              <Route path="overview" element={<Overview />} />
+              <Route path="verify" element={<Verify />} />
+              <Route path="moderate" element={<Moderate />} />
+              <Route path="users" element={<Users />} />
+              <Route path="logs" element={<Logs />} />
+              <Route path="withdrawals" element={<Withdrawals />} />
+              <Route path="*" element={<WorkspaceView />} />
+            </Route>
+          </Route>
 
-      <Route path="/*" element={<RootLayout sidebarContent={<BuyerSidebar />} />}>
-        <Route path="*" element={<WorkspaceView />} />
-      </Route>
-    </Routes>
-  </BrowserRouter>
-  <CartProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Signup />} />
-        <Route path="/verify-seller" element={<SellerVerification />} />
+          <Route element={<SellerRoute />}>
+            <Route
+              path="/seller/*"
+              element={<RootLayout sidebarContent={<SellerSidebar />} />}
+            >
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="catalog" element={<Catalog />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="orders" element={<SellerOrders />} />
+              <Route path="earnings" element={<Earnings />} />
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin/*"
-          element={<RootLayout sidebarContent={<AdminSidebar />} />}
-        >
-          <Route path="overview" element={<Overview />} />
-          <Route path="verify" element={<Verify />} />
-          <Route path="moderate" element={<Moderate />} />
-          <Route path="users" element={<Users />} />
-          <Route path="logs" element={<Logs />} />
-          <Route path="disputes" element={<Disputes />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
+              <Route path="*" element={<WorkspaceView />} />
+            </Route>
+          </Route>
 
-        {/* Seller Routes */}
-        <Route
-          path="/seller/*"
-          element={<RootLayout sidebarContent={<SellerSidebar />} />}
-        >
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="catalog" element={<Catalog />} />
-          <Route path="inventory" element={<Inventory />} />
-          <Route path="orders" element={<SellerOrders />} />
-          <Route path="earnings" element={<Earnings />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
+          {/* Public & Private Buyer Routes */}
+          <Route
+            path="/*"
+            element={<RootLayout sidebarContent={<BuyerSidebar />} />}
+          >
+            {/* Public Buyer Routes */}
+            <Route index element={<MapDiscovery />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="product/:id" element={<ProductDetail />} />
+            <Route path="shop/:id" element={<ShopDetail />} />
+            <Route path="cart" element={<Cart />} />
 
-        {/* Buyer Routes */}
-        <Route
-          path="/*"
-          element={<RootLayout sidebarContent={<BuyerSidebar />} />}
-        >
-          <Route index element={<MapDiscovery />} />
-          <Route path="discover" element={<Discover />} />
-          <Route path="product/:id" element={<ProductDetail />} />
-          <Route path="shops" element={<SavedShops />} />
-          <Route path="shop/:id" element={<ShopDetail />} />
-          <Route path="cart" element={<Cart />} />
-          <Route path="checkout" element={<Checkout />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="profile" element={<BuyerProfile />} />
-          <Route path="*" element={<WorkspaceView />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </CartProvider>
+            {/* Authenticated Buyer Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['buyer']} />}>
+              <Route path="checkout" element={<Checkout />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="profile" element={<BuyerProfile />} />
+              <Route path="shops" element={<SavedShops />} />
+
+              <Route path="success" element={<PaymentSuccess />} />
+            </Route>
+
+            <Route path="*" element={<WorkspaceView />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </CartProvider>
+  </AuthProvider>
 );
 
 export default App;

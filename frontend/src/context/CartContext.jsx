@@ -1,16 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { cartAPI } from '../services/api';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
+  const { user } = useAuth();
+
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('artisan_hub_cart');
     if (!saved) return [];
     try {
       const parsed = JSON.parse(saved);
-      // Sanitize corrupted quantities from previous bug
+
       return parsed.map(item => ({
         ...item,
         quantity: typeof item.quantity === 'object' ? 1 : (item.quantity || 1)
@@ -31,8 +35,20 @@ export const CartProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('artisan_hub_cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (user) {
+      cartAPI.getCart().then(res => {
+        if (res?.data?.items) {
+          setCartItems(res.data.items);
+        }
+      }).catch(err => console.error("Failed to fetch cart:", err));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem('artisan_hub_cart', JSON.stringify(cartItems));
+    }
+  }, [cartItems, user]);
 
   useEffect(() => {
     localStorage.setItem('artisan_hub_saved_shops', JSON.stringify(savedShopIds));
@@ -43,47 +59,78 @@ export const CartProvider = ({ children }) => {
   }, [savedProductIds]);
 
   const toggleSaveShop = (shopId) => {
-    setSavedShopIds(prev => 
+    setSavedShopIds(prev =>
       prev.includes(shopId) ? prev.filter(id => id !== shopId) : [...prev, shopId]
     );
   };
 
   const toggleSaveProduct = (productId) => {
-    setSavedProductIds(prev => 
+    setSavedProductIds(prev =>
       prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
     );
   };
 
-  const addToCart = (product, quantity = 1) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.product._id === product._id);
-      if (existing) {
-        return prev.map(item =>
-          item.product._id === product._id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+  const addToCart = async (product, quantity = 1) => {
+    if (user) {
+      try {
+        const res = await cartAPI.addToCart({ productId: product._id, quantity });
+        if (res?.data?.items) setCartItems(res.data.items);
+      } catch (err) {
+        console.error("Failed to add to cart:", err);
       }
-      return [...prev, { product, quantity }];
-    });
+    } else {
+      setCartItems(prev => {
+        const existing = prev.find(item => item.product._id === product._id);
+        if (existing) {
+          return prev.map(item =>
+            item.product._id === product._id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        }
+        return [...prev, { product, quantity }];
+      });
+    }
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
-    setCartItems(prev =>
-      prev.map(item =>
-        item.product._id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
+    if (user) {
+      try {
+        const res = await cartAPI.updateCartItem({ productId, quantity: newQuantity });
+        if (res?.data?.items) setCartItems(res.data.items);
+      } catch (err) {
+        console.error("Failed to update cart:", err);
+      }
+    } else {
+      setCartItems(prev =>
+        prev.map(item =>
+          item.product._id === productId
+            ? { ...item, quantity: newQuantity }
+            : item
+        )
+      );
+    }
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prev => prev.filter(item => item.product._id !== productId));
+  const removeFromCart = async (productId) => {
+    if (user) {
+      try {
+        const res = await cartAPI.removeFromCart({ productId });
+        if (res?.data?.items) setCartItems(res.data.items);
+      } catch (err) {
+        console.error("Failed to remove from cart:", err);
+      }
+    } else {
+      setCartItems(prev => prev.filter(item => item.product._id !== productId));
+    }
   };
 
-  const updateItemOptions = (productId, color, size) => {
+  const updateItemOptions = async (productId, color, size) => {
+    if (user) {
+      // Backend does not currently support partial option updates cleanly without passing qty,
+      // So we will just fetch existing qty and add. For now, just update local state if needed.
+    }
     setCartItems(prev =>
       prev.map(item =>
         item.product._id === productId
@@ -99,7 +146,7 @@ export const CartProvider = ({ children }) => {
     (total, item) => total + (item?.product?.price || 0) * (item?.quantity || 0),
     0
   );
-  
+
   const cartItemCount = cartItems.reduce(
     (count, item) => count + (item?.quantity || 0),
     0

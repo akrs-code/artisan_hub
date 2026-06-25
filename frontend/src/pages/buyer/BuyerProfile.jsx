@@ -5,15 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Map, MapMarker, MapControls, MarkerContent, MarkerLabel } from '@/components/ui/map';
+import { usePHLocations } from '../../hooks/usePHLocations';
 
 const BuyerProfile = () => {
     const navigate = useNavigate();
     const [isSaved, setIsSaved] = useState(false);
-    
+
     const [formData, setFormData] = useState(() => {
         const saved = localStorage.getItem('buyerProfile');
         if (saved) {
-            try { return JSON.parse(saved); } catch (e) {}
+            try { return JSON.parse(saved); } catch (e) { }
         }
         return {
             firstName: '',
@@ -42,10 +43,25 @@ const BuyerProfile = () => {
 
     const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleAddressChange = (e) => setFormData({
-        ...formData,
-        address: { ...formData.address, [e.target.name]: e.target.value }
-    });
+    const { provinces, cities, getCities, loadingProvinces, loadingCities } = usePHLocations();
+
+    const handleAddressChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'state') {
+            setFormData(prev => ({
+                ...prev,
+                address: { ...prev.address, state: value, city: '' }
+            }));
+            const prov = provinces.find(p => p.name === value);
+            if (prov) getCities(prov.code);
+            else getCities(null);
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                address: { ...prev.address, [name]: value }
+            }));
+        }
+    };
 
     const handleFileChange = (e, field) => {
         if (e.target.files && e.target.files[0]) {
@@ -75,7 +91,7 @@ const BuyerProfile = () => {
     };
 
     const handleLogout = () => {
-        // Clear any auth tokens or user context here if they exist
+        
         navigate('/login');
     };
 
@@ -83,19 +99,19 @@ const BuyerProfile = () => {
 
     return (
         <div className="min-h-screen bg-background pb-12">
-            {/* Header Banner */}
+            
             <div className="h-48 w-full bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 relative border-b border-border/40">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
             </div>
 
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
                     
-                    {/* Left Sidebar Profile Summary */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="bg-card rounded-3xl border border-border/60 shadow-soft-lg p-6 relative z-10 flex flex-col items-center text-center">
+
                             
-                            {/* Avatar */}
                             <div className="relative mb-4 group cursor-pointer">
                                 <div className="w-28 h-28 rounded-full bg-white border-4 border-white shadow-md flex items-center justify-center overflow-hidden relative">
                                     <div className="absolute inset-0 bg-primary/10 flex items-center justify-center text-3xl font-headline font-bold text-primary">
@@ -136,9 +152,9 @@ const BuyerProfile = () => {
 
                             <div className="w-full h-px bg-border/40 my-6"></div>
 
-                            <Button 
+                            <Button
                                 onClick={handleLogout}
-                                variant="outline" 
+                                variant="outline"
                                 className="w-full rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-sans font-bold text-xs uppercase tracking-widest"
                             >
                                 <LogOut className="w-4 h-4 mr-2" />
@@ -150,7 +166,7 @@ const BuyerProfile = () => {
                     {/* Right Form Content */}
                     <div className="lg:col-span-8">
                         <form onSubmit={handleSave} className="space-y-6">
-                            
+
                             {/* Personal Information */}
                             <div className="bg-card p-8 rounded-3xl border border-border/60 shadow-soft-sm relative z-10">
                                 <div className="flex items-center gap-2 mb-6">
@@ -191,7 +207,7 @@ const BuyerProfile = () => {
                                     </div>
                                     <h2 className="text-xl font-headline font-semibold">Delivery Address</h2>
                                 </div>
-                                
+
                                 <div className="space-y-5">
                                     <div className="space-y-2">
                                         <Label htmlFor="street" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Street Address</Label>
@@ -199,12 +215,38 @@ const BuyerProfile = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-5">
                                         <div className="space-y-2">
-                                            <Label htmlFor="city" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">City / Municipality</Label>
-                                            <Input id="city" name="city" value={formData.address.city} onChange={handleAddressChange} className="rounded-xl border-border/60 bg-muted/10 h-11" placeholder="Manila" required />
+                                            <Label htmlFor="state" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">State / Province</Label>
+                                            <select
+                                                id="state"
+                                                name="state"
+                                                value={formData.address.state}
+                                                onChange={handleAddressChange}
+                                                className="flex h-11 w-full rounded-xl border border-border/60 bg-muted/10 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                                                disabled={loadingProvinces}
+                                                required
+                                            >
+                                                <option value="" disabled>Select Province</option>
+                                                {provinces.map(prov => (
+                                                    <option key={prov.code} value={prov.name}>{prov.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="state" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">State / Province</Label>
-                                            <Input id="state" name="state" value={formData.address.state} onChange={handleAddressChange} className="rounded-xl border-border/60 bg-muted/10 h-11" placeholder="Metro Manila" required />
+                                            <Label htmlFor="city" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">City / Municipality</Label>
+                                            <select
+                                                id="city"
+                                                name="city"
+                                                value={formData.address.city}
+                                                onChange={handleAddressChange}
+                                                className="flex h-11 w-full rounded-xl border border-border/60 bg-muted/10 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                                                disabled={!formData.address.state || loadingCities}
+                                                required
+                                            >
+                                                <option value="" disabled>{loadingCities ? 'Loading...' : 'Select City'}</option>
+                                                {cities.map(city => (
+                                                    <option key={city.code} value={city.name}>{city.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
@@ -245,7 +287,7 @@ const BuyerProfile = () => {
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Valid Government ID</Label>
                                     <p className="text-xs text-muted-foreground">For secure transactions, we require a valid government-issued ID.</p>
-                                    
+
                                     <div className="mt-4 flex justify-center rounded-2xl border-2 border-dashed border-border/80 px-6 py-10 hover:bg-primary/5 hover:border-primary/30 transition-all bg-muted/5 relative cursor-pointer group">
                                         <div className="text-center">
                                             <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">

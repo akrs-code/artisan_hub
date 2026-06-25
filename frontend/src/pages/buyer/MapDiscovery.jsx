@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Map, MapMarker, MarkerContent, MarkerLabel, MarkerPopup, MapControls } from '@/components/ui/map';
-import { mockShops } from '../../lib/mockData';
 import { useCart } from '../../context/CartContext';
 import { MapSearchBar } from '@/components/buyer/map/MapSearchBar';
 import { RouteDistanceOverlay } from '@/components/buyer/map/RouteDistanceOverlay';
 import { ShopPopupContent } from '@/components/buyer/map/ShopPopupContent';
 import { RouteLayer } from '@/components/buyer/map/RouteLayer';
 import { NearbyShopStrip } from '@/components/buyer/map/NearbyShopStrip';
+import { shopsAPI } from '../../services/api';
 
 const MapDiscovery = () => {
   const { savedShopIds, toggleSaveShop } = useCart();
+  const [shops, setShops] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [userLocation, setUserLocation] = useState(null);
@@ -19,6 +20,20 @@ const MapDiscovery = () => {
     center: [124.8, 7.9],
     zoom: 7.2,
   });
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const res = await shopsAPI.getShops();
+        
+        const activeShops = (res?.data || []).filter(s => s.isVerified);
+        setShops(activeShops);
+      } catch (err) {
+        console.error("Failed to load active shops:", err);
+      }
+    };
+    fetchShops();
+  }, []);
 
   useEffect(() => {
     let watchId;
@@ -83,9 +98,9 @@ const MapDiscovery = () => {
     }
   };
 
-  const categories = ['All', ...new Set(mockShops.map((shop) => shop.category))];
+  const categories = ['All', ...new Set(shops.map((shop) => shop.category))];
 
-  const filteredArtisans = mockShops.filter(
+  const filteredArtisans = shops.filter(
     (shop) => {
       const matchesSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         shop.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -141,27 +156,32 @@ const MapDiscovery = () => {
             </MapMarker>
           )}
 
-          {filteredArtisans.map((artisan) => (
-            <MapMarker
-              key={artisan._id}
-              longitude={artisan.location.coordinates[0]}
-              latitude={artisan.location.coordinates[1]}
-            >
-              <MarkerContent>
-                <div className="size-5 cursor-pointer rounded-full border-2 border-white bg-primary shadow-lg transition-transform hover:scale-110" />
-                <MarkerLabel position="bottom">{artisan.category}</MarkerLabel>
-              </MarkerContent>
-              <MarkerPopup className="w-72 p-0 overflow-hidden rounded-[1.25rem] bg-card border border-border shadow-(--shadow-soft-lg)">
-                <ShopPopupContent
-                  artisan={artisan}
-                  savedShopIds={savedShopIds}
-                  toggleSaveShop={toggleSaveShop}
-                  routeDistance={routeDistance}
-                  onDirections={handleDirections}
-                />
-              </MarkerPopup>
-            </MapMarker>
-          ))}
+          {filteredArtisans.map((artisan) => {
+            const hasCoords = artisan.location && artisan.location.coordinates && artisan.location.coordinates.length === 2;
+            if (!hasCoords) return null;
+
+            return (
+              <MapMarker
+                key={artisan._id}
+                longitude={artisan.location.coordinates[0]}
+                latitude={artisan.location.coordinates[1]}
+              >
+                <MarkerContent>
+                  <div className="size-5 cursor-pointer rounded-full border-2 border-white bg-primary shadow-lg transition-transform hover:scale-110" />
+                  <MarkerLabel position="bottom">{artisan.category}</MarkerLabel>
+                </MarkerContent>
+                <MarkerPopup className="w-72 p-0 overflow-hidden rounded-[8px] glass-card">
+                  <ShopPopupContent
+                    artisan={artisan}
+                    savedShopIds={savedShopIds}
+                    toggleSaveShop={toggleSaveShop}
+                    routeDistance={routeDistance}
+                    onDirections={handleDirections}
+                  />
+                </MarkerPopup>
+              </MapMarker>
+            );
+          })}
         </Map>
 
         <NearbyShopStrip shops={filteredArtisans} title="Nearby Shops" />

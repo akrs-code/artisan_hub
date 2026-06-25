@@ -1,99 +1,101 @@
-import { Wallet, Banknote, Landmark, Clock, CheckCircle, TrendingUp } from 'lucide-react';
-import DashboardHeader from '../../components/seller/DashboardHeader';
-import InventoryStatCard from '../../components/seller/InventoryStatCard';
-import TransactionsTable from '../../components/seller/TransactionsTable';
-import RevenueTrendChart from '../../components/seller/RevenueTrendChart';
-import PayoutDetails from '../../components/seller/PayoutDetails';
-import ActionModal from '../../components/seller/ActionModal';
-import { useState } from 'react';
-
-// --- Dummy Data (Data Contract for Backend) ---
-const pageData = {
-    userProfile: {
-        name: 'Julian Marks',
-        role: 'Master Weaver',
-        initials: 'JM'
-    },
-    stats: {
-        revenue: { value: 'P24,850.40' },
-        available: { value: 'P4,120.00' },
-        pending: { value: 'P1,840.50', subtext: '3-5 days arrival' },
-        lastPayout: { value: 'P3,200.00', subtext: 'Oct 12, 2023' }
-    },
-    recentTransactions: [
-        {
-            id: 'TXN-9021834',
-            date: 'Oct 24, 2023',
-            type: 'Sale',
-            orderId: '#AH-22941',
-            status: 'COMPLETED',
-            amount: '+P120.00'
-        },
-        {
-            id: 'TXN-9021822',
-            date: 'Oct 23, 2023',
-            type: 'Payout',
-            orderId: null,
-            status: 'PROCESSING',
-            amount: '-P3,200.00'
-        },
-        {
-            id: 'TXN-9021810',
-            date: 'Oct 22, 2023',
-            type: 'Sale',
-            orderId: '#AH-22938',
-            status: 'COMPLETED',
-            amount: '+P45.50'
-        },
-        {
-            id: 'TXN-9021795',
-            date: 'Oct 21, 2023',
-            type: 'Refund',
-            orderId: '#AH-22912',
-            status: 'COMPLETED',
-            amount: '-P24.00'
-        }
-    ],
-    revenueTrend: [
-        { label: 'W1', bars: [45, 65, 55] },
-        { label: 'W2', bars: [85, 75, 95] },
-        { label: 'W3', bars: [60, 70, { value: 100, isHighlighted: true }] },
-        { label: 'W4', bars: [80] }
-    ],
-    payoutInfo: {
-        nextPayoutDate: 'October 28, 2023',
-        scheduleType: 'Weekly Schedule',
-        bankName: 'Artisans National Bank',
-        accountEnding: '5821'
-    }
-};
+import { Wallet, Banknote, Landmark, Clock, CheckCircle, TrendingUp, Loader2 } from 'lucide-react';
+import InventoryStatCard from '../../components/seller/inventory/InventoryStatCard';
+import TransactionsTable from '../../components/seller/finance/TransactionsTable';
+import WithdrawModal from '../../components/seller/finance/WithdrawModal';
+import { useState, useEffect } from 'react';
+import { shopsAPI, ordersAPI, walletAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
 
 const Earnings = () => {
-    const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
+    const [orders, setOrders] = useState([]);
+    const [walletStats, setWalletStats] = useState(null);
+    const [withdrawals, setWithdrawals] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [shop, setShop] = useState(null);
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
-    const openModal = (title, message) => {
-        setModalState({ isOpen: true, title, message });
+    const fetchEarningsData = async () => {
+        try {
+            setLoading(true);
+            const shopRes = await shopsAPI.getOwned();
+            if (shopRes && shopRes.data) {
+                setShop(shopRes.data);
+                
+                const [ordersRes, statsRes, historyRes] = await Promise.all([
+                    ordersAPI.getShopOrders(shopRes.data._id),
+                    walletAPI.getWalletStats(shopRes.data._id),
+                    walletAPI.getWithdrawalHistory(shopRes.data._id)
+                ]);
+
+                if (ordersRes && ordersRes.data) setOrders(ordersRes.data);
+                if (statsRes && statsRes.data) setWalletStats(statsRes.data);
+                if (historyRes && historyRes.data) setWithdrawals(historyRes.data);
+            }
+        } catch (err) {
+            setError(err.message || 'Failed to load shop earnings data.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const closeModal = () => {
-        setModalState(prev => ({ ...prev, isOpen: false }));
-    };
+    useEffect(() => {
+        fetchEarningsData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <p className="text-sm font-sans text-muted-foreground">Loading earnings & payout details...</p>
+            </div>
+        );
+    }
+
+    
+    const pendingOrders = orders.filter(o => ['pending', 'confirmed', 'shipped'].includes(o.status));
+
+    const totalRevenueCentavos = walletStats?.totalEarnings || 0;
+    const availableCentavos = walletStats?.availableBalance || 0;
+    const pendingClearanceCentavos = pendingOrders.reduce((sum, o) => sum + o.total, 0);
+
+    const revenueStr = formatPrice(totalRevenueCentavos);
+    const availableStr = formatPrice(availableCentavos);
+    const pendingStr = formatPrice(pendingClearanceCentavos);
+
+    
+    const orderTxns = orders.map(order => ({
+        id: `ORD-${order._id.substring(0, 8).toUpperCase()}`,
+        date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        type: 'Sale',
+        orderId: `#${order._id.substring(0, 8).toUpperCase()}`,
+        status: order.status,
+        amount: `+${formatPrice(order.total)}`,
+        timestamp: new Date(order.createdAt).getTime()
+    }));
+
+    const withdrawalTxns = withdrawals.map(w => ({
+        id: `WD-${w._id.substring(0, 8).toUpperCase()}`,
+        date: new Date(w.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        type: 'Payout',
+        orderId: w.method.toUpperCase(),
+        status: w.status,
+        amount: `-${formatPrice(w.amount)}`,
+        timestamp: new Date(w.createdAt).getTime()
+    }));
+
+    const transactions = [...orderTxns, ...withdrawalTxns].sort((a, b) => b.timestamp - a.timestamp);
 
     return (
-        <div className="relative min-h-full bg-background px-8 pb-12 w-full max-w-[1400px] mx-auto">
-            <DashboardHeader
-                user={pageData.userProfile}
-                searchPlaceholder="Search transactions..."
-                showSettings={true}
-            />
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
 
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mt-8 mb-6 gap-4">
+            
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
+                    <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
                         Earnings & Payouts
                     </h1>
-                    <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
+                    <p className="text-muted-foreground font-sans text-xs">
                         Monitor your business growth, manage withdrawals, and track transactions.
                     </p>
                 </div>
@@ -101,8 +103,8 @@ const Earnings = () => {
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3">
                     <button 
-                        onClick={() => openModal('Request Payout', 'Payout request form is currently under development.')}
-                        className="flex items-center gap-2 px-6 py-3 rounded-md bg-[#8C5233] hover:bg-[#7E4A2E] text-white text-[13px] font-sans font-bold transition-colors shadow-sm"
+                        onClick={() => setIsWithdrawModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-[13px] font-sans font-bold transition-colors shadow-sm"
                     >
                         <Wallet className="w-4 h-4" />
                         Request Payout
@@ -110,77 +112,71 @@ const Earnings = () => {
                 </div>
             </div>
 
+            {error && (
+                <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-sm font-sans text-destructive">
+                    {error}
+                </div>
+            )}
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <InventoryStatCard
-                    title="TOTAL REVENUE"
-                    value={pageData.stats.revenue.value}
+                    title="Total Revenue"
+                    value={revenueStr}
                     subtext={
-                        <span className="flex items-center gap-1 text-[#4A6478]">
+                        <span className="flex items-center gap-1 text-primary">
                             <TrendingUp className="w-3 h-3" />
-                            +12.5%
+                            Live balance
                         </span>
                     }
                     icon={Banknote}
                 />
                 <InventoryStatCard
-                    title="AVAILABLE FOR PAYOUT"
-                    value={pageData.stats.available.value}
+                    title="Available for Payout"
+                    value={availableStr}
                     subtext={
                         <span 
-                            onClick={() => openModal('Withdraw Funds', 'Withdrawal processing will be available soon.')}
-                            className="text-[#8C5233] hover:text-[#7E4A2E] hover:underline cursor-pointer transition-all"
+                            onClick={() => setIsWithdrawModalOpen(true)}
+                            className="text-primary hover:text-primary/80 hover:underline cursor-pointer transition-all uppercase text-[10px] tracking-widest font-bold"
                         >
                             WITHDRAW NOW
                         </span>
                     }
                     icon={Landmark}
-                    iconBgClass="bg-[#F8E2DF]"
                 />
                 <InventoryStatCard
-                    title="PENDING CLEARANCE"
-                    value={pageData.stats.pending.value}
-                    subtext={pageData.stats.pending.subtext}
+                    title="Pending Clearance"
+                    value={pendingStr}
+                    subtext="Processing orders"
                     icon={Clock}
-                    iconBgClass="bg-[#F8E2DF]"
                 />
                 <InventoryStatCard
-                    title="LAST PAYOUT"
-                    value={pageData.stats.lastPayout.value}
-                    subtext={pageData.stats.lastPayout.subtext}
+                    title="Last Payout"
+                    value="P0.00"
+                    subtext="No payouts requested yet"
                     icon={CheckCircle}
                 />
             </div>
 
             {/* Main Content Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column (Table) */}
-                <div className="lg:col-span-2">
-                    <TransactionsTable
-                        transactions={pageData.recentTransactions}
-                    />
-                </div>
-
-                {/* Right Column (Sidebar Cards) */}
-                <div className="lg:col-span-1 flex flex-col gap-6">
-                    <RevenueTrendChart data={pageData.revenueTrend} />
-                    <PayoutDetails
-                        nextPayoutDate={pageData.payoutInfo.nextPayoutDate}
-                        scheduleType={pageData.payoutInfo.scheduleType}
-                        bankName={pageData.payoutInfo.bankName}
-                        accountEnding={pageData.payoutInfo.accountEnding}
-                        onManageClick={() => openModal('Manage Payout Methods', 'Bank account management settings will be added in a future update.')}
-                    />
-                </div>
+            <div className="w-full">
+                <TransactionsTable
+                    transactions={transactions}
+                />
             </div>
 
-            {/* Action Modal */}
-            <ActionModal 
-                isOpen={modalState.isOpen}
-                onClose={closeModal}
-                title={modalState.title}
-                message={modalState.message}
-            />
+            {/* Withdraw Modal */}
+            {shop && (
+                <WithdrawModal
+                    isOpen={isWithdrawModalOpen}
+                    onClose={() => setIsWithdrawModalOpen(false)}
+                    shopId={shop._id}
+                    onSuccess={() => {
+                        setIsWithdrawModalOpen(false);
+                        fetchEarningsData();
+                    }}
+                />
+            )}
         </div>
     );
 };

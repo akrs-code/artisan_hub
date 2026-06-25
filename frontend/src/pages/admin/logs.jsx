@@ -1,168 +1,105 @@
-import React, { useState } from 'react';
-import { Banknote, CheckCircle, Hourglass, AlertCircle, TrendingUp, Calendar } from 'lucide-react';
-import AdminHeader from '../../components/admin/AdminHeader';
-import AdminStatCard from '../../components/admin/AdminStatCard';
-import TransactionLogsTable from '../../components/admin/TransactionLogsTable';
-import AuditSummaryCard from '../../components/admin/AuditSummaryCard';
-import PayoutHealthCard from '../../components/admin/PayoutHealthCard';
-import AdminActionModal from '../../components/admin/AdminActionModal';
+import React, { useState, useEffect } from 'react';
+import { Banknote, CheckCircle, Hourglass, TrendingUp, Loader2 } from 'lucide-react';
+import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
+import TransactionLogsTable from '../../components/admin/finance/TransactionLogsTable';
+import { adminAPI } from '../../services/api';
+import { formatPrice } from '../../utils/formatters';
 
-// --- Dummy Data (Data Contract for Backend) ---
-const pageData = {
-    stats: {
-        volume: { value: 'P142,850.00', subtext: '12% increase' },
-        successRate: { value: '99.4%', subtext: 'STABLE GROWTH' },
-        pending: { value: 'P12,400.00', subtext: '86 PROCESSING' },
-        disputes: { value: '14', subtext: 'IMMEDIATE ACTION' }
-    },
-    transactions: [
-        {
-            date: 'Oct 24, 2023',
-            id: 'TXN-9021834',
-            shopName: 'Ancient Earth Crafts',
-            type: 'SALE',
-            amount: '+P245.00',
-            status: 'COMPLETED'
-        },
-        {
-            date: 'Oct 23, 2023',
-            id: 'TXN-9021835',
-            shopName: 'Indigo Loom Textiles',
-            type: 'PAYOUT',
-            amount: '-P1,200.00',
-            status: 'PENDING'
-        },
-        {
-            date: 'Oct 23, 2023',
-            id: 'TXN-9021836',
-            shopName: 'Obsidian Fire Glass',
-            type: 'SALE',
-            amount: '+P68.00',
-            status: 'DISPUTED'
-        },
-        {
-            date: 'Oct 22, 2023',
-            id: 'TXN-9021837',
-            shopName: 'The Iron Forge',
-            type: 'REFUND',
-            amount: '-P142.50',
-            status: 'COMPLETED'
-        }
-    ],
-    payoutHealth: [
-        { name: 'BANK TRANSFER (ACH)', health: 99.8 },
-        { name: 'STRIPE CONNECT', health: 98.9 },
-        { name: 'PAYPAL GLOBAL', health: 94.2 }
-    ]
-};
 
 const LogsPage = () => {
-    const [modalState, setModalState] = useState({ isOpen: false, title: '', message: '' });
-    const openModal = (title, message) => {
-        setModalState({ isOpen: true, title, message });
-    };
-    const closeModal = () => {
-        setModalState(prev => ({ ...prev, isOpen: false }));
-    };
-    return (
-        <div className="relative min-h-full bg-background px-8 pb-32 w-full max-w-[1400px] mx-auto">
-            <AdminHeader
-                searchPlaceholder="Search transactions, shop names, or IDs..."
-                primaryActionText="Export CSV"
-                onPrimaryActionClick={() => openModal('Export CSV', 'Download comprehensive financial records.')}
-                secondaryActionText="Filters"
-                secondaryActionIcon={Calendar}
-                onSecondaryActionClick={() => openModal('Advanced Filters', 'Select date ranges and transaction types.')}
-            />
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between mt-8 mb-8 gap-4">
-                <div>
-                    <h1 className="text-3xl font-headline font-bold text-neutral-dark mb-1">
-                        Transaction Logs
-                    </h1>
-                    <p className="text-[13px] font-sans text-neutral-dark/60 font-medium">
-                        Monitor and audit all platform financial activity from artisanal crafts to raw material sales.
-                    </p>
-                </div>
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const res = await adminAPI.getOrders();
+                if (res?.data) setOrders(res.data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrders();
+    }, []);
+
+    const totalOrders = orders.length;
+    const deliveredCount = orders.filter(o => o.status === 'delivered' || o.status === 'completed').length;
+    const successRate = totalOrders > 0 ? ((deliveredCount / totalOrders) * 100).toFixed(1) : 0;
+    const totalRevenue = orders.reduce((sum, o) =>
+        sum + (o.status === 'delivered' || o.status === 'completed' ? (o.total || 0) : 0), 0);
+    const pendingCount = orders.filter(o => o.status === 'pending').length;
+
+    const formattedTransactions = orders.map(o => ({
+        date: o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Unknown Date',
+        id: o._id ? o._id.substring(o._id.length - 8).toUpperCase() : 'UNKNOWN',
+        shopName: o.shop?.name || 'Unknown Shop',
+        type: 'SALE',
+        amount: formatPrice(o.total || 0),
+        status: o.status ? o.status.toUpperCase() : 'UNKNOWN'
+    }));
+
+    if (loading) {
+        return (
+            <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-sm font-sans text-muted-foreground">Loading transaction logs...</p>
             </div>
+        );
+    }
+
+    return (
+        <div className="px-6 lg:px-10 py-10 max-w-7xl mx-auto w-full">
+
+            
+            <div className="mb-8">
+                <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">
+                    Transaction Logs
+                </h1>
+                <p className="text-muted-foreground font-sans text-xs">
+                    Monitor and audit all platform financial activity.
+                </p>
+            </div>
+
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <AdminStatCard
-                    title="TOTAL VOLUME"
-                    value={pageData.stats.volume.value}
+                    title="Total Revenue"
+                    value={formatPrice(totalRevenue)}
                     subtext={
-                        <span className="flex items-center gap-1 text-neutral-dark font-bold">
-                            <TrendingUp className="w-3 h-3" />
-                            {pageData.stats.volume.subtext}
+                        <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                            From delivered orders
                         </span>
                     }
                     icon={Banknote}
                 />
                 <AdminStatCard
-                    title="SUCCESS RATE"
-                    value={pageData.stats.successRate.value}
+                    title="Success Rate"
+                    value={`${successRate}%`}
                     subtext={
-                        <span className="text-neutral-dark/60 font-bold text-[9px] uppercase tracking-widest">
-                            {pageData.stats.successRate.subtext}
+                        <span className="text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
+                            {deliveredCount} of {totalOrders} ORDERS
                         </span>
                     }
                     icon={CheckCircle}
                 />
                 <AdminStatCard
-                    title="PENDING SETTLEMENTS"
-                    value={pageData.stats.pending.value}
+                    title="Pending Orders"
+                    value={pendingCount.toString()}
                     subtext={
-                        <span className="text-neutral-dark/60 font-bold text-[9px] uppercase tracking-widest">
-                            {pageData.stats.pending.subtext}
+                        <span className="text-muted-foreground font-bold text-[9px] uppercase tracking-widest">
+                            AWAITING PROCESSING
                         </span>
                     }
                     icon={Hourglass}
                 />
-                <AdminStatCard
-                    title="ACTIVE DISPUTES"
-                    value={pageData.stats.disputes.value}
-                    subtext={
-                        <span className="text-destructive font-bold text-[9px] uppercase tracking-widest">
-                            {pageData.stats.disputes.subtext}
-                        </span>
-                    }
-                    icon={AlertCircle}
-                    iconBgClass="bg-[#F8E2DF]"
-                    iconColorClass="text-destructive"
-                    accentClass="border-l-4 border-l-destructive"
-                />
             </div>
-            {/* Main Table Content */}
-            <div className="w-full mb-8">
-                <TransactionLogsTable
-                    data={pageData.transactions}
-                    onFilterClick={(filterName) => openModal(`${filterName} Filter`, `Select options to filter the logs by ${filterName}.`)}
-                    onActionClick={(actionName, txnId) => openModal(`Action: ${actionName}`, `Viewing full details for transaction ${txnId}.`)}
-                />
-            </div>
-            {/* Bottom Widgets */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <AuditSummaryCard
-                        onReviewClick={() => openModal('Review Flags', 'Opening the AI audit flags queue for manual review.')}
-                        onDownloadClick={() => openModal('Download Audit', 'Generating the full automated audit PDF report.')}
-                    />
-                </div>
-                <div className="lg:col-span-1">
-                    <PayoutHealthCard
-                        data={pageData.payoutHealth}
-                        lastUpdated="5 minutes ago"
-                    />
-                </div>
-            </div>
-            {/* Action Modal */}
-            <AdminActionModal
-                isOpen={modalState.isOpen}
-                onClose={closeModal}
-                title={modalState.title}
-                message={modalState.message}
-            />
+
+            {/* Transaction Table */}
+            <TransactionLogsTable data={formattedTransactions} />
         </div>
     );
 };
+
 export default LogsPage;
