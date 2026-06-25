@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import DataTable from '../../../components/ui/DataTable';
 
@@ -9,21 +9,29 @@ const ApplicationsTable = ({ data, onRowClick }) => {
       header: 'Shop Name',
       accessorKey: 'name',
       cell: ({ row }) => (
-        <div>
-          <div className="text-sm font-sans font-semibold text-foreground">{row.original.name}</div>
-          <div className="text-[10px] font-sans text-muted-foreground mt-0.5">{row.original.ownerName}</div>
-        </div>
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {row.original.name}
+        </span>
+      )
+    },
+    {
+      header: 'Owner Name',
+      accessorKey: 'ownerName',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans text-muted-foreground leading-tight block">
+          {row.original.owner?.name || row.original.ownerName || '—'}
+        </span>
       )
     },
     {
       header: 'Category',
       accessorKey: 'category',
-      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.category}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.category}</span>
     },
     {
       header: 'Registered On',
       accessorKey: 'appliedOn',
-      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.appliedOn}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.appliedOn}</span>
     },
     {
       header: 'Status',
@@ -31,10 +39,14 @@ const ApplicationsTable = ({ data, onRowClick }) => {
       cell: ({ row }) => <StatusBadge status={row.original.status} />
     },
     {
-      header: '',
+      header: 'Actions',
       id: 'actions',
-      meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
-      cell: () => <ChevronRight className="w-4 h-4 text-muted-foreground/50 inline-block" />
+      meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
+      cell: () => (
+        <button className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">
+            <Eye className="w-4 h-4" />
+        </button>
+      )
     }
   ], []);
 
@@ -46,11 +58,6 @@ const ApplicationsTable = ({ data, onRowClick }) => {
       data={data || []}
       emptyStateMessage="No shops found."
       onRowClick={onRowClick}
-      headerActions={
-        <span className="text-xs font-sans text-muted-foreground">
-          {data.length} total
-        </span>
-      }
       footer={
         <div className="text-xs font-sans text-muted-foreground">
           Showing <span className="font-semibold text-foreground">{data.length}</span> shops

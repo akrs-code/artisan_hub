@@ -41,19 +41,21 @@ const SeverityBar = ({ score }) => {
 const ModerationTable = ({ data, onFilterClick, onReviewClick }) => {
   const columns = useMemo(() => [
     {
-      header: 'Product & ID',
-      accessorKey: 'id',
+      header: 'Product',
+      accessorKey: 'productName',
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center border border-border/50">
             <img src={row.original.image} alt={row.original.productName} className="w-full h-full object-cover" />
           </div>
-          <div>
-            <div className="text-sm font-sans font-semibold text-foreground">{row.original.productName}</div>
-            <div className="text-[10px] font-sans text-muted-foreground tracking-widest uppercase">{row.original.id}</div>
-          </div>
+          <div className="text-sm font-sans font-semibold text-foreground">{row.original.productName}</div>
         </div>
       ),
+    },
+    {
+      header: 'Product ID',
+      accessorKey: 'id',
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground font-mono">{row.original.id}</span>,
     },
     {
       header: 'Shop',
@@ -66,14 +68,14 @@ const ModerationTable = ({ data, onFilterClick, onReviewClick }) => {
       cell: ({ row }) => <ViolationBadge type={row.original.violation} />,
     },
     {
-      header: 'Flagged On',
+      header: 'Flagged Date',
       accessorKey: 'flaggedDate',
-      cell: ({ row }) => (
-        <div>
-          <div className="text-sm font-sans text-muted-foreground">{row.original.flaggedDate}</div>
-          <div className="text-[10px] font-sans text-muted-foreground/60 uppercase">{row.original.flaggedTime}</div>
-        </div>
-      ),
+      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.flaggedDate}</span>,
+    },
+    {
+      header: 'Flagged Time',
+      accessorKey: 'flaggedTime',
+      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.flaggedTime}</span>,
     },
     {
       header: 'Severity',

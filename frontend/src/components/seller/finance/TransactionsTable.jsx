@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import DataTable from '../../../components/ui/DataTable';
+import { Eye } from 'lucide-react';
 
 const StatusBadge = ({ status, type }) => {
   let badgeStyle = "bg-blue-100 text-blue-800"; 
@@ -69,9 +70,19 @@ const TransactionsTable = ({ transactions = [] }) => {
       accessorKey: 'amount',
       meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
       cell: ({ row }) => (
-        <span className={`text-[12px] font-sans font-bold ${row.original.amount.startsWith('-') ? 'text-red-600' : 'text-green-600'}`}>
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight">
           {row.original.amount}
         </span>
+      )
+    },
+    {
+      header: 'Actions',
+      id: 'actions',
+      meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
+      cell: () => (
+        <button className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">
+            <Eye className="w-4 h-4" />
+        </button>
       )
     }
   ], []);

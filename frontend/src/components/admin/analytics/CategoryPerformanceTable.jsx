@@ -13,7 +13,7 @@ const CategoryPerformanceTable = ({ data }) => {
             <Store className="w-3.5 h-3.5 text-primary" />
           </div>
           <span className="text-[13px] font-sans font-bold text-foreground">
-            {row.original.category?.name || 'Uncategorized'}
+            {row.original.category?.name || row.original.category || 'Uncategorized'}
           </span>
         </div>
       )
@@ -23,7 +23,43 @@ const CategoryPerformanceTable = ({ data }) => {
       accessorKey: 'activeShops',
       cell: ({ row }) => (
         <span className="text-[13px] font-sans font-semibold text-foreground">
-          {row.original.activeShops}
+          {row.original.activeShops || 0}
+        </span>
+      )
+    },
+    {
+      header: 'Active Products',
+      accessorKey: 'activeProducts',
+      cell: ({ row }) => (
+        <span className="text-[13px] font-sans text-muted-foreground">
+          {row.original.activeProducts || '—'}
+        </span>
+      )
+    },
+    {
+      header: 'Total Sales',
+      accessorKey: 'totalSales',
+      cell: ({ row }) => (
+        <span className="text-[13px] font-sans text-muted-foreground">
+          {row.original.totalSales || '—'}
+        </span>
+      )
+    },
+    {
+      header: 'Avg Rating',
+      accessorKey: 'avgRating',
+      cell: ({ row }) => (
+        <span className="text-[13px] font-sans text-muted-foreground">
+          {row.original.avgRating ? `${row.original.avgRating} ★` : '—'}
+        </span>
+      )
+    },
+    {
+      header: 'Trend',
+      accessorKey: 'trend',
+      cell: ({ row }) => (
+        <span className={`text-[13px] font-sans font-medium ${row.original.trend > 0 ? 'text-green-600' : row.original.trend < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+          {row.original.trend ? (row.original.trend > 0 ? `+${row.original.trend}%` : `${row.original.trend}%`) : '—'}
         </span>
       )
     }

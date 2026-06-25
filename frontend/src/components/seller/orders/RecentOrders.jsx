@@ -55,6 +55,18 @@ const RecentOrders = ({ orders = [] }) => {
       )
     },
     {
+      header: 'Payment',
+      accessorKey: 'paymentMethod',
+      cell: ({ row }) => {
+        const isCod = row.original.paymentMethod === 'cod';
+        return (
+          <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-widest font-bold ${isCod ? 'bg-amber-100 text-amber-800' : 'bg-primary/10 text-primary'}`}>
+            {isCod ? 'COD' : 'Card'}
+          </span>
+        );
+      }
+    },
+    {
       header: 'Amount',
       accessorKey: 'total',
       meta: { headerClassName: 'text-right', cellClassName: 'text-right' },

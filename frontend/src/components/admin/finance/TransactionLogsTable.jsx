@@ -1,18 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { StatusBadge } from '../common/StatusBadge';
-import { Search } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
 
 const TransactionLogsTable = ({ data }) => {
   const [statusFilter, setStatusFilter] = useState('All');
-  const [search, setSearch] = useState('');
 
   const filtered = data.filter(row => {
     const matchStatus = statusFilter === 'All' || row.status === statusFilter;
-    const matchSearch =
-      row.shopName.toLowerCase().includes(search.toLowerCase()) ||
-      row.id.toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
+    return matchStatus;
   });
 
   const uniqueStatuses = ['All', ...new Set(data.map(r => r.status))];
@@ -21,27 +17,37 @@ const TransactionLogsTable = ({ data }) => {
     {
       header: 'Date',
       accessorKey: 'date',
-      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.date}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.date}</span>
     },
     {
       header: 'Order ID',
       accessorKey: 'id',
-      cell: ({ row }) => <span className="text-[10px] font-sans text-muted-foreground uppercase tracking-widest font-mono">#{row.original.id}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans font-bold text-primary leading-tight block uppercase tracking-widest font-mono">#{row.original.id}</span>
     },
     {
       header: 'Shop',
       accessorKey: 'shopName',
-      cell: ({ row }) => <span className="text-sm font-sans font-semibold text-foreground">{row.original.shopName}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.shopName}</span>
     },
     {
       header: 'Amount',
       accessorKey: 'amount',
-      cell: ({ row }) => <span className="text-sm font-headline font-bold text-primary">{row.original.amount}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">{row.original.amount}</span>
     },
     {
       header: 'Status',
       accessorKey: 'status',
       cell: ({ row }) => <StatusBadge status={row.original.status} />
+    },
+    {
+      header: 'Actions',
+      id: 'actions',
+      meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
+      cell: () => (
+        <button className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">
+            <Eye className="w-4 h-4" />
+        </button>
+      )
     }
   ], []);
 
@@ -55,18 +61,6 @@ const TransactionLogsTable = ({ data }) => {
         emptyStateMessage="No transactions found."
         headerActions={
           <div className="flex items-center gap-2">
-            <div className="relative w-full md:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search by shop or ID..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="input-search rounded-full"
-              />
-            </div>
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}

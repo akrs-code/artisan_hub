@@ -12,7 +12,7 @@ const RoleBadge = ({ role }) => (
 );
 
 // ── User Detail Modal ─────────────────────────────────────────────────────────
-const UserDetailModal = ({ user, shop, onClose }) => {
+const UserDetailModal = ({ user, shop, onClose, onActionClick, onDeleteClick }) => {
   if (!user) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -74,11 +74,27 @@ const UserDetailModal = ({ user, shop, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-border">
-          <button
-            onClick={onClose}
-            className="w-full py-2.5 bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground rounded-xl text-xs font-sans font-bold uppercase tracking-widest transition-all"
-          >
+        <div className="px-6 py-4 border-t border-border flex flex-col gap-2">
+          {user.role === 'SELLER' && (
+            <button onClick={() => { onActionClick('View Shop', user); onClose(); }} className="w-full py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-xs font-bold uppercase tracking-widest">
+              View Shop
+            </button>
+          )}
+          {user.status === 'SUSPENDED' ? (
+            <button onClick={() => { onActionClick('Restore', user); onClose(); }} className="w-full py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs font-bold uppercase tracking-widest">
+              Restore Account
+            </button>
+          ) : (
+            <button onClick={() => { onActionClick('Suspend', user); onClose(); }} className="w-full py-2 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-xl text-xs font-bold uppercase tracking-widest">
+              Suspend Account
+            </button>
+          )}
+          {user.role !== 'ADMIN' && (
+            <button onClick={() => { onDeleteClick?.(user); onClose(); }} className="w-full py-2 border border-destructive text-destructive hover:bg-destructive/10 rounded-xl text-xs font-bold uppercase tracking-widest">
+              Permanently Delete User
+            </button>
+          )}
+          <button onClick={onClose} className="w-full py-2 bg-muted text-muted-foreground hover:bg-muted/80 rounded-xl text-xs font-bold uppercase tracking-widest mt-2">
             Close
           </button>
         </div>
@@ -92,13 +108,11 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = data.filter(row => {
     const roleMatch = roleFilter === 'All' || row.role === roleFilter;
     const statusMatch = statusFilter === 'All' || row.status === statusFilter;
-    const searchMatch = !searchQuery || row.name.toLowerCase().includes(searchQuery.toLowerCase()) || (row.subtext && row.subtext.toLowerCase().includes(searchQuery.toLowerCase()));
-    return roleMatch && statusMatch && searchMatch;
+    return roleMatch && statusMatch;
   });
 
   const userShop = selectedUser
@@ -110,12 +124,18 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
       header: 'Name',
       accessorKey: 'name',
       cell: ({ row }) => (
-        <div className="flex items-center gap-3">
-          <div>
-            <div className="text-sm font-sans font-semibold text-foreground">{row.original.name}</div>
-            <div className="text-[10px] font-sans text-primary">{row.original.subtext}</div>
-          </div>
-        </div>
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {row.original.name}
+        </span>
+      )
+    },
+    {
+      header: 'Email',
+      accessorKey: 'email',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans text-muted-foreground leading-tight block">
+          {row.original.email || row.original.subtext || '—'}
+        </span>
       )
     },
     {
@@ -131,57 +151,20 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
     {
       header: 'Joined',
       accessorKey: 'joinDate',
-      cell: ({ row }) => <span className="text-sm font-sans text-muted-foreground">{row.original.joinDate}</span>
+      cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.joinDate}</span>
     },
     {
       header: 'Actions',
       id: 'actions',
-      meta: { headerClassName: 'text-right', cellClassName: 'flex items-center justify-end gap-3' },
+      meta: { headerClassName: 'text-center', cellClassName: 'flex items-center justify-center gap-3' },
       cell: ({ row }) => (
-        <>
-          <button
-            onClick={() => setSelectedUser(row.original)}
-            title="View Details"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          {row.original.role === 'SELLER' && (
-            <button
-              onClick={() => onActionClick('View Shop', row.original)}
-              title="View Shop"
-              className="text-primary hover:text-primary/70 transition-colors"
-            >
-              <Store className="w-4 h-4" />
-            </button>
-          )}
-          {row.original.status === 'SUSPENDED' ? (
-            <button
-              onClick={() => onActionClick('Restore', row.original)}
-              title="Restore Account"
-              className="text-primary hover:text-primary/70 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={() => onActionClick('Suspend', row.original)}
-              title="Suspend Account"
-              className="text-destructive hover:text-destructive/70 transition-colors"
-            >
-              <Ban className="w-4 h-4" />
-            </button>
-          )}
-          {row.original.role !== 'ADMIN' && (
-            <button
-              onClick={() => onDeleteClick?.(row.original)}
-              title="Permanently Delete User"
-              className="text-muted-foreground hover:text-destructive transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          )}
-        </>
+        <button
+          onClick={() => setSelectedUser(row.original)}
+          title="View Details"
+          className="text-muted-foreground hover:text-primary transition-colors p-1"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
       )
     }
   ], [onActionClick, onDeleteClick]);
@@ -209,18 +192,6 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
             emptyStateMessage="No users found."
             headerActions={
               <div className="flex items-center gap-2">
-                <div className="relative w-full md:w-64">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="input-search rounded-full"
-                  />
-                </div>
                 <select
                   value={statusFilter}
                   onChange={e => setStatusFilter(e.target.value)}
@@ -247,6 +218,8 @@ const UserDirectoryTable = ({ data, shops, onActionClick, onDeleteClick }) => {
           user={selectedUser}
           shop={userShop}
           onClose={() => setSelectedUser(null)}
+          onActionClick={onActionClick}
+          onDeleteClick={onDeleteClick}
         />
       )}
     </div>

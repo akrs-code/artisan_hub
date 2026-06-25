@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import Pagination from '../common/Pagination';
+import { Eye } from 'lucide-react';
 import DataTable from '../../../components/ui/DataTable';
 import StatusBadge from '../../../components/ui/StatusBadge';
 
@@ -45,6 +46,18 @@ const OrderQueueTable = ({ orders, totalOrders, currentlyShowing, onSelectOrder 
       ),
     },
     {
+      header: 'Payment',
+      accessorKey: 'paymentMethod',
+      cell: ({ row }) => {
+        const isCod = row.original.paymentMethod === 'cod';
+        return (
+          <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-widest font-bold ${isCod ? 'bg-amber-100 text-amber-800' : 'bg-primary/10 text-primary'}`}>
+            {isCod ? 'COD' : 'Card'}
+          </span>
+        );
+      },
+    },
+    {
       header: 'Total',
       accessorKey: 'total',
       meta: {
@@ -56,17 +69,32 @@ const OrderQueueTable = ({ orders, totalOrders, currentlyShowing, onSelectOrder 
           style: 'currency',
           currency: 'PHP',
         });
-        return <span className="text-[12px] font-sans text-muted-foreground font-bold">{formattedTotal}</span>;
+        return (
+          <span className="text-[12px] font-sans font-bold text-foreground leading-tight">{formattedTotal}</span>
+        );
       },
     },
     {
       header: 'Status',
       accessorKey: 'status',
       meta: {
-        headerClassName: 'text-right',
-        cellClassName: 'flex justify-end',
+        headerClassName: 'text-center',
+        cellClassName: 'flex justify-center',
       },
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+    {
+      header: 'Actions',
+      id: 'actions',
+      meta: {
+        headerClassName: 'text-center',
+        cellClassName: 'flex justify-center',
+      },
+      cell: () => (
+        <button className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">
+            <Eye className="w-4 h-4" />
+        </button>
+      ),
     },
   ], []);
 

@@ -99,7 +99,7 @@ const DataTable = ({ title, subtitle, columns, data = [], emptyStateMessage = "N
                                     const canSort = header.column.getCanSort() && enableSorting;
                                     const isSorted = header.column.getIsSorted();
                                     return (
-                                        <th key={header.id} className="py-3 px-5 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase whitespace-nowrap"
+                                        <th key={header.id} className={`py-3 px-5 text-[10px] font-sans font-bold tracking-widest text-muted-foreground uppercase whitespace-nowrap ${header.column.columnDef.meta?.headerClassName || ''}`}
                                             aria-sort={isSorted === 'asc' ? 'ascending' : isSorted === 'desc' ? 'descending' : 'none'}>
                                             {header.isPlaceholder ? null : canSort ? (
                                                 <button
