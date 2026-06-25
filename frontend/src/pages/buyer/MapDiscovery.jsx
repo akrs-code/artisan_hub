@@ -58,7 +58,12 @@ const MapDiscovery = () => {
     };
   }, []);
 
+  const [isRouting, setIsRouting] = useState(null);
+
   const handleDirections = async (artisan) => {
+    if (isRouting) return; // Prevent multiple clicks
+    setIsRouting(artisan._id);
+
     const fetchAndSetRoute = async (loc) => {
       try {
         const artisanLng = artisan.location.coordinates[0];
@@ -74,6 +79,8 @@ const MapDiscovery = () => {
       } catch (err) {
         console.error("Routing error:", err);
         alert("Error fetching directions.");
+      } finally {
+        setIsRouting(null);
       }
     };
 
@@ -90,10 +97,12 @@ const MapDiscovery = () => {
           (error) => {
             console.error("Error getting location:", error);
             alert("Could not access your location. Please enable location permissions.");
+            setIsRouting(null);
           }
         );
       } else {
         alert("Geolocation is not supported by your browser.");
+        setIsRouting(null);
       }
     }
   };
@@ -177,6 +186,7 @@ const MapDiscovery = () => {
                     toggleSaveShop={toggleSaveShop}
                     routeDistance={routeDistance}
                     onDirections={handleDirections}
+                    isRouting={isRouting === artisan._id}
                   />
                 </MarkerPopup>
               </MapMarker>

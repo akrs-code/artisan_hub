@@ -14,7 +14,7 @@ const TRUST_BADGES = [
 export const ProductPurchaseCard = ({
   product, quantity, onDecrement, onIncrement, onAddToCart, onBuyNow, addedFeedback,
 }) => (
-  <div className="space-y-4">
+  <div className="glass-card p-5 mt-8 space-y-4">
     {/* Qty + Add */}
     <div className="flex flex-col sm:flex-row gap-3">
       {/* Quantity control */}

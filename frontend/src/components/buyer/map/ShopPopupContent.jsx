@@ -6,7 +6,8 @@ export const ShopPopupContent = ({
   savedShopIds,
   toggleSaveShop,
   routeDistance,
-  onDirections
+  onDirections,
+  isRouting
 }) => {
   const isSaved = savedShopIds.includes(artisan._id);
 
@@ -74,10 +75,20 @@ export const ShopPopupContent = ({
         <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border/50">
           <button
             onClick={() => onDirections(artisan)}
-            className="btn-sm btn-outline flex-1 text-[10px]"
+            disabled={isRouting}
+            className="btn-sm btn-outline flex-1 text-[10px] disabled:opacity-50"
           >
-            <Navigation className="w-3 h-3" />
-            Directions
+            {isRouting ? (
+              <>
+                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                Routing...
+              </>
+            ) : (
+              <>
+                <Navigation className="w-3 h-3" />
+                Directions
+              </>
+            )}
           </button>
 
           <Link

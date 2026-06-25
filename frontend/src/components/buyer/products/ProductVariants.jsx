@@ -24,7 +24,7 @@ export const ProductVariants = ({
   selectedSize,
   onSizeChange,
 }) => (
-  <div className="space-y-5 mb-6 ec-card p-4 sm:p-5">
+  <div className="space-y-5 mb-6 glass-card p-5">
     
     {product.colors?.length > 0 && (
       <div>

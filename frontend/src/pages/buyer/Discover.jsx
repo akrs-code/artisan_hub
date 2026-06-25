@@ -137,28 +137,30 @@ const Discover = () => {
 
 
 
-      <DiscoverFilters
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        minPrice={minPrice}
-        setMinPrice={setMinPrice}
-        maxPrice={maxPrice}
-        setMaxPrice={setMaxPrice}
-        minRating={minRating}
-        setMinRating={setMinRating}
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={clearFilters}
-        resultCount={resultCount}
-        shopCount={shops.length}
-        productCount={products.length}
-      />
+      <div className="glass-card p-6 mb-8 mt-8">
+        <DiscoverFilters
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          minPrice={minPrice}
+          setMinPrice={setMinPrice}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+          minRating={minRating}
+          setMinRating={setMinRating}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+          resultCount={resultCount}
+          shopCount={shops.length}
+          productCount={products.length}
+        />
+      </div>
 
       {/* ── Product Grid ─────────────────────────────────────────────── */}
       {activeTab === 'products' && (

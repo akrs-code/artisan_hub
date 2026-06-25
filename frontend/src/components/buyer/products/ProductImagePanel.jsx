@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, Share2, ZoomIn } from 'lucide-react';
+import { Heart, Share2, ZoomIn, Star } from 'lucide-react';
 
 
 const getGalleryImages = (product) => {
@@ -21,25 +21,9 @@ export const ProductImagePanel = ({ product, isSaved, onToggleSave }) => {
   const gallery = getGalleryImages(product);
 
   return (
-    <div className="flex gap-3">
-      
-      <div className="flex flex-col gap-2 shrink-0">
-        {gallery.map((src, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveIdx(i)}
-            className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all duration-200 ${activeIdx === i
-                ? 'border-primary shadow-md scale-105'
-                : 'border-border/50 hover:border-primary/40 opacity-70 hover:opacity-100'
-              }`}
-          >
-            <img src={src} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.src = product.imageUrl; }} />
-          </button>
-        ))}
-      </div>
-
+    <div className="flex flex-col gap-3">
       {/* Main image */}
-      <div className="relative flex-1 aspect-square rounded-xl overflow-hidden bg-muted border border-border/40 group">
+      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-muted border border-border/40 group">
         <img
           src={gallery[activeIdx]}
           alt={product.name}
@@ -57,6 +41,8 @@ export const ProductImagePanel = ({ product, isSaved, onToggleSave }) => {
             </span>
           </div>
         )}
+
+
 
         {/* Action buttons */}
         <div className="absolute top-3 right-3 flex flex-col gap-2">
@@ -81,6 +67,22 @@ export const ProductImagePanel = ({ product, isSaved, onToggleSave }) => {
             <ZoomIn className="w-3 h-3" /> Click to zoom
           </span>
         </div>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="flex flex-row gap-2 shrink-0 overflow-x-auto pb-1 scrollbar-none">
+        {gallery.map((src, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveIdx(i)}
+            className={`w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200 ${activeIdx === i
+                ? 'border-primary shadow-md scale-100'
+                : 'border-border/50 hover:border-primary/40 opacity-70 hover:opacity-100 scale-95'
+              }`}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.src = product.imageUrl; }} />
+          </button>
+        ))}
       </div>
     </div>
   );
