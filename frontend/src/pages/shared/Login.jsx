@@ -170,7 +170,7 @@ const Login = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('abdulkhaliqsolaiman@gmail.com')}
+                  onClick={() => handleQuickLogin('marksantiago@gmail.com')}
                   disabled={isLoading}
                   className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
                 >

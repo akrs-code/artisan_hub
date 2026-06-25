@@ -70,9 +70,9 @@ const Orders = () => {
       id: 'actions',
       meta: { headerClassName: 'text-center', cellClassName: 'text-center' },
       cell: ({ row }) => (
-        <button 
+        <button
           onClick={() => setSelectedOrder(row.original)}
-          className="text-muted-foreground hover:text-primary transition-colors p-1" 
+          className="text-muted-foreground hover:text-primary transition-colors p-1"
           title="View Details"
         >
           <Eye className="w-4 h-4" />
@@ -125,7 +125,7 @@ const Orders = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full bg-background min-h-full">
 
-      
+
       <div className="mb-8">
         <h1 className="text-3xl font-headline font-bold text-foreground tracking-tight mb-1">Your Orders</h1>
         <p className="text-muted-foreground font-sans text-xs">Track and manage your artisan purchases.</p>
@@ -233,10 +233,10 @@ const Orders = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="p-6 max-h-[70vh] overflow-y-auto">
-             {selectedOrder && <OrderCard order={selectedOrder} onOrderUpdate={fetchOrders} />}
+            {selectedOrder && <OrderCard order={selectedOrder} onOrderUpdate={fetchOrders} />}
           </div>
           <div className="px-6 py-4 border-t border-border bg-muted/20">
-             <Button className="w-full" variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
+            <Button className="w-full" variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
