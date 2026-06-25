@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  FolderPlus,
-  Edit,
-  Trash2,
-  Search,
-  AlertCircle,
-  Loader2,
-  ListCollapse,
-} from "lucide-react";
+import { Plus, Edit, Trash2, FolderPlus, ListCollapse, Loader2, Eye } from 'lucide-react';
 import AdminStatCard from "../../components/admin/dashboard/AdminStatCard";
 import { categoriesAPI } from "../../services/api";
 import DataTable from "../../components/ui/DataTable";
@@ -15,15 +7,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ConfirmDialog from "../../components/ui/confirm-dialog";
+import toast from "react-hot-toast";
+
 const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(""); 
     const [isModalOpen, setIsModalOpen] = useState(false); 
     const [editingCategory, setEditingCategory] = useState(null); 
     const [formData, setFormData] = useState({ name:'', description:'' }); 
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
     
     const loadCategories = async () => { 
         try { 
@@ -52,14 +48,23 @@ const CategoriesPage = () => {
         setIsModalOpen(true); 
     }; 
     
-    const handleDeleteCategory = async (cat) => { 
-        if (!window.confirm(`⚠️ Are you sure you want to delete the category "${cat.name}"? This might affect products using it.`)) return; 
+    const confirmDelete = (cat) => {
+        setCategoryToDelete(cat);
+        setConfirmOpen(true);
+    };
+    
+    const executeDelete = async () => { 
+        if (!categoryToDelete) return;
         try { 
-            await categoriesAPI.deleteCategory(cat._id); 
+            await categoriesAPI.deleteCategory(categoryToDelete._id); 
+            toast.success('Category deleted successfully');
             await loadCategories(); 
         } catch (err) { 
-            alert(err.message ||'Failed to delete category.'); 
-        } 
+            toast.error(err.message ||'Failed to delete category.'); 
+        } finally {
+            setCategoryToDelete(null);
+            setConfirmOpen(false);
+        }
     }; 
     
     const handleFormSubmit = async (e) => { 
@@ -70,48 +75,42 @@ const CategoriesPage = () => {
             setError(''); 
             if (editingCategory) { 
                 await categoriesAPI.updateCategory(editingCategory._id, formData); 
+                toast.success('Category updated successfully');
             } else { 
                 await categoriesAPI.createCategory(formData); 
+                toast.success('Category created successfully');
             } 
             setIsModalOpen(false); 
             await loadCategories(); 
         } catch (err) { 
-            setError(err.message ||'Failed to save category.'); 
+            toast.error(err.message ||'Failed to save category.'); 
         } finally { 
             setIsSaving(false); 
         } 
     }; 
-    
-    const filteredCategories = categories.filter((cat) => { 
-        const q = searchQuery.toLowerCase(); 
-        return ( 
-            cat.name.toLowerCase().includes(q) || 
-            (cat.description && cat.description.toLowerCase().includes(q)) 
-        ); 
-    }); 
     
     const columns = useMemo(() => [
         {
             header: 'Category Name',
             accessorKey: 'name',
             cell: ({ row }) => (
-                <span className="text-sm font-bold text-foreground">{row.original.name}</span>
+                <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">{row.original.name}</span>
             )
         },
         {
             header: 'Description',
             accessorKey: 'description',
             cell: ({ row }) => (
-                <p className="text-xs text-muted-foreground max-w-md line-clamp-2 leading-relaxed">
+                <span className="text-[12px] font-sans text-muted-foreground max-w-[300px] truncate block leading-tight">
                     {row.original.description || 'No description listed.'}
-                </p>
+                </span>
             )
         },
         {
             header: 'Created On',
             accessorKey: 'createdAt',
             cell: ({ row }) => (
-                <span className="text-xs font-sans text-muted-foreground">
+                <span className="text-[12px] font-sans text-muted-foreground leading-tight block">
                     {new Date(row.original.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
             )
@@ -119,16 +118,11 @@ const CategoriesPage = () => {
         {
             header: 'Actions',
             id: 'actions',
-            meta: { headerClassName: 'text-right', cellClassName: 'text-right whitespace-nowrap' },
+            meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
             cell: ({ row }) => (
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(row.original)} className="text-muted-foreground hover:text-primary" title="Edit Category">
-                        <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(row.original)} className="text-muted-foreground hover:text-destructive" title="Delete Category">
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+                <button onClick={() => handleOpenEditModal(row.original)} className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">
+                    <Eye className="w-4 h-4" />
+                </button>
             )
         }
     ], []);
@@ -171,22 +165,8 @@ const CategoriesPage = () => {
                 <DataTable
                     title="All Categories"
                     columns={columns}
-                    data={filteredCategories}
-                    emptyStateMessage="No categories found matching your search."
-                    headerActions={
-                        <div className="relative w-full md:w-64">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <Input
-                                type="text"
-                                placeholder="Search categories..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 rounded-full"
-                            />
-                        </div>
-                    }
+                    data={categories}
+                    emptyStateMessage="No categories found."
                 />
             </div>
 
@@ -213,15 +193,30 @@ const CategoriesPage = () => {
                             </div> 
                         </div> 
                         {/* Footer */} 
-                        <div className="bg-muted/30 p-5 border-t border-border flex justify-end gap-3"> 
-                            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSaving} > Cancel </Button> 
-                            <Button type="submit" disabled={isSaving} > 
-                                {isSaving ? ( <> <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Saving... </> ) : ('Save Category')} 
-                            </Button> 
+                        <div className="bg-muted/30 p-5 border-t border-border flex justify-between gap-3"> 
+                            {editingCategory ? (
+                                <Button type="button" variant="destructive" onClick={() => { setIsModalOpen(false); confirmDelete(editingCategory); }} disabled={isSaving}> Delete </Button>
+                            ) : <div></div>}
+                            <div className="flex gap-2">
+                                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSaving} > Cancel </Button> 
+                                <Button type="submit" disabled={isSaving} > 
+                                    {isSaving ? ( <> <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Saving... </> ) : ('Save')} 
+                                </Button> 
+                            </div>
                         </div> 
                     </form> 
                 </DialogContent>
             </Dialog> 
+
+            <ConfirmDialog
+                isOpen={confirmOpen}
+                onClose={() => setConfirmOpen(false)}
+                onConfirm={executeDelete}
+                title="Delete Category"
+                message={`Are you sure you want to delete the category "${categoryToDelete?.name}"? This might affect products using it.`}
+                isDestructive={true}
+                confirmText="Delete"
+            />
         </div> 
     );
 };

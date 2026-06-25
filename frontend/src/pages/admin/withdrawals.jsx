@@ -1,15 +1,67 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Loader2, Banknote, Eye } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { StatusBadge } from '../../components/admin/common/StatusBadge';
 import DataTable from '../../components/ui/DataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+const WithdrawalDetailModal = ({ withdrawal, onClose, onUpdateStatus }) => {
+    if (!withdrawal) return null;
+    return (
+        <Dialog open={!!withdrawal} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-md p-0 overflow-hidden gap-0 border-border shadow-xl bg-card">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-muted/20">
+                    <DialogTitle className="text-lg font-headline font-bold text-foreground">
+                        Withdrawal Request
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="p-6 space-y-5">
+                    <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Account Information</p>
+                        <p className="text-sm font-semibold text-foreground">{withdrawal.method.toUpperCase()} - {withdrawal.accountName}</p>
+                        <p className="text-sm font-mono text-muted-foreground mt-0.5">{withdrawal.accountNumber}</p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Requested Amount</p>
+                        <p className="text-2xl font-headline font-bold text-foreground">
+                            {(withdrawal.amount / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+                        </p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Current Status</p>
+                        <StatusBadge status={withdrawal.status} />
+                    </div>
+                </div>
+                <div className="px-6 py-4 border-t border-border bg-muted/20 flex flex-col gap-2">
+                    {withdrawal.status === 'pending' && (
+                        <>
+                            <Button className="w-full flex items-center justify-center gap-2" onClick={() => { onUpdateStatus(withdrawal._id, 'approved'); onClose(); }}>
+                                <CheckCircle className="w-4 h-4" /> Approve
+                            </Button>
+                            <Button variant="destructive" className="w-full flex items-center justify-center gap-2" onClick={() => { onUpdateStatus(withdrawal._id, 'rejected'); onClose(); }}>
+                                <XCircle className="w-4 h-4" /> Reject
+                            </Button>
+                        </>
+                    )}
+                    {withdrawal.status === 'approved' && (
+                        <Button className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700" onClick={() => { onUpdateStatus(withdrawal._id, 'completed'); onClose(); }}>
+                            <Banknote className="w-4 h-4" /> Mark as Paid
+                        </Button>
+                    )}
+                    <Button variant="outline" className="w-full mt-2" onClick={onClose}>Close</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 const Withdrawals = () => {
     const [withdrawals, setWithdrawals] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedWithdrawal, setSelectedWithdrawal] = useState(null);
 
     useEffect(() => {
         fetchWithdrawals();
@@ -36,11 +88,6 @@ const Withdrawals = () => {
         }
     };
 
-    const filteredWithdrawals = withdrawals.filter(w =>
-        w.shop?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.accountName?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     // Map payout status to our unified badge vocabulary
     const normalizeStatus = (s) => {
         const map = { completed: 'COMPLETED', rejected: 'REJECTED', approved: 'APPROVED', pending: 'PENDING' };
@@ -52,7 +99,7 @@ const Withdrawals = () => {
             header: 'Requested On',
             accessorKey: 'createdAt',
             cell: ({ row }) => (
-                <span className="text-xs font-sans text-muted-foreground whitespace-nowrap">
+                <span className="text-[12px] font-sans text-muted-foreground leading-tight block whitespace-nowrap">
                     {new Date(row.original.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
             )
@@ -61,27 +108,43 @@ const Withdrawals = () => {
             header: 'Shop',
             accessorKey: 'shop',
             cell: ({ row }) => (
-                <p className="text-sm font-headline font-semibold text-foreground">{row.original.shop?.name || 'Unknown Shop'}</p>
+                <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">{row.original.shop?.name || 'Unknown Shop'}</span>
             )
         },
         {
-            header: 'Account Info',
+            header: 'Payout Method',
+            accessorKey: 'method',
+            cell: ({ row }) => (
+                <span className="text-[12px] font-sans text-muted-foreground leading-tight block uppercase tracking-widest font-bold">
+                    {row.original.method}
+                </span>
+            )
+        },
+        {
+            header: 'Account Name',
             accessorKey: 'accountName',
             cell: ({ row }) => (
-                <div>
-                    <p className="text-xs font-sans text-foreground font-semibold uppercase">{row.original.method}</p>
-                    <p className="text-[10px] font-sans text-muted-foreground">{row.original.accountName}</p>
-                    <p className="text-[10px] font-sans text-muted-foreground">{row.original.accountNumber}</p>
-                </div>
+                <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+                    {row.original.accountName}
+                </span>
+            )
+        },
+        {
+            header: 'Account Number',
+            accessorKey: 'accountNumber',
+            cell: ({ row }) => (
+                <span className="text-[12px] font-sans text-muted-foreground font-mono leading-tight block">
+                    {row.original.accountNumber}
+                </span>
             )
         },
         {
             header: 'Amount',
             accessorKey: 'amount',
             cell: ({ row }) => (
-                <p className="text-sm font-headline font-bold text-primary">
+                <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
                     {(row.original.amount / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
-                </p>
+                </span>
             )
         },
         {
@@ -94,46 +157,16 @@ const Withdrawals = () => {
         {
             header: 'Actions',
             id: 'actions',
-            meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
-            cell: ({ row }) => {
-                const w = row.original;
-                return (
-                    <div className="flex justify-end gap-2">
-                        {w.status === 'pending' && (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleUpdateStatus(w._id, 'approved')}
-                                    className="text-primary hover:text-primary"
-                                    title="Approve"
-                                >
-                                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
-                                    Approve
-                                </Button>
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => handleUpdateStatus(w._id, 'rejected')}
-                                    title="Reject"
-                                >
-                                    <XCircle className="w-3.5 h-3.5 mr-1.5" />
-                                    Reject
-                                </Button>
-                            </>
-                        )}
-                        {w.status === 'approved' && (
-                            <Button
-                                size="sm"
-                                onClick={() => handleUpdateStatus(w._id, 'completed')}
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                            >
-                                Mark Paid
-                            </Button>
-                        )}
-                    </div>
-                );
-            }
+            meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
+            cell: ({ row }) => (
+                <button
+                    onClick={() => setSelectedWithdrawal(row.original)}
+                    className="text-muted-foreground hover:text-primary transition-colors p-1"
+                    title="View Details"
+                >
+                    <Eye className="w-4 h-4" />
+                </button>
+            )
         }
     ], [handleUpdateStatus]);
 
@@ -164,34 +197,17 @@ const Withdrawals = () => {
             <div className="w-full">
                 <DataTable
                     title="All Requests"
-                    subtitle={`${filteredWithdrawals.length} of ${withdrawals.length} requests`}
                     columns={columns}
-                    data={filteredWithdrawals}
-                    emptyStateMessage="No withdrawal requests found."
-                    headerActions={
-                        <div className="relative w-full md:w-64">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <Input
-                                type="text"
-                                placeholder="Search by shop or name..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 rounded-full"
-                            />
-                        </div>
-                    }
-                    footer={
-                        filteredWithdrawals.length > 0 && (
-                            <div className="text-xs font-sans text-muted-foreground w-full">
-                                Showing <span className="font-semibold text-foreground">{filteredWithdrawals.length}</span> of{' '}
-                                <span className="font-semibold text-foreground">{withdrawals.length}</span> requests
-                            </div>
-                        )
-                    }
+                    data={withdrawals}
+                    emptyStateMessage="No withdrawals matching your search."
                 />
             </div>
+
+            <WithdrawalDetailModal
+                withdrawal={selectedWithdrawal}
+                onClose={() => setSelectedWithdrawal(null)}
+                onUpdateStatus={handleUpdateStatus}
+            />
         </div>
     );
 };

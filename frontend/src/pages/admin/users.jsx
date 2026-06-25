@@ -3,12 +3,22 @@ import { Users, Store, Ban, UserPlus, Loader2 } from 'lucide-react';
 import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import UserDirectoryTable from '../../components/admin/users/UserDirectoryTable';
 import { adminAPI } from '../../services/api';
+import ConfirmDialog from '../../components/ui/confirm-dialog';
+import toast from 'react-hot-toast';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [shops, setShops] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmState, setConfirmState] = useState({
+    title: '',
+    message: '',
+    isDestructive: false,
+    confirmText: 'Confirm',
+    onConfirm: () => {}
+  });
 
   const loadUserData = async () => {
     try {
@@ -33,29 +43,47 @@ const UsersPage = () => {
 
   const handleActionClick = async (actionName, row) => {
     if (actionName === 'Suspend' || actionName === 'Restore') {
-      if (!window.confirm(`Are you sure you want to ${actionName.toLowerCase()} ${row.name}?`)) return;
-      try {
-        await adminAPI.toggleUser(row.id);
-        const usersRes = await adminAPI.getUsers();
-        setUsers(usersRes?.data || []);
-      } catch (err) {
-        alert(err.message || 'Failed to update user status.');
-      }
+      setConfirmState({
+        title: `${actionName} User`,
+        message: `Are you sure you want to ${actionName.toLowerCase()} ${row.name}?`,
+        isDestructive: actionName === 'Suspend',
+        confirmText: actionName,
+        onConfirm: async () => {
+          try {
+            await adminAPI.toggleUser(row.id);
+            toast.success(`User ${actionName.toLowerCase()}d successfully.`);
+            const usersRes = await adminAPI.getUsers();
+            setUsers(usersRes?.data || []);
+          } catch (err) {
+            toast.error(err.message || 'Failed to update user status.');
+          }
+        }
+      });
+      setConfirmOpen(true);
     } else if (actionName === 'View Shop') {
       const userShop = shops.find(s => s.owner?._id === row.id || s.owner === row.id);
-      if (!userShop) { alert('No shop associated with this seller.'); }
+      if (!userShop) { toast.error('No shop associated with this seller.'); }
     }
   };
 
   const handleDeleteUser = async (row) => {
-    if (!window.confirm(`⚠️ This will permanently delete "${row.name}" and all their data. This cannot be undone. Continue?`)) return;
-    try {
-      await adminAPI.deleteUser(row.id);
-      const usersRes = await adminAPI.getUsers();
-      setUsers(usersRes?.data || []);
-    } catch (err) {
-      alert(err.message || 'Failed to delete user.');
-    }
+    setConfirmState({
+      title: 'Delete User',
+      message: `This will permanently delete "${row.name}" and all their data. This cannot be undone. Continue?`,
+      isDestructive: true,
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        try {
+          await adminAPI.deleteUser(row.id);
+          toast.success('User deleted successfully.');
+          const usersRes = await adminAPI.getUsers();
+          setUsers(usersRes?.data || []);
+        } catch (err) {
+          toast.error(err.message || 'Failed to delete user.');
+        }
+      }
+    });
+    setConfirmOpen(true);
   };
 
   const directory = users.map(user => {
@@ -156,6 +184,12 @@ const UsersPage = () => {
           onDeleteClick={handleDeleteUser}
         />
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        {...confirmState}
+      />
     </div>
   );
 };

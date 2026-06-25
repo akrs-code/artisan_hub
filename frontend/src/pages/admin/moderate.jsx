@@ -4,31 +4,29 @@ import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import { adminAPI } from '../../services/api';
 import DataTable from '../../components/ui/DataTable';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import toast from 'react-hot-toast';
 
 
 const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
     if (!product) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden z-10 animate-in zoom-in-95 duration-200">
+        <Dialog open={!!product} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-lg p-0 overflow-hidden gap-0 border-border shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-                    <div>
-                        <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest block mb-0.5">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-card">
+                    <DialogTitle>
+                        <span className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest block mb-0.5 text-left">
                             Product Review
                         </span>
-                        <h3 className="font-headline font-bold text-foreground text-lg leading-tight">{product.productName}</h3>
-                    </div>
-                    <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+                        <span className="font-headline font-bold text-foreground text-lg leading-tight block text-left">
+                            {product.productName}
+                        </span>
+                    </DialogTitle>
+                </DialogHeader>
 
-                
-                <div className="p-6 space-y-5">
-                    
+                <div className="p-6 space-y-5 bg-card">
                     <div className="w-full h-48 rounded-xl overflow-hidden bg-muted border border-border">
                         <img src={product.image} alt={product.productName} className="w-full h-full object-cover" />
                     </div>
@@ -57,12 +55,8 @@ const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
                 </div>
 
                 {/* Actions */}
-                <div className="px-6 py-4 border-t border-border flex gap-3">
-                    <Button
-                        variant="secondary"
-                        onClick={onClose}
-                        className="flex-1 uppercase tracking-widest"
-                    >
+                <div className="px-6 py-4 border-t border-border flex gap-3 bg-muted/30">
+                    <Button variant="outline" onClick={onClose} className="flex-1 uppercase tracking-widest">
                         Close
                     </Button>
                     <Button
@@ -77,8 +71,8 @@ const ProductDetailModal = ({ product, onClose, onToggleVisibility }) => {
                         )}
                     </Button>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -107,10 +101,11 @@ const Moderate = () => {
         try {
             setActionLoading(true);
             await adminAPI.toggleProduct(product.rawId);
+            toast.success(`Product ${product.status === 'ACTIVE' ? 'hidden' : 'restored'} successfully.`);
             setSelectedProduct(null);
             fetchProducts();
         } catch (err) {
-            alert(err.message || 'Failed to update product visibility.');
+            toast.error(err.message || 'Failed to update product visibility.');
         } finally {
             setActionLoading(false);
         }
@@ -134,26 +129,20 @@ const Moderate = () => {
             header: 'Product',
             accessorKey: 'product',
             cell: ({ row }) => (
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
-                        <img src={row.original.image} alt={row.original.productName} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                        <div className="text-[13px] font-sans font-bold text-foreground">{row.original.productName}</div>
-                        <div className="text-[9px] font-sans text-muted-foreground uppercase tracking-wider">#{row.original.id}</div>
-                    </div>
-                </div>
+                <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+                    {row.original.productName}
+                </span>
             )
         },
         {
             header: 'Shop',
             accessorKey: 'shopName',
-            cell: ({ row }) => <span className="text-[13px] font-sans text-foreground font-medium">{row.original.shopName}</span>
+            cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.shopName}</span>
         },
         {
             header: 'Listed On',
             accessorKey: 'flaggedDate',
-            cell: ({ row }) => <span className="text-[13px] font-sans text-muted-foreground">{row.original.flaggedDate}</span>
+            cell: ({ row }) => <span className="text-[12px] font-sans text-muted-foreground leading-tight block">{row.original.flaggedDate}</span>
         },
         {
             header: 'Status',
@@ -172,15 +161,15 @@ const Moderate = () => {
         {
             header: 'Actions',
             id: 'actions',
-            meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
+            meta: { headerClassName: 'text-center', cellClassName: 'flex justify-center' },
             cell: ({ row }) => (
-                <Button
-                    variant="outline"
-                    size="sm"
+                <button
                     onClick={() => setSelectedProduct(row.original)}
+                    className="text-[12px] text-muted-foreground hover:text-primary transition-colors p-1"
+                    title="View Details"
                 >
-                    <ExternalLink className="w-3 h-3 mr-1.5" /> Review
-                </Button>
+                    <Eye className="w-4 h-4" />
+                </button>
             )
         }
     ], []);

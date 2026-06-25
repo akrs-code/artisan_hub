@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Store, Banknote, BadgeCheck, Users, Loader2 } from 'lucide-react';
 import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
-import PlatformGrowthChart from '../../components/admin/analytics/PlatformGrowthChart';
 import SystemAlerts from '../../components/admin/dashboard/SystemAlerts';
 import CategoryPerformanceTable from '../../components/admin/analytics/CategoryPerformanceTable';
 import { adminAPI } from '../../services/api';
@@ -126,14 +125,9 @@ const Overview = () => {
                 />
             </div>
 
-            {/* Chart + Alerts */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-                <div className="xl:col-span-2">
-                    <PlatformGrowthChart data={stats.growthData} />
-                </div>
-                <div className="xl:col-span-1">
-                    <SystemAlerts alerts={systemAlerts} />
-                </div>
+            {/* Alerts */}
+            <div className="mb-6">
+                <SystemAlerts alerts={systemAlerts} />
             </div>
 
             {/* Category Table */}

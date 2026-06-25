@@ -17,6 +17,9 @@ import AdminStatCard from '../../components/admin/dashboard/AdminStatCard';
 import ApplicationsTable from '../../components/admin/shops/ApplicationsTable';
 import { adminAPI } from '../../services/api';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ConfirmDialog from '../../components/ui/confirm-dialog';
+import toast from 'react-hot-toast';
 
 const Verify = () => {
     const [shops, setShops] = useState([]);
@@ -24,6 +27,8 @@ const Verify = () => {
     const [error, setError] = useState('');
     const [selectedShop, setSelectedShop] = useState(null);
     const [isActioning, setIsActioning] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [confirmState, setConfirmState] = useState({ shopId: null, status: null });
 
     const loadShops = async () => {
         try {
@@ -42,20 +47,26 @@ const Verify = () => {
         loadShops();
     }, []);
 
-    const handleVerifyAction = async (shopId, status) => {
-        const confirmMsg = `Are you sure you want to set this shop status to ${status.toUpperCase()}?`;
-        if (!window.confirm(confirmMsg)) return;
+    const confirmVerifyAction = (shopId, status) => {
+        setConfirmState({ shopId, status });
+        setConfirmOpen(true);
+    };
+
+    const executeVerifyAction = async () => {
+        const { shopId, status } = confirmState;
+        if (!shopId) return;
 
         try {
             setIsActioning(true);
             await adminAPI.verifyShop(shopId, status);
-            alert(`Shop has been successfully ${status}.`);
+            toast.success(`Shop has been successfully ${status}.`);
             setSelectedShop(null);
             await loadShops();
         } catch (err) {
-            alert(err.message || 'Failed to update shop status.');
+            toast.error(err.message || 'Failed to update shop status.');
         } finally {
             setIsActioning(false);
+            setConfirmOpen(false);
         }
     };
 
@@ -160,37 +171,23 @@ const Verify = () => {
             </div>
 
             
-            {selectedShop && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-                    
-                    <div 
-                        className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity"
-                        onClick={() => setSelectedShop(null)}
-                    />
-                    
-                    {/* Modal Dialog */}
-                    <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto transform transition-all">
-                        {/* Header */}
-                        <div className="sticky top-0 bg-card flex items-center justify-between p-6 border-b border-border z-10">
-                            <div>
-                                <h3 className="text-lg font-headline font-bold text-foreground flex items-center gap-2">
-                                    <BadgeCheck className="w-5 h-5 text-primary" />
-                                    Review Shop Application
-                                </h3>
-                                <p className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider mt-0.5">
-                                    {selectedShop.id} — Status: {selectedShop.status}
-                                </p>
+            <Dialog open={!!selectedShop} onOpenChange={(open) => !open && setSelectedShop(null)}>
+                <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 border-border shadow-xl">
+                    {selectedShop && (
+                        <>
+                            <DialogHeader className="px-6 py-4 border-b border-border bg-card">
+                        <DialogTitle className="flex flex-col gap-1 text-left">
+                            <div className="flex items-center gap-2">
+                                <BadgeCheck className="w-5 h-5 text-primary" />
+                                <span className="text-lg font-headline font-bold text-foreground">Review Shop Application</span>
                             </div>
-                            <button 
-                                onClick={() => setSelectedShop(null)}
-                                className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-full p-2 transition-colors focus:outline-none"
-                            >
-                                <XIcon className="w-5 h-5" />
-                            </button>
-                        </div>
+                            <span className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+                                {selectedShop?.id} — Status: {selectedShop?.status}
+                            </span>
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        
-                        <div className="p-6 space-y-6">
+                    <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto bg-card">
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
@@ -305,14 +302,14 @@ const Verify = () => {
                                 <div className="flex items-center gap-3">
                                     <Button
                                         variant="destructive"
-                                        onClick={() => handleVerifyAction(selectedShop._id, 'rejected')}
+                                        onClick={() => confirmVerifyAction(selectedShop._id, 'rejected')}
                                         disabled={isActioning}
                                     >
                                         <XIcon className="w-4 h-4 mr-1.5" />
                                         Reject
                                     </Button>
                                     <Button
-                                        onClick={() => handleVerifyAction(selectedShop._id, 'verified')}
+                                        onClick={() => confirmVerifyAction(selectedShop._id, 'verified')}
                                         disabled={isActioning}
                                     >
                                         <Check className="w-4 h-4 mr-1.5" />
@@ -321,9 +318,19 @@ const Verify = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
-            )}
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <ConfirmDialog
+                isOpen={confirmOpen}
+                onClose={() => setConfirmOpen(false)}
+                onConfirm={executeVerifyAction}
+                title="Verify Shop Application"
+                message={`Are you sure you want to set this shop status to ${confirmState.status?.toUpperCase()}?`}
+                isDestructive={confirmState.status === 'rejected'}
+            />
         </div>
     );
 };
