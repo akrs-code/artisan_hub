@@ -301,8 +301,8 @@ const Checkout = () => {
     return null;
   }
 
-  const codHandlingFee = 0;
-  const grandTotal = cartTotal + SHIPPING_FEE;
+  const codHandlingFee = paymentMethod === 'cod' ? 3000 : 0;
+  const grandTotal = cartTotal + SHIPPING_FEE + codHandlingFee;
 
   const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
   const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
@@ -577,6 +577,27 @@ const Checkout = () => {
                   />
                 </label>
 
+                {/* COD option */}
+                <label
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                    paymentMethod === 'cod'
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                      : 'border-border hover:border-primary/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className="text-sm font-headline font-bold text-foreground">Cash on Delivery (COD)</span>
+                  </div>
+                  <input
+                    type="radio"
+                    name="paymentMethodSelect"
+                    checked={paymentMethod === 'cod'}
+                    onChange={() => setPaymentMethod('cod')}
+                    className="accent-primary w-4 h-4 cursor-pointer"
+                  />
+                </label>
+
               </div>
 
               {/* Progressive Disclosures */}
@@ -795,8 +816,12 @@ const Checkout = () => {
             </div>
             
             <div>
-              <h2 className="text-2xl font-headline font-bold text-foreground">Payment Successful!</h2>
-              <p className="text-muted-foreground text-xs font-sans mt-1">Thank you for supporting local artisans.</p>
+              <h2 className="text-2xl font-headline font-bold text-foreground">
+                {paymentMethod === 'cod' ? 'Order Confirmed!' : 'Payment Successful!'}
+              </h2>
+              <p className="text-muted-foreground text-xs font-sans mt-1">
+                {paymentMethod === 'cod' ? 'You will pay upon delivery. Please prepare exact change.' : 'Thank you for supporting local artisans.'}
+              </p>
             </div>
 
             {createdOrder && (

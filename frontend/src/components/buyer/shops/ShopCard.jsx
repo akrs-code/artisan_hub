@@ -12,7 +12,7 @@ export const ShopCard = ({ shop }) => {
       className="ec-card-img ec-card-hover flex flex-col h-full cursor-pointer group"
     >
       {/* Cover image */}
-      <div className="relative h-36 sm:h-40 overflow-hidden bg-muted shrink-0">
+      <div className="relative h-48 sm:h-52 overflow-hidden bg-muted shrink-0">
         <img
           src={shop.coverUrl}
           alt={`${shop.name} cover`}

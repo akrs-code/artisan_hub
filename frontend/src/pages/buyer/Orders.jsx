@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Package, PartyPopper, Search, Filter, Loader2 } from 'lucide-react';
+import { Package, PartyPopper, Search, Filter, Loader2, Eye } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
 import { OrderCard } from '@/components/buyer/orders/OrderCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import DataTable from '@/components/ui/DataTable';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const STATUS_OPTIONS = ['All', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
@@ -16,6 +19,67 @@ const Orders = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const columns = useMemo(() => [
+    {
+      header: 'Order ID',
+      accessorKey: '_id',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-primary leading-tight block uppercase tracking-widest font-mono">
+          #{row.original._id.substring(0, 8)}
+        </span>
+      ),
+    },
+    {
+      header: 'Date',
+      accessorKey: 'createdAt',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans text-muted-foreground leading-tight block">
+          {new Date(row.original.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        </span>
+      )
+    },
+    {
+      header: 'Shop',
+      accessorKey: 'shop',
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {row.original.shop?.name || 'Artisan Shop'}
+        </span>
+      )
+    },
+    {
+      header: 'Total',
+      accessorKey: 'total',
+      meta: { headerClassName: 'text-right', cellClassName: 'text-right' },
+      cell: ({ row }) => (
+        <span className="text-[12px] font-sans font-bold text-foreground leading-tight block">
+          {(row.original.total / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+        </span>
+      )
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      meta: { headerClassName: 'text-center', cellClassName: 'text-center' },
+      cell: ({ row }) => <StatusBadge status={row.original.status} />
+    },
+    {
+      header: 'Actions',
+      id: 'actions',
+      meta: { headerClassName: 'text-center', cellClassName: 'text-center' },
+      cell: ({ row }) => (
+        <button 
+          onClick={() => setSelectedOrder(row.original)}
+          className="text-muted-foreground hover:text-primary transition-colors p-1" 
+          title="View Details"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+      )
+    }
+  ], []);
 
   const fetchOrders = async () => {
     try {
@@ -148,14 +212,34 @@ const Orders = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredOrders.map((order) => (
-                <OrderCard key={order._id} order={order} onOrderUpdate={fetchOrders} />
-              ))}
+            <div className="mt-4">
+              <DataTable
+                columns={columns}
+                data={filteredOrders}
+                emptyStateMessage="No orders found."
+              />
             </div>
           )}
         </>
       )}
+
+      {/* Order Details Modal */}
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent className="max-w-xl p-0 overflow-hidden gap-0 border-border shadow-xl bg-card">
+          <DialogHeader className="px-6 py-4 border-b border-border bg-muted/20">
+            <DialogTitle className="text-lg font-headline font-bold text-foreground flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
+              Order Details
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6 max-h-[70vh] overflow-y-auto">
+             {selectedOrder && <OrderCard order={selectedOrder} onOrderUpdate={fetchOrders} />}
+          </div>
+          <div className="px-6 py-4 border-t border-border bg-muted/20">
+             <Button className="w-full" variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
