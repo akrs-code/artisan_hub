@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { shopsAPI, productsAPI } from '../../services/api';
 import { ProductCard } from '@/components/buyer/products/ProductCard';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { StarRating } from '@/components/ui/star-rating';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -111,39 +111,49 @@ const ShopDetail = () => {
 
   return (
     <div className="w-full pb-24 bg-background min-h-full">
-      <div className="relative h-[55vh] w-full overflow-hidden">
+      <div className="relative min-h-[70vh] w-full overflow-hidden flex items-end justify-center pb-16 pt-32">
         <img
           src={shop.coverUrl || 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1920&q=80'}
           alt={`${shop.name} cover`}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-neutral-dark/80 via-neutral-dark/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-neutral-dark/30 via-neutral-dark/60 to-neutral-dark/95" />
 
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-end pb-12 px-8 text-center">
-          <span className="text-white/70 text-[10px] font-sans font-bold uppercase tracking-[0.25em] mb-3">
-            {shop.category}
-          </span>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold tracking-tight text-white mb-4 leading-none">
-            {shop.name}
-          </h1>
-          <p className="text-white/80 text-base md:text-lg font-body max-w-xl leading-relaxed mb-8">
-            {shop.description}
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-white bg-white/15 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(shop.rating || 0) ? 'fill-white text-white' : 'text-white/30'}`} />
-              ))}
-              <span className="text-xs font-sans font-bold ml-1">{(shop.rating || 0).toFixed(1)}</span>
+        <div className="relative z-10 flex flex-col items-center text-center w-full max-w-4xl px-6">
+          {/* Shop Logo Avatar */}
+          <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl mb-6 bg-background shrink-0 hover:scale-105 transition-transform duration-500">
+             <img 
+               src={shop.logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(shop.name)}&background=2C3E50&color=fff&size=256`}
+               alt={`${shop.name} logo`}
+               className="w-full h-full object-cover"
+             />
+          </div>
+
+          {/* Glass Info Card */}
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-glass rounded-[2rem] p-8 md:p-10 w-full hover:border-white/30 transition-colors duration-500">
+            <span className="inline-block text-primary-foreground/90 text-[10px] font-sans font-bold uppercase tracking-[0.3em] mb-4 bg-primary/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-primary/30">
+              {shop.category || 'Artisan Shop'}
+            </span>
+            <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight text-white mb-4 leading-none drop-shadow-md">
+              {shop.name}
+            </h1>
+            <p className="text-white/80 text-sm md:text-base font-body max-w-2xl mx-auto leading-relaxed mb-8">
+              {shop.description}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="flex items-center gap-1.5 text-white bg-black/20 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10 shadow-inner">
+                <StarRating rating={shop.rating || 0} maxStars={5} size="sm" interactive={false} />
+                <span className="text-sm font-sans font-bold ml-1">{(shop.rating || 0).toFixed(1)}</span>
+                <span className="text-[10px] text-white/60 ml-1">({reviews.length})</span>
+              </div>
+              <Button
+                onClick={() => toggleSaveShop(shop._id)}
+                className={`gap-2 h-11 px-6 rounded-xl transition-all ${isSaved ? 'bg-primary text-white hover:bg-primary/90' : 'bg-white text-neutral-dark hover:bg-neutral-100 hover:scale-105 shadow-lg'}`}
+              >
+                <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                {isSaved ? 'Saved to Favorites' : 'Save Shop'}
+              </Button>
             </div>
-            <Button
-              onClick={() => toggleSaveShop(shop._id)}
-              variant={isSaved ? "default" : "outline"}
-              className={`gap-2 ${isSaved ? '' : 'bg-white/15 backdrop-blur-md text-white border-white/30 hover:bg-white/25 hover:text-white'}`}
-            >
-              <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
-              {isSaved ? 'Saved' : 'Save Shop'}
-            </Button>
           </div>
         </div>
       </div>
@@ -225,23 +235,20 @@ const ShopDetail = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
               {/* Review Summary Widget */}
-              <Card className="p-6 lg:col-span-1">
-                <CardContent className="p-0 space-y-5">
-                  <div>
-                    <h3 className="text-sm font-sans font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Shop Rating</h3>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-headline font-bold text-foreground">{(shop.rating || 0).toFixed(1)}</span>
-                      <span className="text-sm text-muted-foreground font-sans">out of 5</span>
-                    </div>
-                    <div className="flex gap-0.5 mt-2.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className={`w-5 h-5 ${star <= Math.round(shop.rating || 0) ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} />
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground font-sans mt-2">
-                      Based on {reviews.length} customer reviews
-                    </p>
+              <div className="glass-card p-6 lg:col-span-1 space-y-5">
+                <div>
+                  <h3 className="text-xs font-sans font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Shop Rating</h3>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-6xl font-headline font-bold text-foreground">{(shop.rating || 0).toFixed(1)}</span>
+                    <span className="text-sm text-muted-foreground font-sans">out of 5</span>
                   </div>
+                  <div className="mt-3">
+                    <StarRating rating={shop.rating || 0} maxStars={5} size="lg" />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-3">
+                    Based on {reviews.length} customer reviews
+                  </p>
+                </div>
 
                   {/* Rating Distribution Bars */}
                   <div className="space-y-2.5 pt-4 border-t border-border/40">
@@ -259,31 +266,22 @@ const ShopDetail = () => {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+              </div>
 
               {/* Individual Reviews List */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Submit New Review Form */}
-                <Card className="p-5 border border-primary/20 bg-primary/5">
-                  <CardContent className="p-0">
-                    <form onSubmit={handleSubmitReview} className="space-y-4">
-                      <h3 className="font-headline font-bold text-base text-neutral-dark">Write a Review</h3>
+                <div className="glass-card p-6 border border-primary/20 bg-primary/5">
+                  <form onSubmit={handleSubmitReview} className="space-y-5">
+                    <div>
+                      <h3 className="font-headline font-bold text-lg text-neutral-dark mb-1">Write a Review</h3>
                       <p className="text-xs text-muted-foreground font-sans">Share your experience with this artisan shop.</p>
+                    </div>
                       
                       {/* Rating selection */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-sans text-muted-foreground font-bold uppercase tracking-wider mr-2">Your Rating:</span>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            type="button"
-                            key={star}
-                            onClick={() => setRating(star)}
-                            className="hover:scale-110 transition-transform focus:outline-none"
-                          >
-                            <Star className={`w-6 h-6 ${star <= rating ? 'fill-primary text-primary' : 'text-neutral-dark/20'}`} />
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-sans text-muted-foreground font-bold uppercase tracking-wider">Your Rating:</span>
+                        <StarRating rating={rating} onRatingChange={setRating} interactive size="xl" />
                       </div>
 
                       {/* Comment Box */}
@@ -300,27 +298,27 @@ const ShopDetail = () => {
                         <p className="text-xs font-sans text-destructive">{reviewError}</p>
                       )}
 
-                      <div className="flex justify-end">
+                      <div className="flex justify-end mt-2">
                         <Button
                           type="submit"
                           disabled={isSubmittingReview}
+                          className="px-6"
                         >
                           <Send className="w-4 h-4 mr-2" />
                           Submit Review
                         </Button>
                       </div>
-                    </form>
-                  </CardContent>
-                </Card>
+                  </form>
+                </div>
 
                 <h3 className="text-sm font-sans font-bold text-muted-foreground uppercase tracking-widest mb-2.5">Customer Reviews</h3>
                 {reviews.length === 0 ? (
                   <p className="text-xs text-muted-foreground font-sans py-4">No reviews yet. Be the first to review this shop!</p>
                 ) : (
-                  reviews.map((rev) => (
-                    <Card key={rev._id} className="p-5">
-                      <CardContent className="p-0 space-y-3">
-                        <div className="flex items-center justify-between">
+                  <div className="space-y-4">
+                    {reviews.map((rev) => (
+                      <div key={rev._id} className="glass-card p-5 hover:border-primary/30 transition-colors duration-300">
+                        <div className="flex items-center justify-between mb-3">
                           <div>
                             <h4 className="font-headline font-bold text-foreground text-sm">{rev.user?.name || 'Anonymous Customer'}</h4>
                             <span className="text-[10px] text-muted-foreground font-sans">
@@ -328,16 +326,16 @@ const ShopDetail = () => {
                             </span>
                           </div>
                           <div className="flex items-center gap-0.5 bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10">
-                            <Star className="w-2.5 h-2.5 fill-primary text-primary" />
-                            <span className="text-[10px] font-sans font-bold text-primary">{(rev.rating || 0).toFixed(1)}</span>
+                            <StarRating rating={rev.rating || 0} maxStars={5} size="sm" />
+                            <span className="text-[10px] font-sans font-bold text-primary ml-1">{(rev.rating || 0).toFixed(1)}</span>
                           </div>
                         </div>
-                        <p className="text-xs text-muted-foreground font-body leading-relaxed">
+                        <p className="text-sm text-foreground/80 font-body leading-relaxed">
                           {rev.comment}
                         </p>
-                      </CardContent>
-                    </Card>
-                  ))
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

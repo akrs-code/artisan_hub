@@ -75,9 +75,9 @@ const ReviewModal = ({ title, subtitle, rating, onRatingChange, comment, onComme
 
 // ── Detail Row ────────────────────────────────────────────────────────────────
 const DetailRow = ({ label, value, bold }) => (
-  <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-0 last:pt-1">
-    <span className="text-xs text-muted-foreground font-sans">{label}</span>
-    <span className={`text-xs font-sans ${bold ? 'font-headline font-bold text-sm text-primary' : 'font-semibold text-foreground'}`}>
+  <div className="flex items-center justify-between py-1 border-b border-border/30 last:border-0 last:pt-0.5">
+    <span className="text-[11px] text-muted-foreground font-sans">{label}</span>
+    <span className={`text-[11px] font-sans ${bold ? 'font-headline font-bold text-xs text-primary' : 'font-semibold text-foreground'}`}>
       {value}
     </span>
   </div>
@@ -162,10 +162,10 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
   return (
     <>
       {/* Card — NO overflow-hidden so nothing clips */}
-      <div className="bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col hover:border-primary/30 hover:shadow-md transition-all duration-200">
+      <div className="bg-card border border-border rounded-xl p-3 sm:p-4 flex flex-col hover:border-primary/30 hover:shadow-md transition-all duration-200">
 
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className="flex items-start justify-between gap-3 pb-4 mb-4 border-b border-border/60">
+        <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-border/60">
           <div className="min-w-0">
             <p className="text-[9px] font-sans font-bold text-primary uppercase tracking-widest mb-1">
               Order #{order._id.slice(-8).toUpperCase()}
@@ -186,14 +186,14 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
         </div>
 
         {/* ── Items ──────────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col gap-2 mb-3">
           {visibleItems.map((item, idx) => {
             const hasReviewed = reviewsSubmitted[item.name];
             return (
-              <div key={idx} className="flex items-start gap-3 py-2.5 border-b border-border/30 last:border-0">
+              <div key={idx} className="flex items-start gap-2 py-1.5 border-b border-border/30 last:border-0">
                 {/* Icon */}
-                <div className="w-9 h-9 bg-primary/8 rounded-xl flex items-center justify-center shrink-0 border border-primary/12">
-                  <Package className="w-4 h-4 text-primary" />
+                <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center shrink-0 border border-primary/12">
+                  <Package className="w-3.5 h-3.5 text-primary" />
                 </div>
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -276,7 +276,7 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
         {/* ── Footer: total + actions ───────────────────────────────── */}
         <div className="mt-auto">
           {/* Total + action row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-muted/30 rounded-xl border border-border/50">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-muted/30 rounded-xl border border-border/50">
             <div>
               <p className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest mb-0.5">
                 Total Amount
@@ -324,8 +324,8 @@ export const OrderCard = ({ order, onOrderUpdate }) => {
 
           {/* Expanded details panel */}
           {expanded && (
-            <div className="mt-4 pt-4 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
-              <p className="field-label mb-3">Order Details</p>
+            <div className="mt-3 pt-3 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
+              <p className="field-label mb-2">Order Details</p>
               <DetailRow label="Order ID" value={`#${order._id}`} />
               <DetailRow label="Shop" value={shop?.name || 'Artisan Shop'} />
               <DetailRow label="Date Placed" value={formatDate(order.createdAt)} />

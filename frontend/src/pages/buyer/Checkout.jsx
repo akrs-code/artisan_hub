@@ -304,8 +304,8 @@ const Checkout = () => {
   const codHandlingFee = paymentMethod === 'cod' ? 3000 : 0;
   const grandTotal = cartTotal + SHIPPING_FEE + codHandlingFee;
 
-  const fieldLabel = 'text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
-  const fieldInput = 'w-full px-3.5 py-2.5 bg-card border border-border/70 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+  const fieldLabel = 'text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest block mb-1.5';
+  const fieldInput = 'w-full px-3 py-2 bg-muted/10 border border-border/70 rounded-lg text-xs font-sans focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 w-full">
@@ -788,15 +788,15 @@ const Checkout = () => {
 
             <div className="w-full h-px bg-border/60 mb-4" />
 
-            <div className="flex justify-between items-end mb-5">
+            <div className="flex justify-between items-end mb-4 bg-primary/5 p-3 rounded-xl border border-primary/10">
               <div>
-                <span className="text-xs font-headline font-bold text-foreground">Total</span>
-                <p className="text-[8px] text-muted-foreground uppercase tracking-wider leading-none mt-0.5">VAT INCLUDED</p>
+                <span className="text-sm font-headline font-bold text-foreground">Total</span>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mt-0.5">VAT INCLUDED</p>
               </div>
               <span className="text-xl font-headline font-bold text-primary">{formatPrice(grandTotal)}</span>
             </div>
 
-            <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground font-sans uppercase tracking-widest pt-2 border-t border-border/30">
+            <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground font-sans uppercase tracking-widest pt-2">
               <Lock className="w-3 h-3 text-secondary-dark" />
               <span>Secured by SSL encryption</span>
             </div>

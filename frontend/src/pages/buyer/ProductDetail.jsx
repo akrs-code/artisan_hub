@@ -5,11 +5,13 @@ import { useCart } from '../../context/CartContext';
 import { productsAPI } from '../../services/api';
 
 import { Button } from '@/components/ui/button';
-import { ProductImagePanel }   from '@/components/buyer/products/ProductImagePanel';
-import { ProductDetailTabs }   from '@/components/buyer/products/ProductDetailTabs';
-import { ProductVariants }     from '@/components/buyer/products/ProductVariants';
+import { StarRating } from '@/components/ui/star-rating';
+import { ProductImagePanel } from '@/components/buyer/products/ProductImagePanel';
+import { ProductDetailTabs } from '@/components/buyer/products/ProductDetailTabs';
+import { ProductVariants } from '@/components/buyer/products/ProductVariants';
 import { ProductPurchaseCard } from '@/components/buyer/products/ProductPurchaseCard';
 import { ProductRecommendations } from '@/components/buyer/products/ProductRecommendations';
+import { StoreDetailsHero } from '@/components/buyer/products/StoreDetailsHero';
 
 const formatPrice = (centavos) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(centavos / 100);
@@ -19,15 +21,15 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [product, setProduct]           = useState(null);
-  const [shop, setShop]                 = useState(null);
-  const [quantity, setQuantity]         = useState(1);
+  const [product, setProduct] = useState(null);
+  const [shop, setShop] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
-  const [isZoomed, setIsZoomed]         = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
-  const [activeTab, setActiveTab]       = useState('product');
-  const [reviews, setReviews]           = useState([]);
+  const [activeTab, setActiveTab] = useState('product');
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -132,13 +134,8 @@ const ProductDetail = () => {
 
               <div className="flex items-center gap-4 mb-5">
                 <div className="flex items-center gap-1.5 text-primary">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${i < Math.round(product.rating || 0) ? 'fill-primary' : 'text-muted/40'}`}
-                    />
-                  ))}
-                  <span className="font-bold font-sans text-sm ml-1">{product.rating || '0'}</span>
+                  <StarRating rating={product.rating} maxStars={5} size="lg" />
+                  <span className="font-bold font-sans text-sm ml-1">{product.rating ? Number(product.rating).toFixed(1) : '0.0'}</span>
                   <span className="text-muted-foreground text-sm font-sans">
                     ({product.reviewCount || '0'} reviews)
                   </span>
@@ -186,6 +183,9 @@ const ProductDetail = () => {
             />
           </div>
         </div>
+
+        {/* ── Store Details ─────────────────────────────── */}
+        <StoreDetailsHero shop={shop} />
 
         {/* ── Product Recommendations ─────────────────────────────── */}
         <div className="mt-20 border-t border-border/50 pt-16">
