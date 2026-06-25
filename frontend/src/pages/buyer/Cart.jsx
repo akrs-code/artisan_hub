@@ -42,28 +42,17 @@ const Cart = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cart Table */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="glass-card overflow-hidden">
-            {/* Table Header */}
-            <div className="hidden sm:grid grid-cols-[56px_1fr_auto_auto_32px] gap-4 items-center px-5 py-3 bg-muted/30 border-b border-border/60">
-              <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Item</span>
-              <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest">Details</span>
-              <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest text-center">Qty</span>
-              <span className="text-[9px] font-sans font-bold text-muted-foreground uppercase tracking-widest text-right">Total</span>
-              <span />
-            </div>
-
-            {cartItems.map((item) => (
-              <CartItem
-                key={item.product._id}
-                item={item}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeFromCart}
-                onUpdateOptions={updateItemOptions}
-              />
-            ))}
-          </div>
+        {/* Cart Items List */}
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 items-start content-start">
+          {cartItems.map((item) => (
+            <CartItem
+              key={item.product._id}
+              item={item}
+              onUpdateQuantity={updateQuantity}
+              onRemove={removeFromCart}
+              onUpdateOptions={updateItemOptions}
+            />
+          ))}
         </div>
 
         {/* Order Summary */}
@@ -86,13 +75,13 @@ const Cart = () => {
 
             <div className="w-full h-px bg-border/60 mb-5" />
 
-            <div className="flex justify-between items-end mb-6">
+            <div className="flex justify-between items-end mb-6 bg-primary/5 p-4 rounded-xl border border-primary/10">
               <span className="text-sm font-headline font-bold text-foreground">Total</span>
               <div className="text-right">
-                <span className="block text-2xl font-headline font-bold text-primary">
+                <span className="block text-2xl font-headline font-bold text-primary leading-none">
                   {formatPrice(grandTotal)}
                 </span>
-                <span className="text-[9px] text-muted-foreground font-sans uppercase tracking-wider">VAT included</span>
+                <span className="text-[9px] text-muted-foreground font-sans uppercase tracking-wider mt-1 block">VAT included</span>
               </div>
             </div>
 
