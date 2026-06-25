@@ -79,7 +79,7 @@ const OrderQueueTable = ({ orders, totalOrders, currentlyShowing, onSelectOrder 
       accessorKey: 'status',
       meta: {
         headerClassName: 'text-center',
-        cellClassName: 'flex justify-center',
+        cellClassName: 'text-center',
       },
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
@@ -88,7 +88,7 @@ const OrderQueueTable = ({ orders, totalOrders, currentlyShowing, onSelectOrder 
       id: 'actions',
       meta: {
         headerClassName: 'text-center',
-        cellClassName: 'flex justify-center',
+        cellClassName: 'text-center',
       },
       cell: () => (
         <button className="text-muted-foreground hover:text-primary transition-colors p-1" title="View Details">

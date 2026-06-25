@@ -187,10 +187,25 @@ export const ordersAPI = {
       method: 'PUT',
     }),
 
+  prepareOrder: (orderId) =>
+    request(`/orders/${orderId}/prepare`, {
+      method: 'PUT',
+    }),
+
+  readyOrder: (orderId) =>
+    request(`/orders/${orderId}/ready`, {
+      method: 'PUT',
+    }),
+
   shipOrder: (orderId, shippingData) =>
     request(`/orders/${orderId}/ship`, {
       method: 'PUT',
       body: JSON.stringify(shippingData),
+    }),
+
+  deliverOrder: (orderId) =>
+    request(`/orders/${orderId}/deliver`, {
+      method: 'PUT',
     }),
 
 
