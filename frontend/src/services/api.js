@@ -212,6 +212,29 @@ export const ordersAPI = {
 
 
 
+export const categoriesAPI = {
+  getCategories: () =>
+    request('/categories', {
+      method: 'GET',
+    }),
+  createCategory: (data) =>
+    request('/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateCategory: (id, data) =>
+    request(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteCategory: (id) =>
+    request(`/categories/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+
+
 export const adminAPI = {
   getStats: () =>
     request('/admin/stats', {
@@ -349,6 +372,14 @@ export const notificationsAPI = {
   markAsRead: (id) =>
     request(`/notifications/${id}/read`, {
       method: 'PUT',
+    }),
+};
+
+export const aiAPI = {
+  chat: (prompt, userLocation) =>
+    request('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ prompt, userLocation }),
     }),
 };
 

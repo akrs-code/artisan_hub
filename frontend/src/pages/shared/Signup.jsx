@@ -11,7 +11,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  const [role, setRole] = useState('buyer'); 
+  const [role, setRole] = useState('buyer');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -32,7 +32,7 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
-    
+
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
@@ -53,7 +53,7 @@ const Signup = () => {
     try {
       const data = await register({ ...formData, role });
 
-      
+
       const userRole = data.user?.role;
       if (userRole === 'seller') {
         navigate('/verify-seller');
@@ -70,7 +70,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-background/50 relative overflow-hidden">
 
-      
+
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-3xl" />
 
@@ -89,7 +89,7 @@ const Signup = () => {
             </p>
           </div>
 
-          
+
           {error && (
             <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
@@ -99,7 +99,7 @@ const Signup = () => {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
 
-            
+
             <Tabs>
               <TabsList className="w-full flex">
                 {[
@@ -245,7 +245,7 @@ const Signup = () => {
             <Button
               type="submit"
               disabled={isLoading || !agreedToTerms}
-              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group"
+              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-4 group"
             >
               {isLoading ? (
                 <>

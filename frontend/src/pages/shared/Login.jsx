@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, Shield, Store, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,30 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleQuickLogin = async (quickEmail) => {
+    setError('');
+    setIsLoading(true);
+    setEmail(quickEmail);
+    setPassword('password123');
+
+    try {
+      const data = await login({ email: quickEmail, password: 'password123' });
+
+      const role = data.user?.role;
+      if (role === 'admin') {
+        navigate('/admin/overview');
+      } else if (role === 'seller') {
+        navigate('/seller/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Quick login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -23,7 +47,7 @@ const Login = () => {
     try {
       const data = await login({ email, password });
 
-      
+
       const role = data.user?.role;
       if (role === 'admin') {
         navigate('/admin/overview');
@@ -42,7 +66,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 bg-background/50 relative overflow-hidden">
 
-      
+
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-3xl" />
 
@@ -61,7 +85,7 @@ const Login = () => {
             </p>
           </div>
 
-          
+
           {error && (
             <div className="mt-6 flex items-center gap-3 p-3.5 bg-destructive/10 border border-destructive/20 rounded-xl">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
@@ -115,7 +139,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-6 group"
+              className="w-full rounded-xl font-sans font-bold text-sm uppercase tracking-widest py-4 group"
             >
               {isLoading ? (
                 <>
@@ -130,7 +154,42 @@ const Login = () => {
               )}
             </Button>
 
-            <div className="text-center mt-8 pt-6 border-t border-border/50">
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <p className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                Quick Login for Testing
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('superadmin@artisanhub.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <Shield className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('abdulkhaliqsolaiman@gmail.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <Store className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Seller</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('khaliq.business16@gmail.com')}
+                  disabled={isLoading}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 transition-all group disabled:opacity-50"
+                >
+                  <User className="w-5 h-5 text-muted-foreground group-hover:text-primary mb-2 transition-colors" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">Buyer</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="text-center mt-6">
               <p className="text-sm font-sans text-muted-foreground">
                 Don't have an account?{' '}
                 <Link to="/register" className="font-semibold text-primary hover:text-primary-dark transition-colors">
