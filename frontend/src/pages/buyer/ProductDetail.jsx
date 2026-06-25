@@ -9,6 +9,7 @@ import { ProductImagePanel }   from '@/components/buyer/products/ProductImagePan
 import { ProductDetailTabs }   from '@/components/buyer/products/ProductDetailTabs';
 import { ProductVariants }     from '@/components/buyer/products/ProductVariants';
 import { ProductPurchaseCard } from '@/components/buyer/products/ProductPurchaseCard';
+import { ProductRecommendations } from '@/components/buyer/products/ProductRecommendations';
 
 const formatPrice = (centavos) =>
   new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(centavos / 100);
@@ -65,6 +66,11 @@ const ProductDetail = () => {
     addToCart(product, quantity);
     setAddedFeedback(true);
     setTimeout(() => setAddedFeedback(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    addToCart(product, quantity);
+    navigate('/cart');
   };
 
   const handleReviewSubmit = async (rating, comment) => {
@@ -175,10 +181,17 @@ const ProductDetail = () => {
               onDecrement={decrement}
               onIncrement={increment}
               onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
               addedFeedback={addedFeedback}
             />
           </div>
         </div>
+
+        {/* ── Product Recommendations ─────────────────────────────── */}
+        <div className="mt-20 border-t border-border/50 pt-16">
+          <ProductRecommendations product={product} />
+        </div>
+
       </div>
     </div>
   );

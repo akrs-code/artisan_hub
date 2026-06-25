@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { categoriesAPI } from '../../../services/api';
 
 const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   const [formData, setFormData] = useState({
@@ -17,19 +18,37 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [customCategory, setCustomCategory] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await categoriesAPI.getCategories();
+        if (res && res.data) setCategories(res.data);
+      } catch (err) {}
+    };
+    fetchCategories();
+  }, []);
 
   
   useEffect(() => {
     if (product) {
+      const isKnown = categories.some(c => c.name === product.category) || 
+                      ['Ceramics', 'Textiles', 'Woodwork', 'Home Decor', 'Glassware', 'Stationery', 'Clothings'].includes(product.category);
+      
+      const catVal = (product.category && !isKnown && categories.length > 0) ? 'Other' : (product.category || 'Ceramics');
+
       setFormData({
         name: product.name || '',
-        category: product.category || 'Ceramics',
+        category: catVal,
         price: product.price ? (product.price / 100).toString() : '',
         stockQuantity: product.stockQuantity !== undefined ? product.stockQuantity.toString() : '0',
         description: product.description || '',
         colors: product.colors ? product.colors.join(', ') : '',
         sizes: product.sizes ? product.sizes.join(', ') : '',
       });
+      setCustomCategory((product.category && !isKnown && categories.length > 0) ? product.category : '');
       setImagePreviews(product.imageUrls?.length > 0 ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []));
       setImageFiles([]);
     } else {
@@ -42,11 +61,12 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
         colors: '',
         sizes: '',
       });
+      setCustomCategory('');
       setImagePreviews([]);
       setImageFiles([]);
     }
     setError('');
-  }, [product, isOpen]);
+  }, [product, isOpen, categories]);
 
   
   useEffect(() => {
@@ -114,11 +134,13 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
       const sizesArray = formData.sizes
         ? formData.sizes.split(',').map((s) => s.trim()).filter(Boolean)
         : [];
+      
+      const finalCategory = formData.category === 'Other' ? customCategory : formData.category;
 
       
       const data = new FormData();
       data.append('name', formData.name);
-      data.append('category', formData.category);
+      data.append('category', finalCategory);
       data.append('price', parsedPrice.toString());
       data.append('stockQuantity', parsedStock.toString());
       data.append('description', formData.description);
@@ -229,16 +251,39 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null }) => {
                 name="category"
                 disabled={isLoading}
                 value={formData.category}
-                onChange={handleChange}
+                onChange={(e) => {
+                  handleChange(e);
+                  if (e.target.value !== 'Other') setCustomCategory('');
+                }}
                 className="field-select !py-1.5 !text-xs"
               >
-                <option value="Ceramics">Ceramics</option>
-                <option value="Textiles">Textiles</option>
-                <option value="Woodwork">Woodwork</option>
-                <option value="Home Decor">Home Decor</option>
-                <option value="Glassware">Glassware</option>
-                <option value="Stationery">Stationery</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat.name}>{cat.name}</option>
+                ))}
+                {categories.length === 0 && (
+                  <>
+                    <option value="Ceramics">Ceramics</option>
+                    <option value="Textiles">Textiles</option>
+                    <option value="Woodwork">Woodwork</option>
+                    <option value="Home Decor">Home Decor</option>
+                    <option value="Glassware">Glassware</option>
+                    <option value="Stationery">Stationery</option>
+                    <option value="Clothings">Clothings</option>
+                  </>
+                )}
+                <option value="Other">Other (Please specify)</option>
               </select>
+              {formData.category === 'Other' && (
+                <div className="mt-2">
+                  <input
+                    placeholder="Enter custom category..."
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="field-input !py-1.5 !text-xs"
+                    required
+                  />
+                </div>
+              )}
             </div>
           </div>
 

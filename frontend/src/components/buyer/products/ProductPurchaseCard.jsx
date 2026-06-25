@@ -49,9 +49,15 @@ export const ProductPurchaseCard = ({
 
     {/* Stock warning */}
     {product.inStock && product.stockQuantity != null && product.stockQuantity <= 5 && (
-      <p className="text-xs font-sans text-destructive font-semibold text-center">
-        Only {product.stockQuantity} left in stock!
-      </p>
+      <div className="flex items-center justify-center p-2.5 bg-destructive/10 border border-destructive/20 rounded-xl">
+        <span className="relative flex h-2.5 w-2.5 mr-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+        </span>
+        <p className="text-xs font-sans text-destructive font-bold uppercase tracking-widest">
+          Only {product.stockQuantity} left in stock!
+        </p>
+      </div>
     )}
 
     {/* Divider */}

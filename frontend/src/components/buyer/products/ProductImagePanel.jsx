@@ -2,17 +2,23 @@ import { useState } from 'react';
 import { Heart, Share2, ZoomIn } from 'lucide-react';
 
 
-const getGalleryImages = (imageUrl) => [
-  imageUrl,
-  imageUrl.replace('w=800', 'w=400').replace('q=80', 'q=60'),
-  imageUrl.replace('photo-', 'photo-alt-').replace('w=800', 'w=600'),
-  imageUrl.replace('w=800', 'w=300'),
-];
+const getGalleryImages = (product) => {
+  if (product.imageUrls && product.imageUrls.length > 0) {
+    return product.imageUrls;
+  }
+  if (!product.imageUrl) return [];
+  return [
+    product.imageUrl,
+    product.imageUrl.replace('w=800', 'w=400').replace('q=80', 'q=60'),
+    product.imageUrl.replace('photo-', 'photo-alt-').replace('w=800', 'w=600'),
+    product.imageUrl.replace('w=800', 'w=300'),
+  ];
+};
 
 export const ProductImagePanel = ({ product, isSaved, onToggleSave }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
-  const gallery = getGalleryImages(product.imageUrl);
+  const gallery = getGalleryImages(product);
 
   return (
     <div className="flex gap-3">
